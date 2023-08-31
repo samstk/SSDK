@@ -14,7 +14,7 @@ namespace SSDK.Core.Algorithms.Sorting
     {
         /// <summary>
         /// Performs insertion sort on the given array, assuming the elements
-        /// are comparable.
+        /// are comparable. Estimation of O(n^2) running time.
         /// </summary>
         /// <param name="array">the array to perform the sort on</param>
         /// <param name="descendingOrder">if true, then sort in descendingOrder</param>

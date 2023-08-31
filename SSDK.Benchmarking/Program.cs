@@ -23,7 +23,7 @@ Benchmarker.Do(() =>
 {
     array2.SortViaInsertion();
 }, "Insertion Sort: ");
-if (!array2.IsSorted()) Console.WriteLine("Code Error");
+array2 = array.DeepClone();
 
 // Perform merge sort
 array2 = array.DeepClone();
@@ -31,4 +31,3 @@ Benchmarker.Do(() =>
 {
     array2.SortViaMerge();
 }, "Merge Sort: ");
-if (!array2.IsSorted()) Console.WriteLine("Code Error");

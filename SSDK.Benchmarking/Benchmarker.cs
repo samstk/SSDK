@@ -56,7 +56,7 @@ namespace SSDK.Benchmarking
         /// </summary>
         /// <param name="action">the action to complete</param>
         /// <param name="report">the report prefix, or null if not reporting</param>
-        public static void Do(Action action, string report=null)
+        public static TimeSpan Do(Action action, string report=null)
         {
             Start();
 
@@ -65,6 +65,8 @@ namespace SSDK.Benchmarking
 
             if (report == null) End();
             else Report(report);
+
+            return BenchmarkTime;
         }
 
         /// <summary>

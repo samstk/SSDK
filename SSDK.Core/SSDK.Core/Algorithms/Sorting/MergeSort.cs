@@ -10,13 +10,13 @@ namespace SSDK.Core.Algorithms.Sorting
 {
     /// <summary>
     /// A helper/extension class that contains the methods for a merge sort
-    /// algorithm, which runs in O(n log2(n)) time.
+    /// algorithm, which runs in O(n log n) time.
     /// </summary>
     public static class MergeSort
     {
         /// <summary>
         /// Performs merge sort on the given array, assuming the elements
-        /// are comparable.
+        /// are comparable. Estimation of O(n log n) running time.
         /// </summary>
         /// <param name="array">the array to perform the sort on</param>
         /// <param name="descendingOrder">if true, then sort in descending order</param>
@@ -64,26 +64,54 @@ namespace SSDK.Core.Algorithms.Sorting
             int j = start;
             int k = middle;
 
-            // Fill in array using smallest of each index.
-            while (o < nextArray.Length)
+            if (descendingOrder)
             {
-                if (j >= middle)
+                // Fill in array using largest of each index.
+                while (o < nextArray.Length)
                 {
-                    // Rest of the elements are at k
-                    nextArray[o++] = array[k++];
-                }
-                else if (k > end)
-                {
-                    // Rest of the elements are at j
-                    nextArray[o++] = array[j++];
-                }
-                else
-                {
-                    if (array[j].CompareTo(array[k]) < 0)
+                    if (j >= middle)
                     {
+                        // Rest of the elements are at k
+                        nextArray[o++] = array[k++];
+                    }
+                    else if (k > end)
+                    {
+                        // Rest of the elements are at j
                         nextArray[o++] = array[j++];
                     }
-                    else nextArray[o++] = array[k++];
+                    else
+                    {
+                        if (array[j].CompareTo(array[k]) > 0)
+                        {
+                            nextArray[o++] = array[j++];
+                        }
+                        else nextArray[o++] = array[k++];
+                    }
+                }
+            }
+            else
+            {
+                // Fill in array using smallest of each index.
+                while (o < nextArray.Length)
+                {
+                    if (j >= middle)
+                    {
+                        // Rest of the elements are at k
+                        nextArray[o++] = array[k++];
+                    }
+                    else if (k > end)
+                    {
+                        // Rest of the elements are at j
+                        nextArray[o++] = array[j++];
+                    }
+                    else
+                    {
+                        if (array[j].CompareTo(array[k]) < 0)
+                        {
+                            nextArray[o++] = array[j++];
+                        }
+                        else nextArray[o++] = array[k++];
+                    }
                 }
             }
             
