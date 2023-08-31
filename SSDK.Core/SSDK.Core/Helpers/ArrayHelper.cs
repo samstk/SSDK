@@ -47,7 +47,7 @@ namespace SSDK.Core.Helpers
         }
         #endregion
 
-        #region Array Checking
+        #region Array Searching
         /// <summary>
         /// Checks whether the array is sorted or not, assuming the array type
         /// is comparable.
@@ -100,6 +100,7 @@ namespace SSDK.Core.Helpers
             }
             return $"{sub}]";
         }
+
         #endregion
     }
 }

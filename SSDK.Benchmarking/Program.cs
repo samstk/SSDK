@@ -17,8 +17,16 @@ Benchmarker.Do(() =>
     array = NumberGenerator.CreateRandomIntegers(10000);
 }, "Array (10000) Generation: ");
 
-// Perform insertion sort
+// Perform selection sort
 int[] array2 = array.DeepClone();
+Benchmarker.Do(() =>
+{
+    array2.SortViaSelection();
+}, "Selection Sort: ");
+
+
+// Perform insertion sort
+array2 = array.DeepClone();
 Benchmarker.Do(() =>
 {
     array2.SortViaInsertion();
@@ -31,3 +39,4 @@ Benchmarker.Do(() =>
 {
     array2.SortViaMerge();
 }, "Merge Sort: ");
+
