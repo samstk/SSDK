@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32819.101
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSDK.Core", "SSDK.Core\SSDK.Core.csproj", "{62513307-0C20-48EB-8418-734CA1DB8509}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSDK.Benchmarking", "..\SSDK.Benchmarking\SSDK.Benchmarking.csproj", "{11077908-BC3F-4475-A34F-244E6E03AC7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62513307-0C20-48EB-8418-734CA1DB8509}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62513307-0C20-48EB-8418-734CA1DB8509}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62513307-0C20-48EB-8418-734CA1DB8509}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62513307-0C20-48EB-8418-734CA1DB8509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11077908-BC3F-4475-A34F-244E6E03AC7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11077908-BC3F-4475-A34F-244E6E03AC7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11077908-BC3F-4475-A34F-244E6E03AC7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11077908-BC3F-4475-A34F-244E6E03AC7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F1E99865-20CC-4616-A92B-E2C2496064BC}
+	EndGlobalSection
+EndGlobal
