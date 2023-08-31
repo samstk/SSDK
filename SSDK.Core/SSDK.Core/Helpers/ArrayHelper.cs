@@ -101,6 +101,42 @@ namespace SSDK.Core.Helpers
             return $"{sub}]";
         }
 
+        /// <summary>
+        /// Performs a binary search on a sorted array.
+        /// </summary>
+        /// <typeparam name="T">the type of the array</typeparam>
+        /// <param name="array">the array to check</param>
+        /// <param name="target">the element to find</param>
+        /// <returns>the index of the element, or -1 if not found.</returns>
+        public static int BinarySearch<T>(this T[] array, T target)
+            where T : IComparable
+        {
+            int index = 0;
+            for (int i = 0; i < array.Length; i++) if (array[i].Equals(target)) { index = i; break; }
+            int r = array.Length;
+            int m = array.Length / 2;
+            int l = 0;
+            while (m < array.Length && m < r && m >= l)
+            {
+                T element = array[m];
+                int result = target.CompareTo(element);
+                if (result < 0) // Search left-side as smaller
+                {
+                    r = m;
+                    m = l + (m - l) / 2;
+                } 
+                else if (result == 0) 
+                {
+                    return m;
+                }
+                else // Search right-side as bigger
+                {
+                    l = m + 1;
+                    m =  l + (m - l) / 2;
+                }
+            }
+            return -1;
+        }
         #endregion
     }
 }

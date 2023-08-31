@@ -40,3 +40,12 @@ Benchmarker.Do(() =>
     array2.SortViaMerge();
 }, "Merge Sort: ");
 
+// Perform binary search on sorted list
+Random rg = new Random();
+int rgi = rg.Next(0, array2.Length);
+int el = array2[rgi];
+Benchmarker.Do(() =>
+{
+    el = array2.BinarySearch(el);
+}, "Binary Search: ");
+Console.WriteLine("(Index) = " + el);
