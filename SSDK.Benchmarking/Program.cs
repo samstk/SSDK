@@ -40,6 +40,14 @@ Benchmarker.Do(() =>
     array2.SortViaMerge();
 }, "Merge Sort: ");
 
+// Perform quick sort
+array2 = array.DeepClone();
+Benchmarker.Do(() =>
+{
+    array2.SortViaQuickSort();
+}, "Quick Sort: ");
+if (!array2.IsSorted()) Console.WriteLine("ERR");
+
 // Perform binary search on sorted list
 Random rg = new Random();
 int rgi = rg.Next(0, array2.Length);
