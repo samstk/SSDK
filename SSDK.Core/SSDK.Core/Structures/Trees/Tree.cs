@@ -48,6 +48,73 @@ namespace SSDK.Core.Structures.Trees
         }
 
         /// <summary>
+        /// True if all levels of the tree are full, or all levels but
+        /// the last level is full and all leaves are furthest to the left.
+        /// </summary>
+        public bool IsComplete
+        {
+            get
+            {
+                int k = K;
+                int[] levels = new int[Height+1];
+
+                // Traverse all levels and accumulate totals for each level.
+                TraverseInLevel((el, level) =>
+                {
+                    levels[level]++;
+                }, (el) => true);
+
+                // Check all levels are as expected.
+                for(int l = 0; l<levels.Length-1; l++)
+                {
+                    int expected = (int)Math.Pow(k, l);
+                    if(expected != levels[l])
+                    {
+                        return false;
+                    }
+                }
+
+                // Check to make sure last level is far-left as possible.
+                bool valid = true;
+                TraverseInLevel((el, level) =>
+                {
+                    if (el.Left == null && el.Right != null)
+                    {
+                        valid = false;
+                    }
+                }, (l) => l == levels.Length - 2, (l) => valid);
+
+                return valid;
+            }
+        }
+
+        /// <summary>
+        /// True if all nodes in this tree except leaf nodes has k children.
+        /// </summary>
+        public bool IsProper
+        {
+            get
+            {
+                int k = K;
+                bool valid = true;
+
+                // Check to make sure all child nodes furthest left.
+                TraverseInLevel((el, level) =>
+                {
+                    int got = 0;
+                    foreach(TreeNode<T> child in el.Children)
+                    {
+                        if (child != null)
+                            got++;
+                        else got = 0;
+                    }
+                    if (got != k)
+                        valid = false; // Either full or empty.
+                }, (l) => true, (l) => valid);
+                return valid;
+            }
+        }
+        /// <summary>
         /// True if there exists no nodes in this tree.
         /// (i.e. the root node doesn't exist)
         /// </summary>
@@ -204,7 +271,36 @@ namespace SSDK.Core.Structures.Trees
         {
             RootNode?.TraverseInPostOrder(traverseAction);
         }
+
+        /// <summary>
+        /// Traverses the nodes in pre-order and visits the node if the level selector
+        /// checks of (e.g. () => 2, visits all nodes in level 2).
+        /// </summary>
+        /// <param name="traverseAction">the action to apply on every visited node (w/ level)</param>
+        /// <param name="levelSelector">the selector which determines which nodes to visit based on level</param>
+        public void TraverseInLevel(Action<TreeNode<T>, int> traverseAction, Func<int, bool> levelSelector, Func<int,bool> cutoffSelector=null)
+        {
+            RootNode?.TraverseInLevel(traverseAction, levelSelector, 0, cutoffSelector);
+        }
+
         #endregion
+
+        /// <summary>
+        /// Returns true if the given level at depth l is full according to k-ary ness.
+        /// </summary>
+        /// <param name="level">the level to check</param>
+        /// <returns>true if the given level is full</returns>
+        public bool IsLevelFull(int level)
+        {
+            int k = K, got = 0;
+            int expected = (int)Math.Pow(k, level);
+
+            // Traverse in order to check level is full.
+            TraverseInLevel((el, level) => got++, (l) => l == level, (l) => l == level);
+
+            return got == expected;
+        }
+
         /// <summary>
         /// Gets the tree node that contains the element to search for.
         /// The current method to search uses an inefficient method.
@@ -238,6 +334,8 @@ namespace SSDK.Core.Structures.Trees
             }
             return null;
         }
+        
+        
         #endregion
         #region Conversion
         /// <summary>

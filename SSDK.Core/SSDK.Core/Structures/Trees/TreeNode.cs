@@ -11,7 +11,7 @@ namespace SSDK.Core.Structures.Trees
     public sealed class TreeNode<T> : IEnumerable<TreeNode<T>>
     {
         #region Properties & Fields
-
+        #region Binary Properties
         /// <summary>
         /// Gets or sets the left-side child assuming k=2
         /// </summary>
@@ -58,6 +58,18 @@ namespace SSDK.Core.Structures.Trees
             }
         }
 
+        /// <summary>
+        /// Gets the opposing sibling in a binary tree.
+        /// </summary>
+        public TreeNode<T> Sibling
+        {
+            get
+            {
+                if (ParentNode == null) return null;
+                return ParentNode.Left == this ? ParentNode.Right : ParentNode.Left;
+            }
+        }
+        #endregion
         /// <summary>
         /// Gets all nodes existing in this tree/subtree, including
         /// this one.
@@ -164,12 +176,12 @@ namespace SSDK.Core.Structures.Trees
         /// <summary>
         /// True if this node has children.
         /// </summary>
-        public bool IsInternalNode { get { return _Children.Count > 0; } }
+        public bool IsInternalNode { get { return _Children.Any((el) => el != null); } }
 
         /// <summary>
         /// True if this node has no children.
         /// </summary>
-        public bool IsLeafNode { get { return _Children.Count == 0; } }
+        public bool IsLeafNode { get { return _Children.Count == 0 || _Children.All((el) => el == null); } }
 
         /// <summary>
         /// True if this node is treated as the root of a tree.
@@ -238,7 +250,8 @@ namespace SSDK.Core.Structures.Trees
                 // Search through children to accumulate size
                 foreach (TreeNode<T> child in _Children)
                 {
-                    size += child.Size;
+                    if(child != null)
+                        size += child.Size;
                 }
 
                 return size;
@@ -370,6 +383,26 @@ namespace SSDK.Core.Structures.Trees
             }
 
             traverseAction(this);
+        }
+
+        /// <summary>
+        /// Traverses the nodes in pre-order and visits the node if the level selector
+        /// checks of (e.g. () => 2, visits all nodes in level 2).
+        /// </summary>
+        /// <param name="traverseAction">the action to apply on every visited node  (w/ level)</param>
+        /// <param name="levelSelector">the selector which determines which nodes to visit based on level</param>
+        public void TraverseInLevel(Action<TreeNode<T>, int> traverseAction, Func<int, bool> levelSelector, int level=0, Func<int, bool> cutoff=null)
+        {
+            // Check if it should visit this node
+            if (levelSelector(level)) traverseAction(this, level);
+
+            // Traverse all child nodes if below cutoff.
+            if (cutoff != null && cutoff(level)) return;
+            
+            foreach(TreeNode<T> child in _Children)
+            {
+                child?.TraverseInLevel(traverseAction, levelSelector, level + 1, cutoff);
+            }
         }
         #endregion
         #endregion

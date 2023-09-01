@@ -19,6 +19,7 @@ namespace SSDK.Core.Structures.Trees
         /// is a binary tree, the k-ary ness is always 2.
         /// </summary>
         public override int K => 2;
+
         #endregion
     }
 }
