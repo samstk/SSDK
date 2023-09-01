@@ -70,3 +70,4 @@ Benchmarker.Do(() =>
     el = array2.BinarySearch(el);
 }, "Binary Search: ");
 Console.WriteLine("(Index) = " + el);
+

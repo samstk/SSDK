@@ -42,7 +42,7 @@ namespace SSDK.Core.Algorithms.Sorting
                     array[index++] = element;
                 }
             }
-
+            
             return bucketIndices;
         }
 
