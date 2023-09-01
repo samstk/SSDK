@@ -13,6 +13,52 @@ namespace SSDK.Core.Structures.Trees
         #region Properties & Fields
 
         /// <summary>
+        /// Gets or sets the left-side child assuming k=2
+        /// </summary>
+        public TreeNode<T> Left
+        {
+            get
+            {
+                if (_Children.Count < 1) return null;
+                return _Children[0];
+            }
+            set
+            {
+                // Add left-side if applicable.
+                if (_Children.Count == 0)
+                {
+                    _Children.Add(value);
+                }
+                else _Children[0] = value; // Set left-side
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the right-side child assuming k=2
+        /// </summary>
+        public TreeNode<T> Right { 
+            get
+            {
+                if (_Children.Count < 2) return null;
+                return _Children[1];
+            }
+            set
+            {
+                // Add empty left-side if applicable
+                if(_Children.Count == 0)
+                {
+                    _Children.Add(null);
+                }
+                // Add right-side if applicable
+                if (_Children.Count == 1)
+                {
+                    _Children.Add(value);
+                }
+                else _Children[1] = value; // Set right-side
+            }
+        }
+
+        /// <summary>
         /// Gets all nodes existing in this tree/subtree, including
         /// this one.
         /// </summary>
@@ -27,7 +73,8 @@ namespace SSDK.Core.Structures.Trees
                 // Get all children
                 foreach(TreeNode<T> child in _Children)
                 {
-                    list.AddRange(child.AllNodes);
+                    if (child != null)
+                        list.AddRange(child.AllNodes);
                 }
 
                 return list;
@@ -47,7 +94,8 @@ namespace SSDK.Core.Structures.Trees
                 // Get all children
                 foreach (TreeNode<T> child in _Children)
                 {
-                    list.AddRange(child.AllNodes);
+                    if (child != null)
+                        list.AddRange(child.AllNodes);
                 }
 
                 return list;
@@ -280,7 +328,7 @@ namespace SSDK.Core.Structures.Trees
 
             foreach(TreeNode<T> child in _Children)
             {
-                child.TraverseInPreOrder(traverseAction);
+                child?.TraverseInPreOrder(traverseAction);
             }
         }
 
@@ -297,7 +345,7 @@ namespace SSDK.Core.Structures.Trees
             // Traverse all items before current
             for(int i = 0; i< middle; i++)
             {
-                _Children[i].TraverseInOrder(traverseAction, k);
+                _Children[i]?.TraverseInOrder(traverseAction, k);
             }
 
             traverseAction(this);
@@ -305,7 +353,7 @@ namespace SSDK.Core.Structures.Trees
             // Traverse all items after current
             for(int i = middle; i < _Children.Count; i++)
             {
-                _Children[i].TraverseInOrder(traverseAction, k);
+                _Children[i]?.TraverseInOrder(traverseAction, k);
             }
         }
 
@@ -318,7 +366,7 @@ namespace SSDK.Core.Structures.Trees
         {
             foreach (TreeNode<T> child in _Children)
             {
-                child.TraverseInPreOrder(traverseAction);
+                child?.TraverseInPreOrder(traverseAction);
             }
 
             traverseAction(this);
@@ -329,7 +377,10 @@ namespace SSDK.Core.Structures.Trees
         public IEnumerator<TreeNode<T>> GetEnumerator()
         {
             foreach (TreeNode<T> node in _Children)
-                yield return node;
+                if (node != null)
+                {
+                    yield return node;
+                }
         }
 
         IEnumerator IEnumerable.GetEnumerator()

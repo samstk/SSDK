@@ -99,7 +99,7 @@ namespace SSDK.Core.Structures.Trees
         /// <summary>
         /// Gets the root node of this tree.
         /// </summary>
-        public TreeNode<T> RootNode { get; private set; }
+        public TreeNode<T> RootNode { get; protected set; }
 
         
 
@@ -237,6 +237,69 @@ namespace SSDK.Core.Structures.Trees
                 }
             }
             return null;
+        }
+        #endregion
+        #region Conversion
+        /// <summary>
+        /// Converts this tree to a binary tree, assuming k=2
+        /// </summary>
+        /// <param name="treeType">a constructor for the tree type</param>
+        /// <returns>null if invalid tree, else the resulting tree</returns>
+        public BinaryTree<T> ToBinaryTree(Func<BinaryTree<T>> treeType, bool deepCloning=true)
+        {
+            BinaryTree<T> tree = treeType();
+            if(RootNode != null)
+            {
+                if(RootNode.NumberOfChildren > 2)
+                {
+                    return null;
+                }
+                else
+                {
+                    tree.RootNode = RootNode.Clone(false);
+                    
+                } 
+            }
+            return tree;
+        }
+
+        /// <summary>
+        /// Adds a given node to the binary tree node, returning false if
+        /// the number of children exceeds two.
+        /// </summary>
+        /// <param name="to">the node to add itself to</param>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        private static bool AddBinaryNode(TreeNode<T> to, TreeNode<T> left, TreeNode<T> right, bool deepCloning)
+        {
+            // Check if nodes exceed 2-ary
+            if (left != null && left.NumberOfChildren > 2 || right != null && right.NumberOfChildren > 2) return false;
+
+            // Clone left and right (shallow copy)
+            if (deepCloning)
+            {
+                if (left != null)
+                    left = left.Clone(false);
+                if (right != null)
+                    right = right.Clone(false);
+            }
+
+            // Re-assign parent nodes
+            if (left != null)
+            {
+                left.ParentNode = to;
+            }
+            if (right != null)
+            {
+                right.ParentNode = to;
+            }
+
+            // Add children
+            bool leftSuccess = AddBinaryNode(left, left.Left, left.Right, deepCloning);
+            if (!leftSuccess) return false;
+
+            bool rightSuccess = AddBinaryNode(right, right.Left, right.Right, deepCloning);
+            return rightSuccess;
         }
         #endregion
         #endregion
