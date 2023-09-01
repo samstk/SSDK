@@ -48,6 +48,19 @@ Benchmarker.Do(() =>
 }, "Quick Sort: ");
 if (!array2.IsSorted()) Console.WriteLine("ERR");
 
+// Perform bucket sort
+
+array2 = array.DeepClone();
+Benchmarker.Do(() =>
+{
+    array2.SortViaBucket(3, (val) =>
+    {
+        if (val == 0) return 1;
+        else if (val < 0) return 0;
+        return 2;
+    });
+}, "Bucket Sort (<0, 0, >0): ");
+
 // Perform binary search on sorted list
 Random rg = new Random();
 int rgi = rg.Next(0, array2.Length);

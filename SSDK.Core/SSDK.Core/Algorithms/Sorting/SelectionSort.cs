@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 namespace SSDK.Core.Algorithms.Sorting
 {
     /// <summary>
-    /// A helper/extension class that contains the methods for an insertion sort
+    /// A helper/extension class that contains the methods for an selection sort
     /// algorithm, which runs in O(n^2) time.
     /// </summary>
     public static class SelectionSort
     {
         /// <summary>
-        /// Performs insertion sort on the given array, assuming the elements
+        /// Performs selection sort on the given array, assuming the elements
         /// are comparable. Estimation of O(n^2) running time.
         /// </summary>
         /// <param name="array">the array to perform the sort on</param>
