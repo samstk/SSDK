@@ -3,6 +3,7 @@
 using SSDK.Benchmarking;
 using SSDK.Core.Helpers;
 using SSDK.Core.Algorithms.Sorting;
+using SSDK.Core.Structures.Trees;
 
 Console.WriteLine("--SSDK Benchmarking--");
 Console.WriteLine("Time values may be inaccurate, as it depends on the state of the machine.");
@@ -71,3 +72,69 @@ Benchmarker.Do(() =>
 }, "Binary Search: ");
 Console.WriteLine("(Index) = " + el);
 
+HeapTree<int> heapTest = new HeapTree<int>();
+
+Benchmarker.Do(() => {
+    foreach(int element in array)
+    {
+        heapTest.Add(element);
+    }
+}, "Adding 10000 elements to heap: ");
+
+
+PriorityQueue<int, int> queue = new PriorityQueue<int, int>();
+Benchmarker.Do(() => {
+    foreach (int element in array)
+    {
+        queue.Enqueue(element, element);
+    }
+}, "Adding 10000 elements to native priority queue: ");
+HeapTree<int> heapTest2 = heapTest.Clone(true);
+
+Benchmarker.Do(() => {
+    foreach (int element in array)
+    {
+        if(heapTest.Remove(element) == null)
+        {
+            Console.Write("ERR ");
+            break;
+        }
+       
+    }
+}, "Removing 10000 random elements from heap: ");
+
+
+
+Benchmarker.Do(() => {
+    int i = 0;
+    foreach (int element in array)
+    {
+        if (heapTest2.Remove(element) == null)
+        {
+            Console.Write("ERR at "+i+" ");
+            break;
+        }
+        i++;
+
+    }
+}, "Removing 10000 min-elements from heap: ");
+
+Benchmarker.Do(() => {
+    foreach (int element in array)
+    {
+        queue.Dequeue();
+    }
+}, "Removing 10000 elements from native priority queue: ");
+heapTest = new HeapTree<int>();
+Benchmarker.Do(() =>
+{
+    for(int i = 0; i<5000; i++)
+    {
+        for(int x = 0; x<2; x++)
+        {
+            heapTest.Add(i * (x + 1));
+        }
+        heapTest.Remove(i * 2);
+    }
+}, "Sequence of adding (10000) and removals (5000)");
+Console.WriteLine("Finished");

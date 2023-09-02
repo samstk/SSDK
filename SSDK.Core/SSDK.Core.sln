@@ -3,9 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32819.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSDK.Core", "SSDK.Core\SSDK.Core.csproj", "{62513307-0C20-48EB-8418-734CA1DB8509}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSDK.Core", "SSDK.Core\SSDK.Core.csproj", "{62513307-0C20-48EB-8418-734CA1DB8509}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSDK.Benchmarking", "..\SSDK.Benchmarking\SSDK.Benchmarking.csproj", "{11077908-BC3F-4475-A34F-244E6E03AC7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSDK.Benchmarking", "..\SSDK.Benchmarking\SSDK.Benchmarking.csproj", "{11077908-BC3F-4475-A34F-244E6E03AC7A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B11E9C01-CC17-4E37-9F0D-0D651A442A16}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

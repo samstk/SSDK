@@ -199,7 +199,29 @@ namespace SSDK.Core.Structures.Trees
         /// and modifications to the tree are then shared.
         /// </param>
         /// <returns>a new tree, which is an exact copy of this tree.</returns>
-        public abstract Tree<T> Clone(bool deep = false);
+        public abstract Tree<T> Clone(bool deep = true);
+        /// <summary>
+        /// Clones the current tree.
+        /// </summary>
+        /// <param name="treeType">the tree type constructor</param>
+        /// <param name="deep">
+        /// If false, then only the reference to the root node is copied.
+        /// and modifications to the tree are then shared.
+        /// </param>
+        /// <returns>a new tree, which is an exact copy of this tree.</returns>
+        internal Tree<T> Clone(Func<Tree<T>> treeType, bool deep = true)
+        {
+            Tree<T> tree = treeType();
+            if(deep && RootNode!=null)
+            {
+                tree.RootNode = RootNode.Clone(true);
+            }
+            else
+            {
+                tree.RootNode = RootNode;
+            }
+            return tree;
+        }
         #endregion
         #region Modification
         
@@ -210,17 +232,29 @@ namespace SSDK.Core.Structures.Trees
         public abstract void Add(T element);
 
         /// <summary>
+        /// Removes an element's node from the tree.
+        /// </summary>
+        /// <param name="elementNode">the element node to remove</param>
+        public abstract void Remove(TreeNode<T> elementNode);
+        
+        /// <summary>
         /// Removes an element from the tree.
         /// </summary>
         /// <param name="element">the element to remove</param>
         /// <returns>the node that was removed, with its references still existing.</returns>
-        public abstract TreeNode<T> Remove(T element);
+        public TreeNode<T> Remove(T element)
+        {
+            TreeNode<T> result = Search(element);
+            if (result == null) return null;
+            Remove(result);
+            return result;
+        }
 
         /// <summary>
         /// Sets the root of the tree.
         /// </summary>
         /// <param name="element">the element contained within the root of the tree</param>
-        public void SetRoot(T element)
+        public virtual void SetRoot(T element)
         {
             RootNode = new TreeNode<T>(element);
         }
@@ -245,9 +279,9 @@ namespace SSDK.Core.Structures.Trees
         /// pre-order traversal logic.
         /// </summary>
         /// <param name="traverseAction">the action to apply on every visited node</param>
-        public void TraverseInPreOrder(Action<TreeNode<T>> traverseAction)
+        public void TraverseInPreOrder(Action<TreeNode<T>> traverseAction, Func<bool> cutoffSelector = null)
         {
-            RootNode?.TraverseInPreOrder(traverseAction);
+            RootNode?.TraverseInPreOrder(traverseAction, cutoffSelector);
         }
 
         /// <summary>
@@ -256,10 +290,10 @@ namespace SSDK.Core.Structures.Trees
         /// </summary>
         /// <param name="traverseAction">the action to apply on every visited node</param>
         /// <param name="k">the k-ary of the tree (k/2) is where the in-order parent is visited.</param>
-        public void TraverseInOrder(Action<TreeNode<T>> traverseAction, int k=-1)
+        public void TraverseInOrder(Action<TreeNode<T>> traverseAction, int k=-1, Func<bool> cutoffSelector = null)
         {
             if (k == -1) k = K;
-            RootNode?.TraverseInOrder(traverseAction, k);
+            RootNode?.TraverseInOrder(traverseAction, k, cutoffSelector);
         }
 
         /// <summary>
@@ -267,9 +301,9 @@ namespace SSDK.Core.Structures.Trees
         /// post-order traversal logic.
         /// </summary>
         /// <param name="traverseAction">the action to apply on every visited node</param>
-        public void TraverseInPostOrder(Action<TreeNode<T>> traverseAction)
+        public void TraverseInPostOrder(Action<TreeNode<T>> traverseAction, Func<bool> cutoffSelector=null)
         {
-            RootNode?.TraverseInPostOrder(traverseAction);
+            RootNode?.TraverseInPostOrder(traverseAction, cutoffSelector);
         }
 
         /// <summary>
@@ -280,7 +314,7 @@ namespace SSDK.Core.Structures.Trees
         /// <param name="levelSelector">the selector which determines which nodes to visit based on level</param>
         public void TraverseInLevel(Action<TreeNode<T>, int> traverseAction, Func<int, bool> levelSelector, Func<int,bool> cutoffSelector=null)
         {
-            RootNode?.TraverseInLevel(traverseAction, levelSelector, 0, cutoffSelector);
+            RootNode?.TraverseInLevel(traverseAction, levelSelector, cutoffSelector);
         }
 
         #endregion
@@ -427,5 +461,10 @@ namespace SSDK.Core.Structures.Trees
             return GetEnumerator();
         }
         #endregion
+
+        public override string ToString()
+        {
+            return $"Tree({Size})";
+        }
     }
 }

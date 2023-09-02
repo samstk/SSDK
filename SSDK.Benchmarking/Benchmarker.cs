@@ -58,13 +58,18 @@ namespace SSDK.Benchmarking
         /// <param name="report">the report prefix, or null if not reporting</param>
         public static TimeSpan Do(Action action, string report=null)
         {
+            if (report != null)
+                Console.Write(report);
+
             Start();
 
             // Complete action
             action();
 
-            if (report == null) End();
-            else Report(report);
+            End();
+
+            if (report != null)
+            Console.WriteLine(BenchmarkTime);
 
             return BenchmarkTime;
         }
