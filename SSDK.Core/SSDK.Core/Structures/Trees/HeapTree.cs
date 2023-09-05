@@ -5,14 +5,14 @@ using System.Net;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace SSDK.Core.Structures.Trees
 {
     /// <summary>
     /// A heap tree that maintains the root node is the smallest
-    /// element. Tree nodes in a heap tree must not be modified.
+    /// element. Tree nodes in a heap tree must not be modified directly.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
     public class HeapTree<T> : BinaryTree<T>
         where T : IComparable
     {
@@ -21,13 +21,13 @@ namespace SSDK.Core.Structures.Trees
         /// The node which contains the parent that the next
         /// node must be inserted to.
         /// </summary>
-        private TreeNode<T> HeapInsertionNode;
+        private BinaryTreeNode<T> HeapInsertionNode;
 
         /// <summary>
         /// The node which contains the parent that the next node
         /// </summary>
 
-        private TreeNode<T> HeapRemovalNode;
+        private BinaryTreeNode<T> HeapRemovalNode;
         #endregion
 
         #region Methods
@@ -54,14 +54,14 @@ namespace SSDK.Core.Structures.Trees
         {
             if (RootNode == null)
             {
-                RootNode = new TreeNode<T>(element);
+                RootNode = new BinaryTreeNode<T>(element);
                 HeapInsertionNode = RootNode;
                 HeapRemovalNode = RootNode; // Update removal node
             }
             else
             {
-                TreeNode<T> furthest = HeapInsertionNode;
-                TreeNode<T> node = new TreeNode<T>(element);
+                BinaryTreeNode<T> furthest = HeapInsertionNode;
+                BinaryTreeNode<T> node = new BinaryTreeNode<T>(element);
                 HeapRemovalNode = node; // Update removal node
                 if(HeapInsertionNode.Left == null)
                 {
@@ -73,7 +73,7 @@ namespace SSDK.Core.Structures.Trees
                     HeapInsertionNode.Right = node;
 
                     // Change insertion point to neighbour.
-                    TreeNode<T> sibling = HeapInsertionNode.Sibling;
+                    BinaryTreeNode<T> sibling = HeapInsertionNode.Sibling;
                     
                     if(HeapInsertionNode.ParentNode == null)
                     { 
@@ -85,7 +85,7 @@ namespace SSDK.Core.Structures.Trees
                         if (HeapInsertionNode.IsRight)
                         {
                             // We need to find the next neighbour on the same depth.
-                            TreeNode<T> current = HeapInsertionNode;
+                            BinaryTreeNode<T> current = HeapInsertionNode;
 
                             // Calculate actions to root.
                             while(current != null)
@@ -109,12 +109,12 @@ namespace SSDK.Core.Structures.Trees
                     }
                 }
                 // If new node is less than parent, then heap order is disturbed.
-                TreeNode<T> parent = furthest;
+                BinaryTreeNode<T> parent = furthest;
                 while(parent != null && node.Value.CompareTo(parent.Value) < 0)
                 {
                     // Up-heap algorithm
                     // Simply swap the values of the node.
-                    node.Swap(parent);
+                    node.SwapValue(parent);
                     node = parent;
                     parent = parent.ParentNode;
                 }
@@ -126,13 +126,13 @@ namespace SSDK.Core.Structures.Trees
         /// Removes the root node from the heap, returning the smallest value in the tree.
         /// </summary>
         /// <returns>a shallow copy of the root node of the tree</returns>
-        public TreeNode<T> Remove()
+        public BinaryTreeNode<T> Remove()
         {
             if (RootNode == null) return null;
             return Remove(RootNode.Value);
         }
 
-        public override void Remove(TreeNode<T> node)
+        public override void Remove(BinaryTreeNode<T> node)
         {
             if (RootNode == null || HeapRemovalNode == null)
             {
@@ -143,21 +143,36 @@ namespace SSDK.Core.Structures.Trees
             HeapInsertionNode = HeapRemovalNode.ParentNode;
 
             // Replace root key with last node.
-            HeapRemovalNode.Swap(node);
+            HeapRemovalNode.SwapValue(node);
 
-            TreeNode<T> removedNode = HeapRemovalNode;
+            BinaryTreeNode<T> removedNode = HeapRemovalNode;
 
             // Find next removal node
             // We need to find the next neighbour on the same depth.
-            TreeNode<T> current = HeapRemovalNode;
+            BinaryTreeNode<T> current = HeapRemovalNode;
+
+            // Remove last node.
+            if (removedNode == RootNode)
+            {
+                RootNode = null;
+                HeapInsertionNode = null;
+                HeapRemovalNode = null;
+                return;
+            }
+            else
+            {
+                removedNode.Remove();
+
+                // Restore heap-order property.
+                Downheap(node);
+            }
 
             // Calculate next removal node.
-
             while (current != null)
             {
                 if (current.IsRight)
                 {
-                    TreeNode<T> sibling = current.Sibling;
+                    BinaryTreeNode<T> sibling = current.Sibling;
                     if (sibling!=null)
                     {
                         // Next removal is sibling's right-most node.
@@ -171,20 +186,6 @@ namespace SSDK.Core.Structures.Trees
             if (current == null) // Must remove from last level.
                 HeapRemovalNode = RootNode.RightMostNode;
 
-            // Remove last node.
-            if (removedNode == RootNode)
-            {
-                RootNode = null;
-                HeapInsertionNode = null;
-                HeapRemovalNode = null;
-            }
-            else
-            {
-                removedNode.Remove();
-
-                // Restore heap-order property.
-                Downheap(node);
-            }
         }
 
         /// <summary>
@@ -192,7 +193,7 @@ namespace SSDK.Core.Structures.Trees
         /// given node.
         /// </summary>
         /// <param name="node">the node to order</param>
-        private static void Downheap(TreeNode<T> node)
+        private static void Downheap(BinaryTreeNode<T> node)
         {
             // Check if heap order is volated.
             bool violated = node.Left != null && node.Left.Value.CompareTo(node.Value) < 0
@@ -202,12 +203,12 @@ namespace SSDK.Core.Structures.Trees
             {
                 if(node.Right == null)
                 {
-                    node.Swap(node.Left);
+                    node.SwapValue(node.Left);
                     Downheap(node.Left);
                 }
                 else if (node.Left == null)
                 {
-                    node.Swap(node.Right);
+                    node.SwapValue(node.Right);
                     Downheap(node.Right);
                 }
                 else
@@ -216,51 +217,19 @@ namespace SSDK.Core.Structures.Trees
                     if(comparison <= 0)
                     {
                         // Left is smaller or equal
-                        node.Swap(node.Left);
+                        node.SwapValue(node.Left);
                         Downheap(node.Left);
                     }
                     else
                     {
                         // Right is smaller
-                        node.Swap(node.Right);
+                        node.SwapValue(node.Right);
                         Downheap(node.Right);
                     }
                 }
             }
         }
         #endregion
-        #region Search
-        /// <summary>
-        /// Gets the node parent where the next insertion (ignoring heap order), would be
-        /// added.
-        /// </summary>
-        /// <returns>the node parent where the next node would be inserted</returns>
-        public TreeNode<T> GetNextInsertionNodeParent()
-        {
-            if (RootNode == null)
-                return null;
-
-            Queue<TreeNode<T>> visitQueue = new Queue<TreeNode<T>>();
-            
-            visitQueue.Enqueue(RootNode);
-
-            // Wait until first node found has a child missing.
-            while (visitQueue.Count > 0)
-            {
-                TreeNode<T> node = visitQueue.Dequeue();
-
-                if (node.Left == null || node.Right == null) return node;      
-
-                foreach (TreeNode<T> child in node._Children)
-                {
-                    visitQueue.Enqueue(child);
-                }
-            }
-
-            return null; // Should never occur.
-        }
-        #endregion
-        
         #endregion
 
 

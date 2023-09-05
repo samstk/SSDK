@@ -81,7 +81,6 @@ Benchmarker.Do(() => {
     }
 }, "Adding 10000 elements to heap: ");
 
-
 PriorityQueue<int, int> queue = new PriorityQueue<int, int>();
 Benchmarker.Do(() => {
     foreach (int element in array)
@@ -125,16 +124,36 @@ Benchmarker.Do(() => {
         queue.Dequeue();
     }
 }, "Removing 10000 elements from native priority queue: ");
+
 heapTest = new HeapTree<int>();
+
 Benchmarker.Do(() =>
 {
     for(int i = 0; i<5000; i++)
     {
         for(int x = 0; x<2; x++)
         {
-            heapTest.Add(i * (x + 1));
+            heapTest.Add(i * 2 + x);
         }
         heapTest.Remove(i * 2);
     }
-}, "Sequence of adding (10000) and removals (5000)");
+}, "Sequence of adding (10000) and removals (5000) to heap");
+
+BinarySearchTree<int> bst = new BinarySearchTree<int>();
+Benchmarker.Do(() =>
+{
+    for (int i = 0; i < array.Length; i++)
+    {
+        bst.Add(array[i]);
+    }
+}, "Adding 10000 elements to BST: ");
+
+Benchmarker.Do(() =>
+{
+    for (int i = 0; i < array.Length; i++)
+    {
+        bst.Remove(array[i]);
+    }
+}, "Removing 10000 elements from BST: ");
+
 Console.WriteLine("Finished");

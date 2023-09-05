@@ -377,9 +377,9 @@ namespace SSDK.Core.Structures.Trees
         /// </summary>
         /// <param name="treeType">a constructor for the tree type</param>
         /// <returns>null if invalid tree, else the resulting tree</returns>
-        public BinaryTree<T> ToBinaryTree(Func<BinaryTree<T>> treeType, bool deepCloning=true)
+        public Tree<T> ToBinaryTree(Func<Tree<T>> treeType, bool deepCloning=true)
         {
-            BinaryTree<T> tree = treeType();
+            Tree<T> tree = treeType();
             if(RootNode != null)
             {
                 if(RootNode.NumberOfChildren > 2)
@@ -389,7 +389,6 @@ namespace SSDK.Core.Structures.Trees
                 else
                 {
                     tree.RootNode = RootNode.Clone(false);
-                    
                 } 
             }
             return tree;
