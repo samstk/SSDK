@@ -4,6 +4,7 @@ using SSDK.Benchmarking;
 using SSDK.Core.Helpers;
 using SSDK.Core.Algorithms.Sorting;
 using SSDK.Core.Structures.Trees;
+using System;
 
 int INTEGER_COUNT = 10000;
 
@@ -157,6 +158,27 @@ Benchmarker.Do(() =>
         bst.Remove(array[i]);
     }
 }, "Removing elements from BST: ");
+
+SplaySearchTree<int> splay = new SplaySearchTree<int>();
+Benchmarker.Do(() =>
+{
+    for (int i = 0; i < array.Length; i++)
+    {
+        splay.Add(array[i]);
+        if(splay.RootNode.Value != array[i])
+        {
+
+        }
+    }
+}, "Adding elements to Splay Tree: ");
+
+Benchmarker.Do(() =>
+{
+    for (int i = 0; i < array.Length; i++)
+    {
+        splay.Remove(array[i]);
+    }
+}, "Removing elements from Splay Tree: ");
 
 AVLSearchTree<int> avl = new AVLSearchTree<int>();
 
