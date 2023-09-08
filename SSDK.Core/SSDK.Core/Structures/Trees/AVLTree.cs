@@ -173,6 +173,17 @@ namespace SSDK.Core.Structures.Trees
             
             return newNode;
         }
+
+        public override void Remove(BinaryTreeNode<T> elementNode)
+        {
+            BinaryTreeNode<T> parentNode = elementNode.ParentNode;
+            
+            // Remove as per normal BST
+            base.Remove(elementNode);
+
+            // Perform re-structure operation to node-to-root.
+            if(parentNode != null) Restructure(parentNode);
+        }
         #endregion
     }
 }

@@ -168,7 +168,6 @@ Benchmarker.Do(() =>
     }
 }, "Adding elements to AVL: ");
 
-File.WriteAllText("tree.txt", avl.GetTextVisualisation(false, true));
 Benchmarker.Do(() =>
 {
     int errors = 0;
@@ -182,5 +181,33 @@ Benchmarker.Do(() =>
     Console.WriteLine($"[{errors} errors found]");
 }, "Checking AVL Balance Properties: ");
 
+Benchmarker.Do(() =>
+{
+    for (int i = 0; i < array.Length / 2; i++)
+    {
+        avl.Remove(array[i]);
+    }
+}, "Removing half-elements from AVL: ");
+
+Benchmarker.Do(() =>
+{
+    int errors = 0;
+    foreach (var node in avl)
+    {
+        if (!node.IsBalanced)
+        {
+            errors++;
+        }
+    }
+    Console.WriteLine($"[{errors} errors found]");
+}, "Checking AVL Balance Properties: ");
+
+Benchmarker.Do(() =>
+{
+    for (int i = array.Length / 2; i < array.Length; i++)
+    {
+        avl.Remove(array[i]);
+    }
+}, "Removing rest of elements from AVL: ");
 
 Console.WriteLine("Finished");
