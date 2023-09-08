@@ -163,12 +163,25 @@ namespace SSDK.Core.Structures.Trees
             }
         }
 
+        private TreeNode<T> _RootNode;
         /// <summary>
         /// Gets the root node of this tree.
         /// </summary>
-        public TreeNode<T> RootNode { get; protected set; }
+        public TreeNode<T> RootNode
+        {
+            get
+            {
+                return _RootNode;
+            }
+            protected set
+            {
+                _RootNode = value;
+                if (value != null)
+                    value.ParentNode = null;
+            }
+        }
 
-        
+
 
         /// <summary>
         /// Returns the number of nodes in this tree
@@ -229,7 +242,7 @@ namespace SSDK.Core.Structures.Trees
         /// Adds an element to the tree.
         /// </summary>
         /// <param name="element">the element to add</param>
-        public abstract void Add(T element);
+        public abstract TreeNode<T> Add(T element);
 
         /// <summary>
         /// Removes an element's node from the tree.

@@ -50,18 +50,20 @@ namespace SSDK.Core.Structures.Trees
         {
             throw new InvalidOperationException("Cannot set the root of a heap tree, the tree must be individually formed.");
         }
-        public override void Add(T element)
+        public override BinaryTreeNode<T> Add(T element)
         {
             if (RootNode == null)
             {
                 RootNode = new BinaryTreeNode<T>(element);
                 HeapInsertionNode = RootNode;
                 HeapRemovalNode = RootNode; // Update removal node
+                return RootNode;
             }
             else
             {
                 BinaryTreeNode<T> furthest = HeapInsertionNode;
-                BinaryTreeNode<T> node = new BinaryTreeNode<T>(element);
+                BinaryTreeNode<T> newNode = new BinaryTreeNode<T>(element);
+                BinaryTreeNode<T> node = newNode;
                 HeapRemovalNode = node; // Update removal node
                 if(HeapInsertionNode.Left == null)
                 {
@@ -118,6 +120,7 @@ namespace SSDK.Core.Structures.Trees
                     node = parent;
                     parent = parent.ParentNode;
                 }
+                return newNode;
             }
         }
 

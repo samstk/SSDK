@@ -11,7 +11,21 @@ namespace SSDK.Core.Structures.Trees
     public sealed class BinaryTreeNode<T> : IEnumerable<BinaryTreeNode<T>>
     {
         #region Properties & Fields
+
         #region Binary Properties
+        /// <summary>
+        /// True if the difference between Left and Right's height is at most 1.
+        /// </summary>
+        public bool IsBalanced
+        {
+            get
+            {
+                int leftHeight = Left == null ? 0 : Left.Height;
+                int rightHeight = Right == null ? 0 : Right.Height;
+                return Math.Abs(leftHeight - rightHeight) <= 1;
+            }
+        }
+
         /// <summary>
         /// True if this node is the left descendent of the parent.
         /// </summary>
@@ -46,7 +60,7 @@ namespace SSDK.Core.Structures.Trees
             }
             set
             {
-                if (_Left != null) _Left.ParentNode = null;
+                if (_Left != null && _Left.ParentNode == this) _Left.ParentNode = null;
                 _Left = value;
                 if (_Left != null) _Left.ParentNode = this;
             }
@@ -67,6 +81,21 @@ namespace SSDK.Core.Structures.Trees
             }
         }
 
+        /// <summary>
+        /// Gets the child with the largest height, or if only
+        /// one child exists, returns that.
+        /// </summary>
+        public BinaryTreeNode<T> LargestChild
+        {
+            get
+            {
+                if (Left == null && Right == null) return null;
+                if (Left != null && Right == null) return Left;
+                if (Right != null && Left == null) return Right;
+                if (Left.Height < Right.Height) return Right;
+                return Left;
+            }
+        }
         /// <summary>
         /// Gets the in-order predecessor of this node, simply
         /// returning null if it does not exist.
@@ -126,7 +155,7 @@ namespace SSDK.Core.Structures.Trees
             }
             set
             {
-                if (_Right != null) _Right.ParentNode = null;
+                if (_Right != null && _Right.ParentNode == this) _Right.ParentNode = null;
                 _Right = value;
                 if (_Right != null) _Right.ParentNode = this;
             }
@@ -157,6 +186,21 @@ namespace SSDK.Core.Structures.Trees
             {
                 if (ParentNode == null) return null;
                 return ParentNode.Left == this ? ParentNode.Right : ParentNode.Left;
+            }
+        }
+
+        /// <summary>
+        /// Gets the child with the smallest height, or if only
+        /// one child exists, returns that.
+        /// </summary>
+        public BinaryTreeNode<T> SmallestChild
+        {
+            get
+            {
+                if (Left != null && Right == null) return Left;
+                if (Right != null && Left == null) return Right;
+                if (Left.Height > Right.Height) return Right;
+                return Left;
             }
         }
         #endregion
@@ -240,7 +284,8 @@ namespace SSDK.Core.Structures.Trees
         {
             get
             {
-                if (Children.Count == 0)
+                if (CacheHeight != -1) return CacheHeight;
+                if (Left == null && Right == null)
                     return 0;
 
                 // Search through children for max height
@@ -254,10 +299,18 @@ namespace SSDK.Core.Structures.Trees
                     }
                 }
 
+                CacheHeight = maxHeight;
+
                 return maxHeight + 1;
             }
         }
 
+        /// <summary>
+        /// Gets or sets the cached height of the node.
+        /// Use this if you don't wish to recalculate the height of a node.
+        /// Implemented in Binary Search Trees.
+        /// </summary>
+        public int CacheHeight { get; set; } = -1;
         
         
         /// <summary>
@@ -418,44 +471,66 @@ namespace SSDK.Core.Structures.Trees
             Value = node.Value;
             node.Value = val;
         }
+
+        /// <summary>
+        /// Swaps the two nodes in the structure.
+        /// 
+        /// </summary>
+        /// <param name="nodeToSwap">the node to swap out</param>
+        /// <param name="newNode">the node to swap in</param>
+        /// <remarks>
+        /// NOTE: that this operation only modifies the current node, 
+        /// and they other parent node must also be modified, else
+        /// cloning may occur.</remarks>
+        public void SwapNode(BinaryTreeNode<T> nodeToSwap, BinaryTreeNode<T> newNode)
+        {
+            if(nodeToSwap == Left)
+            {
+                Left = newNode;
+            }
+            else if (nodeToSwap == Right)
+            {
+                Right = newNode;
+            }
+        }
         #endregion
         #region Traversals
         /// <summary>
         /// Performs the given action on every visit to a node, using 
         /// pre-order traversal logic.
         /// </summary>
-        /// <param name="traverseAction">the action to apply on every visited node</param>
+        /// <param name="traverseAction">the action to apply on every visited node (node, level)</param>
         /// <param name="cutoffSelector">a function which returns a boolean indicating the traversal should stop</param>
-        public void TraverseInPreOrder(Action<BinaryTreeNode<T>> traverseAction, Func<bool> cutoffSelector=null)
+        public void TraverseInPreOrder(Action<BinaryTreeNode<T>, int> traverseAction, Func<bool> cutoffSelector=null, int level = 0)
         {
             if (cutoffSelector != null && cutoffSelector()) return;
 
-            traverseAction(this);
+            traverseAction(this, level);
 
-            Left?.TraverseInPreOrder(traverseAction, cutoffSelector);
-            Right?.TraverseInPreOrder(traverseAction, cutoffSelector);
+            Left?.TraverseInPreOrder(traverseAction, cutoffSelector, level+1);
+            Right?.TraverseInPreOrder(traverseAction, cutoffSelector, level+1);
         }
 
         /// <summary>
         /// Performs the given action on every visit to a node, using 
         /// in-order traversal logic.
         /// </summary>
-        /// <param name="traverseAction">the action to apply on every visited node</param>
+        /// <param name="traverseAction">the action to apply on every visited node (node, level)</param>
         /// <param name="cutoffSelector">a function which returns a boolean indicating the traversal should stop</param>
         /// <param name="k">the k-ary of the tree (k/2) is where the in-order parent is visited.</param>
-        public void TraverseInOrder(Action<BinaryTreeNode<T>> traverseAction, int k, Func<bool> cutoffSelector=null)
+        public void TraverseInOrder(Action<BinaryTreeNode<T>, int> traverseAction, int k, Func<bool> cutoffSelector=null, int level=0)
         {
             if (cutoffSelector != null && cutoffSelector()) return;
 
             int middle = k / 2;
 
             // Traverse left before current
-            Left?.TraverseInPreOrder(traverseAction, cutoffSelector);
+            Left?.TraverseInPreOrder(traverseAction, cutoffSelector, level + 1);
 
-            traverseAction(this);
+            traverseAction(this, level);
 
             // Traverse right after current
-            Right?.TraverseInPreOrder(traverseAction, cutoffSelector);
+            Right?.TraverseInPreOrder(traverseAction, cutoffSelector, level + 1);
         }
 
         /// <summary>
@@ -463,16 +538,16 @@ namespace SSDK.Core.Structures.Trees
         /// post-order traversal logic.
         /// </summary>
         /// <param name="cutoffSelector">a function which returns a boolean indicating the traversal should stop</param>
-        /// <param name="traverseAction">the action to apply on every visited node</param>
-        public void TraverseInPostOrder(Action<BinaryTreeNode<T>> traverseAction, Func<bool> cutoffSelector=null)
+        /// <param name="traverseAction">the action to apply on every visited node (node, level)</param>
+        public void TraverseInPostOrder(Action<BinaryTreeNode<T>, int> traverseAction, Func<bool> cutoffSelector=null, int level = 0)
         {
             if (cutoffSelector != null && cutoffSelector()) return;
 
             // Traverse both before current.
-            Left?.TraverseInPreOrder(traverseAction, cutoffSelector);
-            Right?.TraverseInPreOrder(traverseAction, cutoffSelector);
+            Left?.TraverseInPreOrder(traverseAction, cutoffSelector, level + 1);
+            Right?.TraverseInPreOrder(traverseAction, cutoffSelector, level + 1);
 
-            traverseAction(this);
+            traverseAction(this, level);
         }
 
         /// <summary>
@@ -497,11 +572,12 @@ namespace SSDK.Core.Structures.Trees
                 // Queue all child nodes if below cutoff.
                 if (cutoff != null && cutoff(nodeLevel)) continue;
 
-                if (Left != null) visitQueue.Enqueue((Left, nodeLevel + 1));
-                if (Right != null) visitQueue.Enqueue((Right, nodeLevel + 1));
+                if (node.Left != null) visitQueue.Enqueue((node.Left, nodeLevel + 1));
+                if (node.Right != null) visitQueue.Enqueue((node.Right, nodeLevel + 1));
             }
         }
         #endregion
+
         #endregion
         #region Enumerator
         public IEnumerator<BinaryTreeNode<T>> GetEnumerator()
@@ -519,6 +595,15 @@ namespace SSDK.Core.Structures.Trees
         public override string ToString()
         {
             return $"BinaryTreeNode({(Value == null ? "null" : Value)})";
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+        public override bool Equals(object? obj)
+        {
+            return (obj is BinaryTreeNode<T>) ? ((BinaryTreeNode<T>)obj).Value.Equals(Value) : false;
         }
     }
 }

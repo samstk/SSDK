@@ -145,10 +145,22 @@ namespace SSDK.Core.Structures.Trees
             }
         }
 
+
+        private BinaryTreeNode<T> _RootNode;
         /// <summary>
         /// Gets the root node of this tree.
         /// </summary>
-        public BinaryTreeNode<T> RootNode { get; protected set; }
+        public BinaryTreeNode<T> RootNode { get
+            {
+                return _RootNode;
+            }
+            protected set
+            {
+                _RootNode = value;
+                if(value != null)
+                    value.ParentNode = null;
+            }
+        }
 
 
 
@@ -211,7 +223,8 @@ namespace SSDK.Core.Structures.Trees
         /// Adds an element to the tree.
         /// </summary>
         /// <param name="element">the element to add</param>
-        public abstract void Add(T element);
+        /// <returns>the node that was added</returns>
+        public abstract BinaryTreeNode<T> Add(T element);
 
         /// <summary>
         /// Removes an element's node from the tree.
@@ -260,8 +273,8 @@ namespace SSDK.Core.Structures.Trees
         /// Performs the given action on every visit to a node, using 
         /// pre-order traversal logic.
         /// </summary>
-        /// <param name="traverseAction">the action to apply on every visited node</param>
-        public void TraverseInPreOrder(Action<BinaryTreeNode<T>> traverseAction, Func<bool> cutoffSelector = null)
+        /// <param name="traverseAction">the action to apply on every visited node (node, level)</param>
+        public void TraverseInPreOrder(Action<BinaryTreeNode<T>, int> traverseAction, Func<bool> cutoffSelector = null)
         {
             RootNode?.TraverseInPreOrder(traverseAction, cutoffSelector);
         }
@@ -270,9 +283,9 @@ namespace SSDK.Core.Structures.Trees
         /// Performs the given action on every visit to a node, using 
         /// in-order traversal logic.
         /// </summary>
-        /// <param name="traverseAction">the action to apply on every visited node</param>
+        /// <param name="traverseAction">the action to apply on every visited node (node, level)</param>
         /// <param name="k">the k-ary of the tree (k/2) is where the in-order parent is visited.</param>
-        public void TraverseInOrder(Action<BinaryTreeNode<T>> traverseAction, int k = -1, Func<bool> cutoffSelector = null)
+        public void TraverseInOrder(Action<BinaryTreeNode<T>, int> traverseAction, int k = -1, Func<bool> cutoffSelector = null)
         {
             if (k == -1) k = K;
             RootNode?.TraverseInOrder(traverseAction, k, cutoffSelector);
@@ -282,8 +295,8 @@ namespace SSDK.Core.Structures.Trees
         /// Performs the given action on every visit to a node, using 
         /// post-order traversal logic.
         /// </summary>
-        /// <param name="traverseAction">the action to apply on every visited node</param>
-        public void TraverseInPostOrder(Action<BinaryTreeNode<T>> traverseAction, Func<bool> cutoffSelector = null)
+        /// <param name="traverseAction">the action to apply on every visited node (node, level)</param>
+        public void TraverseInPostOrder(Action<BinaryTreeNode<T>, int> traverseAction, Func<bool> cutoffSelector = null)
         {
             RootNode?.TraverseInPostOrder(traverseAction, cutoffSelector);
         }
@@ -446,7 +459,7 @@ namespace SSDK.Core.Structures.Trees
         /// <summary>
         /// Gets the text representation of the binary tree, 
         /// </summary>
-        public string GetTextVisualisation()
+        public string GetTextVisualisation(bool capConsoleWidth=true, bool structureOnly=false)
         {
             List<BinaryTreeNode<T>> nodes = AllNodes;
             Dictionary<BinaryTreeNode<T>, string> representations = new Dictionary<BinaryTreeNode<T>, string>();
@@ -454,7 +467,7 @@ namespace SSDK.Core.Structures.Trees
             // Create representations and check max length of representation.
             for (int i = 0; i < nodes.Count; i++)
             {
-                string repr = (
+                string repr = structureOnly ? "O" : (
                     Nullable.GetUnderlyingType(typeof(T)) != null
                     && nodes[i].Value == null
                     ) ? "<null>" : nodes[i].Value.ToString();
@@ -469,6 +482,9 @@ namespace SSDK.Core.Structures.Trees
 
             int padding = 2;
             int allowedWidth = (maxReprLength + padding * 2) * (int)Math.Pow(2, Height);
+
+            if (capConsoleWidth && allowedWidth > Console.BufferWidth)
+                allowedWidth = Console.BufferWidth;
 
             for (int h = 0; h <= Height; h++)
             {
@@ -498,11 +514,39 @@ namespace SSDK.Core.Structures.Trees
 
             return representation;
         }
+
+        /// <summary>
+        /// Gets the heirarchical text visualisation of a binary tree node.
+        /// i.e.
+        /// root
+        /// - left
+        ///     - left
+        ///     - right
+        /// - right
+        /// </summary>
+        /// <returns></returns>
+        public string GetHeirarchicalTextVisualisation()
+        {
+            if (RootNode == null) return "- No Root -";
+
+            string representation = "";
+
+            RootNode.TraverseInPreOrder((node, level) =>
+            {
+                if (representation != "") representation += "\n";
+                representation += "".PadLeft(level, '\t');
+                if (level != 0) representation += "- ";
+                representation += node.Value.ToString();
+            });
+
+            return representation;
+        }
         #endregion
         public override string ToString()
         {
             return $"Binary-Tree({Size})";
         }
+
         #endregion
 
 

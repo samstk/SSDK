@@ -21,7 +21,8 @@ namespace SSDK.Core.Helpers
         {
             int length = toInsert.Length;
             int target = index - length / 2;
-
+            if (target < 0) target = 0;
+            if (target > original.Length) target = original.Length;
             return original.Remove(target, length).Insert(target, toInsert);
         }
     }

@@ -28,13 +28,14 @@ namespace SSDK.Core.Structures.Trees
         }
         #endregion
         #region Modification
-        public override void Add(T element)
+        public override BinaryTreeNode<T> Add(T element)
         {
             BinaryTreeNode<T> newNode = new BinaryTreeNode<T>(element);
             if (RootNode == null)
             {
                 // New node is the new root node.
                 RootNode = newNode;
+                newNode.CacheHeight = 0; // Height 0 is new root node.
             }
             else
             {
@@ -68,6 +69,7 @@ namespace SSDK.Core.Structures.Trees
                         throw new ConflictingDataException("Element already exists in the BST.");
                 }
             }
+            return newNode;
         }
 
         public override void Remove(BinaryTreeNode<T> elementNode)
@@ -75,6 +77,7 @@ namespace SSDK.Core.Structures.Trees
             if (elementNode.IsLeafNode)
             {
                 // Simply remove the node
+                BinaryTreeNode<T> parentNode = elementNode;
                 elementNode.Remove();
             }
             else

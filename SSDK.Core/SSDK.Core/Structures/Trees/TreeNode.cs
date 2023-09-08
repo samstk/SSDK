@@ -522,5 +522,14 @@ namespace SSDK.Core.Structures.Trees
         {
             return $"TreeNode({(Value == null ? "null" : Value)})";
         }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+        public override bool Equals(object? obj)
+        {
+            return (obj is TreeNode<T>) ? ((TreeNode<T>)obj).Value.Equals(obj) : false;
+        }
     }
 }
