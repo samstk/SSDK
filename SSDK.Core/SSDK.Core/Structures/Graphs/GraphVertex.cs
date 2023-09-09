@@ -28,6 +28,17 @@ namespace SSDK.Core.Structures.Graphs
         public T Value { get; set; }
 
         /// <summary>
+        /// Returns true if this vertex has edges leading from it.
+        /// </summary>
+        public bool HasEdgesFrom
+        {
+            get
+            {
+                return _EdgesFrom != null && _EdgesFrom.Count > 0;
+            }
+        }
+
+        /// <summary>
         /// The list of all edges from this vertex to another.
         /// </summary>
         private List<GraphEdge<T>> _EdgesFrom;
@@ -43,6 +54,16 @@ namespace SSDK.Core.Structures.Graphs
             } 
         }
 
+        /// <summary>
+        /// Returns true if this vertex has edges leading to it.
+        /// </summary>
+        public bool HasEdgesTo
+        {
+            get
+            {
+                return _EdgesTo != null && _EdgesTo.Count > 0;
+            }
+        }
         /// <summary>
         /// The list of all edges from another vertex to this vertex.
         /// </summary>

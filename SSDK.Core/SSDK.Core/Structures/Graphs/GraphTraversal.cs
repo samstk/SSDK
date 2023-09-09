@@ -50,6 +50,55 @@ namespace SSDK.Core.Structures.Graphs
             on.UpdateIndexReferences();
         }
         #endregion
+
+        #region Searching
+        /// <summary>
+        /// Gets the path between the initially traversed vertex and the target vertex.
+        /// </summary>
+        /// <param name="target">the target vertex that was reached in the traversal</param>
+        /// <param name="desiredEdgeState">
+        /// the edge state that allows a path to be made
+        /// (defaults to 1 as this is generally used for discovery edges)
+        /// </param>
+        /// <returns>a list of edges that is a path from the initial vertex to the target vertex</returns>
+        public List<GraphEdge<T>> GetPathBackFrom(GraphVertex<T> target, int desiredEdgeState=1)
+        {
+            List<GraphEdge<T>> path = new List<GraphEdge<T>>();
+
+            GraphVertex<T> currentVertex = target;
+
+            // Continue path until complete or invalid.
+            while (true)
+            {
+                // Check all edges to current vertex for discovery edge.
+
+                if (currentVertex.HasEdgesTo)
+                {
+                    GraphEdge<T> discoveryEdge = null;
+                    foreach (GraphEdge<T> edge in currentVertex.EdgesTo)
+                    {
+                        if (EdgeStates[edge.LatestIndex] == desiredEdgeState)
+                        {
+                            discoveryEdge = edge;
+                            break;
+                        }
+                    }
+
+                    if(discoveryEdge != null)
+                    {
+                        path.Add(discoveryEdge);
+                        currentVertex = discoveryEdge.TraverseBackFrom(currentVertex);
+                        continue;
+                    }
+                }
+                break; // Invalid path as no edge from current vertex is a discovery edge.
+            }
+
+            path.Reverse();
+
+            return path;
+        }
+        #endregion
         #endregion
 
         public override string ToString()

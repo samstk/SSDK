@@ -90,6 +90,25 @@ namespace SSDK.Core.Structures.Graphs
         }
 
         /// <summary>
+        /// Traverses the edge back ending from a given node
+        /// (i.e. in a single-way edge, the vertex from must be the end of the edge), 
+        /// assuming that the parameter is either vertex from or vertex to.
+        /// </summary>
+        public GraphVertex<T> TraverseBackFrom(GraphVertex<T> from)
+        {
+            if (from == VertexTo)
+            {
+                return VertexFrom;
+            }
+            else if (Multiway)
+            {
+                return VertexTo;
+            }
+            else throw new InvalidOperationException("Attempted to traverse graph edge backwards on a single-way edge.");
+        }
+
+
+        /// <summary>
         /// Returns true if the edge can be traversed from the given vertex.
         /// </summary>
         /// <param name="from">the vertex to traverse from</param>
@@ -97,6 +116,16 @@ namespace SSDK.Core.Structures.Graphs
         public bool CanTraverse(GraphVertex<T> from)
         {
             return from == VertexFrom || Multiway;
+        }
+
+        /// <summary>
+        /// Returns true if the edge can be traversed back from from the given vertex.
+        /// </summary>
+        /// <param name="from">the vertex to traverse from</param>
+        /// <returns>true if a traversal can happen from the given vertex to the other</returns>
+        public bool CanTraverseBackFrom(GraphVertex<T> from)
+        {
+            return from == VertexTo || Multiway;
         }
 
         /// <summary>

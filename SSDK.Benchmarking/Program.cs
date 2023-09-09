@@ -33,6 +33,12 @@ Benchmarker.Do(() =>
     GraphTraversal<int> traversal = graph.DepthFirstSearch(g2);
 }, "DFS Traversal on 1: ");
 
+Benchmarker.Do(() =>
+{
+    GraphTraversal<int> traversal = graph.BreadthFirstSearch(g2, g3);
+    List<GraphEdge<int>> paths = traversal.GetPathBackFrom(g3);
+}, "BFS Traversal on 2->1");
+
 Console.WriteLine("**Sorting Algorithms");
 Console.WriteLine($"All sorting algorithms are based on {INTEGER_COUNT} elements.");
 int[] array = null;
