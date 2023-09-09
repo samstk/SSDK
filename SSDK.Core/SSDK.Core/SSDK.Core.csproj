@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Algorithms\Search\" />
     <Folder Include="Structures\Arrays\" />
     <Folder Include="Testing\" />
   </ItemGroup>

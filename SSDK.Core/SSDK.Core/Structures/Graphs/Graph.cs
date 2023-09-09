@@ -124,6 +124,135 @@ namespace SSDK.Core.Structures.Graphs
         }
 
         #endregion
+
+        #region Search
+        /// <summary>
+        /// Gets the first edge matching from=v1 and to=v2, or if multiway is allowed, then an edge
+        /// that matches accordingly.
+        /// </summary>
+        /// <param name="v1">the vertex from</param>
+        /// <param name="v2">the vertex to</param>
+        /// <param name="allowMultiway">if true, then v1 can be to and v2 can be from</param>
+        /// <returns></returns>
+        public GraphEdge<T> GetEdge(GraphVertex<T> v1, GraphVertex<T> v2, bool allowMultiway=true)
+        {
+            if (allowMultiway)
+            {
+                // Get an edge that matches (allowing for multi-way paths)
+                foreach (GraphEdge<T> edge in Edges)
+                {
+                    if(edge.VertexFrom == v1 && edge.VertexTo == v2
+                        || edge.VertexFrom == v2 && edge.VertexTo == v1 && edge.Multiway)
+                    {
+                        return edge;
+                    }
+                }
+            }
+            else
+            {
+                // Get an edge that matches.
+                foreach (GraphEdge<T> edge in Edges)
+                {
+                    if(edge.VertexFrom == v1 && edge.VertexTo == v2)
+                    {
+                        return edge;
+                    }
+                }
+            }
+            return null;
+        }
+        #endregion
+
+        #region Graph Traversal Algorithms
+        /// <summary>
+        /// Updates all edge and vertices indices to ensure they have an exact reference.
+        /// </summary>
+        public void UpdateIndexReferences()
+        {
+            // Update edge indices
+            for(int i = 0; i<_Edges.Count; i++)
+            { 
+                _Edges[i].LatestIndex = i;
+            }
+
+            // Update vertex indices
+            for(int i = 0; i<_Vertices.Count; i++)
+            {
+                _Vertices[i].LatestIndex = i;
+            }
+        }
+
+        #region DFS Constants
+        /// <summary>
+        /// A constant for the GT state of the vertex when unvisited in DFS.
+        /// </summary>
+        public const int VTX_DFS_UNVISITED = 0;
+        /// <summary>
+        /// A constant for the GT state of the vertex when visited in DFS.
+        /// </summary>
+        public const int VTX_DFS_VISITED = 1;
+
+        /// <summary>
+        /// A constant for the GT state of the edge when unexplored in DFS.
+        /// </summary>
+        public const int EDGE_DFS_UNEXPLORED = 0;
+        /// <summary>
+        /// A constant for the GT state of the edge when 'discovered' in DFS.
+        /// </summary>
+        public const int EDGE_DFS_DISCOVERY = 1;
+        /// <summary>
+        /// A constant for the GT state of the edge when it leads to a discovered vertex.
+        /// </summary>
+        public const int EDGE_DFS_BACK = 2;
+        #endregion
+        /// <summary>
+        /// Performs depth-first search (dfs) on the graph and given vertex.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <returns></returns>
+        public GraphTraversal<T> DepthFirstSearch(GraphVertex<T> v)
+        {
+            GraphTraversal<T> traversal = new GraphTraversal<T>(this, "DFS");
+
+            // Create DFS stack for algorithm.
+            Stack <GraphVertex<T>> dfsStack = new ();
+            dfsStack.Push(v);
+
+            while (dfsStack.Count > 0)
+            {
+                GraphVertex<T> vertex = dfsStack.Pop();
+
+                // Mark vertex as visited
+                traversal.VertexStates[vertex.LatestIndex] = VTX_DFS_VISITED;
+
+                if (vertex.EdgesFrom != null)
+                {
+                    // Check all outgoing edges for unexplored vertices
+                    foreach(GraphEdge<T> edge in vertex.EdgesFrom)
+                    {
+                        if (traversal.EdgeStates[edge.LatestIndex] == EDGE_DFS_UNEXPLORED)
+                        {
+                            GraphVertex<T> reachedVertex = edge.Traverse(vertex);
+                            if (traversal.VertexStates[reachedVertex.LatestIndex] == EDGE_DFS_UNEXPLORED)
+                            {
+                                // Mark edge as discovery edge
+                                traversal.EdgeStates[edge.LatestIndex] = EDGE_DFS_DISCOVERY;
+                                dfsStack.Push(reachedVertex); // Add to stack for next depth-first step.
+                            }
+                            else
+                            {
+                                // Mark edge as back edge.
+                                traversal.EdgeStates[edge.LatestIndex] = EDGE_DFS_BACK;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return traversal;
+        }
+        #endregion
+
         #endregion
 
         public override string ToString()

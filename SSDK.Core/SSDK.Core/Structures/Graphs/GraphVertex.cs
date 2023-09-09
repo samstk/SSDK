@@ -12,6 +12,12 @@ namespace SSDK.Core.Structures.Graphs
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets or sets the latest index that this vertex was found on in the root graph.
+        /// Updated generally during graph traversal constructor.
+        /// </summary>
+        public int LatestIndex { get; set; } = -1;
+
+        /// <summary>
         /// Gets the root associatied with this vertex.
         /// </summary>
         public Graph<T> Root { get; private set; }

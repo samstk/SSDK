@@ -26,6 +26,12 @@ graph.CreatePath(g1, g3, 3);
 graph.CreatePath(g2, g4, 4);
 graph.Join(g4, g1, 2);
 graph.Join(g4, g5, 2);
+graph.Join(g5, g3, 2);
+
+Benchmarker.Do(() =>
+{
+    GraphTraversal<int> traversal = graph.DepthFirstSearch(g2);
+}, "DFS Traversal on 1: ");
 
 Console.WriteLine("**Sorting Algorithms");
 Console.WriteLine($"All sorting algorithms are based on {INTEGER_COUNT} elements.");

@@ -15,6 +15,11 @@ namespace SSDK.Core.Structures.Graphs
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets or sets the latest index that this edge was found on in the root graph.
+        /// Updated generally during graph traversal constructor.
+        /// </summary>
+        public int LatestIndex { get; set; } = -1;
+        /// <summary>
         /// Gets the edge number, which is a unique number for the edge within
         /// a single graph.
         /// </summary>
@@ -82,6 +87,16 @@ namespace SSDK.Core.Structures.Graphs
                 return VertexFrom;
             }
             else throw new InvalidOperationException("Attempted to traverse graph edge backwards on a single-way edge.");
+        }
+
+        /// <summary>
+        /// Returns true if the edge can be traversed from the given vertex.
+        /// </summary>
+        /// <param name="from">the vertex to traverse from</param>
+        /// <returns>true if a traversal can happen from the given vertex to the other</returns>
+        public bool CanTraverse(GraphVertex<T> from)
+        {
+            return from == VertexFrom || Multiway;
         }
 
         /// <summary>
