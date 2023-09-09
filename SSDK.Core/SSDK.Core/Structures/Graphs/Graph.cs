@@ -56,6 +56,82 @@ namespace SSDK.Core.Structures.Graphs
             
         }
         #endregion
+        #region Cloning
+        /// <summary>
+        /// Creates a deep-copy of this graph.
+        /// </summary>
+        /// <returns>an exact clone of this graph (all vertices and edges)</returns>
+        public Graph<T> Clone()
+        {
+            UpdateIndexReferences();
+
+            Graph<T> newGraph = new Graph<T>();
+
+            foreach(GraphVertex<T> vertex in this.Vertices)
+            {
+                GraphVertex<T> newVert = newGraph.Add(vertex.Value);
+                newVert.LatestIndex = Vertices.Count;
+            }
+
+            foreach(GraphEdge<T> edge in this.Edges)
+            {
+                if(edge.Multiway)
+                {
+                    if(edge.AltWeight != null)
+                        newGraph.Join(edge.VertexFrom, edge.VertexTo, edge.AltWeight);
+                    else newGraph.Join(edge.VertexFrom, edge.VertexTo, edge.Weight);
+                }
+                else
+                {
+                    if (edge.AltWeight != null)
+                        newGraph.CreatePath(edge.VertexFrom.LatestIndex, edge.VertexTo.LatestIndex, edge.AltWeight);
+                    else newGraph.CreatePath(edge.VertexFrom.LatestIndex, edge.VertexTo.LatestIndex, edge.Weight);
+                }
+            }
+
+            return newGraph;
+        }
+        #endregion
+        #region Conversions
+        /// <summary>
+        /// Gets the transposed graph, which is an exact copy of this graph, except with
+        /// all edges reversed.
+        /// </summary>
+        /// <returns></returns>
+        public Graph<T> Transpose()
+        {
+            Graph<T> graph = this.Clone();
+            UpdateIndexReferences();
+
+            Graph<T> newGraph = new Graph<T>();
+
+            foreach (GraphVertex<T> vertex in this.Vertices)
+            {
+                GraphVertex<T> newVert = newGraph.Add(vertex.Value);
+                newVert.LatestIndex = Vertices.Count;
+            }
+
+            foreach (GraphEdge<T> edge in this.Edges)
+            {
+                if (edge.Multiway)
+                {
+                    if (edge.AltWeight != null)
+                        newGraph.Join(edge.VertexTo, edge.VertexFrom, edge.AltWeight);
+                    else newGraph.Join(edge.VertexTo, edge.VertexFrom, edge.Weight);
+                }
+                else
+                {
+                    if (edge.AltWeight != null)
+                        newGraph.CreatePath(edge.VertexTo.LatestIndex, edge.VertexFrom.LatestIndex, edge.AltWeight);
+                    else newGraph.CreatePath(edge.VertexTo.LatestIndex, edge.VertexFrom.LatestIndex, edge.Weight);
+                }
+            }
+
+            return newGraph;
+        }
+
+
+        #endregion
 
         #region Modification
         /// <summary>
@@ -87,10 +163,50 @@ namespace SSDK.Core.Structures.Graphs
         }
 
         /// <summary>
-        /// Creates a path from one vertex to another in a single-way edge.
+        /// Joins two vertices together in a multi-way edge.
         /// </summary>
         /// <param name="vertex1">first vertex to join</param>
         /// <param name="vertex2">second vertex to join</param>
+        /// <param name="altWeight">the 'distance' function between the two vertices</param>
+        /// <returns>the graph edge joining the two vertices</returns>
+        public GraphEdge<T> Join(GraphVertex<T> vertex1, GraphVertex<T> vertex2, Func<UncontrolledNumber> altWeight)
+        {
+            GraphEdge<T> newEdge = new GraphEdge<T>(vertex1, vertex2, altWeight, true);
+            _Edges.Add(newEdge);
+            vertex1.AddEdge(newEdge);
+            vertex2.AddEdge(newEdge);
+            return newEdge;
+        }
+
+        /// <summary>
+        /// Joins two vertices together in a multi-way edge.
+        /// </summary>
+        /// <param name="vertex1">first vertex index to join</param>
+        /// <param name="vertex2">second vertex index to join</param>
+        /// <param name="weight">the 'distance' between the two vertices</param>
+        /// <returns>the graph edge joining the two vertices</returns>
+        public GraphEdge<T> Join(int vertex1, int vertex2, UncontrolledNumber weight)
+        {
+            return Join(Vertices[vertex1], Vertices[vertex2], weight);
+        }
+
+        /// <summary>
+        /// Joins two vertices together in a multi-way edge.
+        /// </summary>
+        /// <param name="vertex1">first vertex index to join</param>
+        /// <param name="vertex2">second vertex index to join</param>
+        /// <param name="altWeight">the 'distance' function between the two vertices</param>
+        /// <returns>the graph edge joining the two vertices</returns>
+        public GraphEdge<T> Join(int vertex1, int vertex2, Func<UncontrolledNumber> altWeight)
+        {
+            return Join(Vertices[vertex1], Vertices[vertex2], altWeight);
+        }
+
+        /// <summary>
+        /// Creates a path from one vertex to another in a single-way edge.
+        /// </summary>
+        /// <param name="vertex1">first vertex from</param>
+        /// <param name="vertex2">second vertex to</param>
         /// <param name="weight">the 'distance' between the two vertices</param>
         /// <returns>the graph edge joining the two vertices</returns>
         public GraphEdge<T> CreatePath(GraphVertex<T> vertexFrom, GraphVertex<T> vertexTo, UncontrolledNumber weight)
@@ -103,13 +219,44 @@ namespace SSDK.Core.Structures.Graphs
         }
 
         /// <summary>
-        /// Removes the given vertex from the graph, and all of its edges.
+        /// Creates a path from one vertex to another in a single-way edge.
         /// </summary>
-        /// <param name="vertex">the vertex to remove</param>
-        public void RemoveVertex(GraphVertex<T> vertex)
+        /// <param name="vertex1">first vertex from</param>
+        /// <param name="vertex2">second vertex to</param>
+        /// <param name="altWeight">the 'distance' function between the two vertices</param>
+        /// <returns>the graph edge joining the two vertices</returns>
+        public GraphEdge<T> CreatePath(GraphVertex<T> vertexFrom, GraphVertex<T> vertexTo, Func<UncontrolledNumber> altWeight)
         {
-            vertex.DestroyEdges();
-            _Vertices.Remove(vertex);
+            GraphEdge<T> newEdge = new GraphEdge<T>(vertexFrom, vertexTo, altWeight, false);
+            _Edges.Add(newEdge);
+            vertexFrom.AddEdge(newEdge);
+            vertexTo.AddEdge(newEdge);
+            return newEdge;
+        }
+
+        /// <summary>
+        /// Creates a path from one vertex to another in a single-way edge.
+        /// </summary>
+        /// <param name="vertex1">first vertex index from</param>
+        /// <param name="vertex2">second vertex index to</param>
+        /// <param name="weight">the 'distance' between the two vertices</param>
+        /// <returns>the graph edge joining the two vertices</returns>
+        public GraphEdge<T> CreatePath(int vertexFrom, int vertexTo, UncontrolledNumber weight)
+        {
+            return CreatePath(Vertices[vertexFrom], Vertices[vertexTo], weight);
+        }
+
+
+        /// <summary>
+        /// Creates a path from one vertex to another in a single-way edge.
+        /// </summary>
+        /// <param name="vertex1">first vertex index from</param>
+        /// <param name="vertex2">second vertex index to</param>
+        /// <param name="altWeight">the 'distance' function between the two vertices</param>
+        /// <returns>the graph edge joining the two vertices</returns>
+        public GraphEdge<T> CreatePath(int vertexFrom, int vertexTo, Func<UncontrolledNumber> altWeight)
+        {
+            return CreatePath(Vertices[vertexFrom], Vertices[vertexTo], altWeight);
         }
 
         /// <summary>

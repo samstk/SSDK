@@ -28,6 +28,8 @@ graph.Join(g4, g1, 2);
 graph.Join(g4, g5, 2);
 graph.Join(g5, g3, 2);
 
+graph = graph.Transpose();
+
 Benchmarker.Do(() =>
 {
     GraphTraversal<int> traversal = graph.DepthFirstSearch(g2);
