@@ -6,6 +6,7 @@ using SSDK.Core.Algorithms.Sorting;
 using SSDK.Core.Structures.Trees;
 using System;
 using KBS.Core.Arithmetic;
+using SSDK.Core.Structures.Graphs;
 
 int INTEGER_COUNT = 10000;
 
@@ -13,11 +14,21 @@ Console.WriteLine("--SSDK Benchmarking--");
 Console.WriteLine("Time values may be inaccurate, as it depends on the state of the machine.");
 Console.WriteLine("However, they will provide a guide as to faster algorithms in general.");
 
+Console.WriteLine("**Graph Algorithms");
+Graph<int> graph = new Graph<int>();
+GraphVertex<int> g1 = graph.Add(1),
+    g2 = graph.Add(2),
+    g3 = graph.Add(3),
+    g4 = graph.Add(4),
+    g5 = graph.Add(5);
+
+graph.CreatePath(g1, g3, 3);
+graph.CreatePath(g2, g4, 4);
+graph.Join(g4, g1, 2);
+graph.Join(g4, g5, 2);
+
 Console.WriteLine("**Sorting Algorithms");
 Console.WriteLine($"All sorting algorithms are based on {INTEGER_COUNT} elements.");
-
-Console.WriteLine($"Testing uncontrolled numbers");
-Console.WriteLine(new UncontrolledNumber(123812349.12312312) * new UncontrolledNumber(128172421.12312312));
 int[] array = null;
 Benchmarker.Do(() =>
 {
