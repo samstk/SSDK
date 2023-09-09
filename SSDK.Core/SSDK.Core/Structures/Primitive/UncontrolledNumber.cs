@@ -262,6 +262,9 @@ namespace KBS.Core.Arithmetic
         }
 
         #region Operators
+        public static implicit operator UncontrolledNumber(double num) => new UncontrolledNumber(num);
+        public static implicit operator UncontrolledNumber(long num) => new UncontrolledNumber(num, 0, 0, false);
+        public static implicit operator UncontrolledNumber(int num) => new UncontrolledNumber(num, 0, 0, false);
 
         public static UncontrolledNumber operator +(UncontrolledNumber a) => a;
         public static UncontrolledNumber operator -(UncontrolledNumber a) => new UncontrolledNumber(-a.Integer, a.Decimal, a.DecimalZeroes, !a.IsNegative);
