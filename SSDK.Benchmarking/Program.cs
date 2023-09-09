@@ -5,6 +5,7 @@ using SSDK.Core.Helpers;
 using SSDK.Core.Algorithms.Sorting;
 using SSDK.Core.Structures.Trees;
 using System;
+using KBS.Core.Arithmetic;
 
 int INTEGER_COUNT = 10000;
 
@@ -15,6 +16,8 @@ Console.WriteLine("However, they will provide a guide as to faster algorithms in
 Console.WriteLine("**Sorting Algorithms");
 Console.WriteLine($"All sorting algorithms are based on {INTEGER_COUNT} elements.");
 
+Console.WriteLine($"Testing uncontrolled numbers");
+Console.WriteLine(new UncontrolledNumber(123812349.12312312) * new UncontrolledNumber(128172421.12312312));
 int[] array = null;
 Benchmarker.Do(() =>
 {
