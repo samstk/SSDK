@@ -7,6 +7,8 @@ using SSDK.Core.Structures.Trees;
 using System;
 using KBS.Core.Arithmetic;
 using SSDK.Core.Structures.Graphs;
+using SSDK.Core.Algorithms.Graphs.Exploration;
+using SSDK.Core.Algorithms.Graphs.ShortestPath;
 
 int INTEGER_COUNT = 10000;
 
@@ -40,6 +42,12 @@ Benchmarker.Do(() =>
     GraphTraversal<int> traversal = graph.BreadthFirstSearch(g2, g3);
     List<GraphEdge<int>> paths = traversal.GetPathBackFrom(g3);
 }, "BFS Traversal on 2->1");
+
+Benchmarker.Do(() =>
+{
+    GraphTraversal<int> traversal = graph.ShortestPathSearchDijkstra(g2, g3);
+    List<GraphEdge<int>> paths = traversal.GetPathBackFrom(g3);
+}, "Dijkstra Traversal on 2->1");
 
 Console.WriteLine("**Sorting Algorithms");
 Console.WriteLine($"All sorting algorithms are based on {INTEGER_COUNT} elements.");

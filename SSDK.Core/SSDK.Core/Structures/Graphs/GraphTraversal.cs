@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KBS.Core.Arithmetic;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -35,6 +36,12 @@ namespace SSDK.Core.Structures.Graphs
         /// Gets the edge states according to edge index
         /// </summary>
         public int[] EdgeStates { get; private set; }
+
+        /// <summary>
+        /// Gets the weight states according to vertex
+        /// </summary>
+        public UncontrolledNumber[] VertexWeights { get; private set; }
+
         #endregion
 
         #region Methods
@@ -45,6 +52,7 @@ namespace SSDK.Core.Structures.Graphs
             On = on;
             VertexStates = new int[on.Vertices.Count];
             EdgeStates = new int[on.Edges.Count];
+            VertexWeights = new UncontrolledNumber[on.Vertices.Count];
 
             // Update vertices and edges of graph
             on.UpdateIndexReferences();
