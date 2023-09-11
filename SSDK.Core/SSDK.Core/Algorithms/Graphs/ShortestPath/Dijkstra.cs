@@ -1,5 +1,6 @@
-﻿using KBS.Core.Arithmetic;
-using SSDK.Core.Structures.Graphs;
+﻿using SSDK.Core.Structures.Graphs;
+using SSDK.Core.Structures.Linear;
+using SSDK.Core.Structures.Primitive;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,26 +17,22 @@ namespace SSDK.Core.Algorithms.Graphs.ShortestPath
     {
         #region Dijkstra Constants
         /// <summary>
-        /// A constant for the GT state of the vertex when unvisited in BFS.
+        /// A constant for the GT state of the vertex when unvisited in Dijkstra.
         /// </summary>
         public const int VTX_UNVISITED = 0;
         /// <summary>
-        /// A constant for the GT state of the vertex when visited in BFS.
+        /// A constant for the GT state of the vertex when visited in Dijkstra.
         /// </summary>
         public const int VTX_VISITED = 1;
 
         /// <summary>
-        /// A constant for the GT state of the edge when unexplored in BFS.
+        /// A constant for the GT state of the edge when unexplored in Dijkstra.
         /// </summary>
         public const int EDGE_UNEXPLORED = 0;
         /// <summary>
-        /// A constant for the GT state of the edge when 'discovered' in BFS.
+        /// A constant for the GT state of the edge when 'discovered' in Dijkstra.
         /// </summary>
         public const int EDGE_DISCOVERY = 1;
-        /// <summary>
-        /// A constant for the GT state of the cross edge when it leads to a visited vertex in BFS.
-        /// </summary>
-        public const int EDGE_CROSS = 2;
         #endregion
 
         /// <summary>
@@ -54,42 +51,65 @@ namespace SSDK.Core.Algorithms.Graphs.ShortestPath
             GraphTraversal<T> traversal = new GraphTraversal<T>(graph, "Dijkstra");
 
             // Create Priority Queue for algorithm
-            PriorityQueue<GraphVertex<T>, UncontrolledNumber> priorityQueue = new PriorityQueue<GraphVertex<T>, UncontrolledNumber>();
-            
-            // Insert all vertices into priority queue
+            FPriorityQueue<(GraphVertex<T>,GraphEdge<T>), UncontrolledNumber> priorityQueue = new FPriorityQueue<(GraphVertex<T>, GraphEdge<T>), UncontrolledNumber>();
 
+            // Insert all vertices into priority queue
             foreach (GraphVertex<T> vertex in graph.Vertices)
             {
                 if (vertex == v)
                 {
-                    priorityQueue.Enqueue(vertex,
+                    priorityQueue.Enqueue((vertex,null),
                     traversal.VertexWeights[vertex.LatestIndex] = 0
                     );
                 }
-                else priorityQueue.Enqueue(vertex,
+                else priorityQueue.Enqueue((vertex, null),
                     traversal.VertexWeights[vertex.LatestIndex] = UncontrolledNumber.Infinity
                     );
             }
 
             while (priorityQueue.Count > 0)
             {
-                GraphVertex<T> vertex = priorityQueue.Dequeue();
+                (GraphVertex<T> vertex, GraphEdge<T> traversedEdge) = priorityQueue.Dequeue();
 
-                foreach(GraphEdge<T> edge in vertex.EdgesFrom)
+                if(traversedEdge != null)
                 {
-                    GraphVertex<T> to = edge.Traverse(vertex);
-                    // Calculate new distance
-                    UncontrolledNumber newDistance = traversal.VertexWeights[vertex.LatestIndex]
-                        + edge.GetDistance();
-
-                    // Check if this becomes newest shortest path for vertex.
-                    if (newDistance < traversal.VertexWeights[to.LatestIndex])
-                    {
-                        // Set distance for to
-                        traversal.VertexWeights[to.LatestIndex] = newDistance;
-                        
-                    }
+                    // Edge must be discovery edge.
+                    traversal.EdgeStates[traversedEdge.LatestIndex] = EDGE_DISCOVERY;
                 }
+
+                if (vertex == vTarget) break; // Vertex was reached.
+
+                if (vertex.HasEdgesFrom)
+                    foreach (GraphEdge<T> edge in vertex.EdgesFrom)
+                    {
+                        // 'Relax edge'
+
+                        GraphVertex<T> to = edge.Traverse(vertex);
+                        // Calculate new distance
+                        UncontrolledNumber newDistance = traversal.VertexWeights[vertex.LatestIndex]
+                            + edge.GetDistance();
+
+                        // Check if this becomes newest shortest path for vertex.
+                        if (newDistance < traversal.VertexWeights[to.LatestIndex])
+                        {
+                            UncontrolledNumber oldDistance = traversal.VertexWeights[to.LatestIndex];
+
+                            // Set distance for vertex
+                            traversal.VertexWeights[to.LatestIndex] = newDistance;
+
+                            // Replace priority in queue with new distance.
+                            if(traversedEdge == edge) // Keep current edge
+                            {
+                                priorityQueue.SetPriority((to, edge), oldDistance, newDistance);
+                            }
+                            else
+                            {
+                                // Enqueue with new leading edge.
+                                priorityQueue.Remove((to, traversedEdge), oldDistance);
+                                priorityQueue.Enqueue((to, edge), newDistance);
+                            }
+                        }
+                    }
             }
 
             return traversal;

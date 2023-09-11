@@ -5,16 +5,72 @@ using SSDK.Core.Helpers;
 using SSDK.Core.Algorithms.Sorting;
 using SSDK.Core.Structures.Trees;
 using System;
-using KBS.Core.Arithmetic;
 using SSDK.Core.Structures.Graphs;
 using SSDK.Core.Algorithms.Graphs.Exploration;
 using SSDK.Core.Algorithms.Graphs.ShortestPath;
+using SSDK.Core.Structures.Linear;
+using SSDK.Core.Structures.Primitive;
 
 int INTEGER_COUNT = 10000;
 
 Console.WriteLine("--SSDK Benchmarking--");
 Console.WriteLine("Time values may be inaccurate, as it depends on the state of the machine.");
 Console.WriteLine("However, they will provide a guide as to faster algorithms in general.");
+
+int[] array = null;
+Benchmarker.Do(() =>
+{
+    array = NumberGenerator.CreateRandomIntegers(INTEGER_COUNT);
+}, "Array Generation: ");
+
+Console.WriteLine("**SSDK Priority Queue (SPriorityQueue)");
+
+FPriorityQueue<int, int> squeue = new FPriorityQueue<int, int>();
+Benchmarker.Do(() =>
+{
+    int i = 0;
+    foreach(int el in array)
+    {
+        squeue.Enqueue(10000-i, 10000-i);
+        i++;
+    }
+}, "SSDK Priority Queue Add Elements: ");
+
+Benchmarker.Do(() =>
+{
+    squeue.Dequeue();
+}, "SSDK Priority Queue Remove Min-Elements: ");
+
+Benchmarker.Do(() =>
+{
+    foreach (int el in array)
+    {
+        squeue.Enqueue(el, el);
+        squeue.Dequeue();
+    }
+}, "SSDK Priority Queue Add/Remove Min-Elements: ");
+
+PriorityQueue<int, int> queue = new PriorityQueue<int, int>();
+Benchmarker.Do(() => {
+    foreach (int element in array)
+    {
+        queue.Enqueue(element, element);
+    }
+}, "Adding elements to native priority queue: ");
+
+Benchmarker.Do(() =>
+{
+    queue.Dequeue();
+}, "Native Priority Queue Remove Min-Elements: ");
+
+Benchmarker.Do(() =>
+{
+    foreach (int el in array)
+    {
+        queue.Enqueue(el, el);
+        queue.Dequeue();
+    }
+}, "Native Priority Queue Add/Remove Min-Elements: ");
 
 Console.WriteLine("**Graph Algorithms");
 Graph<int> graph = new Graph<int>();
@@ -27,10 +83,8 @@ GraphVertex<int> g1 = graph.Add(1),
 graph.CreatePath(g1, g3, 3);
 graph.CreatePath(g2, g4, 4);
 graph.Join(g4, g1, 2);
-graph.Join(g4, g5, 2);
+graph.Join(g4, g5, 4);
 graph.Join(g5, g3, 2);
-
-graph = graph.Transpose();
 
 Benchmarker.Do(() =>
 {
@@ -41,21 +95,20 @@ Benchmarker.Do(() =>
 {
     GraphTraversal<int> traversal = graph.BreadthFirstSearch(g2, g3);
     List<GraphEdge<int>> paths = traversal.GetPathBackFrom(g3);
-}, "BFS Traversal on 2->1");
+}, "BFS Traversal on 2->1: ");
 
 Benchmarker.Do(() =>
 {
     GraphTraversal<int> traversal = graph.ShortestPathSearchDijkstra(g2, g3);
     List<GraphEdge<int>> paths = traversal.GetPathBackFrom(g3);
-}, "Dijkstra Traversal on 2->1");
+
+    UncontrolledNumber totalDistance = paths.GetTotalDistance();
+    Console.Write($"DIST [{totalDistance}] ");
+}, "Dijkstra Traversal on 2->1: ");
 
 Console.WriteLine("**Sorting Algorithms");
 Console.WriteLine($"All sorting algorithms are based on {INTEGER_COUNT} elements.");
-int[] array = null;
-Benchmarker.Do(() =>
-{
-    array = NumberGenerator.CreateRandomIntegers(INTEGER_COUNT);
-}, "Array Generation: ");
+
 
 // Perform selection sort
 int[] array2 = array.DeepClone();
@@ -120,13 +173,7 @@ Benchmarker.Do(() => {
     }
 }, "Adding elements to heap: ");
 
-PriorityQueue<int, int> queue = new PriorityQueue<int, int>();
-Benchmarker.Do(() => {
-    foreach (int element in array)
-    {
-        queue.Enqueue(element, element);
-    }
-}, "Adding elements to native priority queue: ");
+
 HeapTree<int> heapTest2 = heapTest.Clone(true);
 
 Benchmarker.Do(() => {
@@ -156,13 +203,6 @@ Benchmarker.Do(() => {
 
     }
 }, "Removing min-elements from heap: ");
-
-Benchmarker.Do(() => {
-    foreach (int element in array)
-    {
-        queue.Dequeue();
-    }
-}, "Removing elements from native priority queue: ");
 
 heapTest = new HeapTree<int>();
 

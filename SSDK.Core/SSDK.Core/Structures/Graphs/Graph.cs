@@ -1,4 +1,4 @@
-﻿using KBS.Core.Arithmetic;
+﻿using SSDK.Core.Structures.Primitive;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

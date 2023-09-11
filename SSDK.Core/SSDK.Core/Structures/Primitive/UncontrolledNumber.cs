@@ -6,12 +6,13 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KBS.Core.Arithmetic
+namespace SSDK.Core.Structures.Primitive
 {
     /// <summary>
     /// Represents a number with no max/min or precisional boundaries.
     /// </summary>
     public struct UncontrolledNumber
+        : IComparable
     {
         #region Properties & Fields
 
@@ -412,7 +413,7 @@ namespace KBS.Core.Arithmetic
             if (a.IsInfinity || b.IsInfinity)
             {
                 int infA = (a.IsNegative ? -1 : 1) * (a.IsInfinity ? 1 : 0);
-                int infB = (a.IsNegative ? -1 : 1) * (a.IsInfinity ? 1 : 0);
+                int infB = (b.IsNegative ? -1 : 1) * (b.IsInfinity ? 1 : 0);
                 if (infA != infB)
                 {
                     return infA < infB;
@@ -435,6 +436,24 @@ namespace KBS.Core.Arithmetic
             if (Decimal == 0) return neg+$"{Integer}";
             string dec = $"{Integer}." + "".PadLeft(DecimalZeroes, '0') + $"{Decimal}";
             return neg+dec;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ((obj is UncontrolledNumber && ((UncontrolledNumber)obj == this)));
+        }
+
+        public override int GetHashCode()
+        {
+            return Integer.GetHashCode();
+        }
+
+        public int CompareTo(object? obj)
+        {
+            if (!(obj is UncontrolledNumber)) return int.MinValue;
+
+            UncontrolledNumber other = (UncontrolledNumber)obj;
+            return other < this ? 1 : other == this ? 0 : -1;
         }
     }
 }
