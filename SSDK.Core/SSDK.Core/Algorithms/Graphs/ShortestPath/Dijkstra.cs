@@ -53,16 +53,18 @@ namespace SSDK.Core.Algorithms.Graphs.ShortestPath
             // Create Priority Queue for algorithm
             FPriorityQueue<(GraphVertex<T>,GraphEdge<T>), UncontrolledNumber> priorityQueue = new FPriorityQueue<(GraphVertex<T>, GraphEdge<T>), UncontrolledNumber>();
 
+            FPriorityQueueItem<(GraphVertex<T>, GraphEdge<T>), UncontrolledNumber>[] vertexQueueItems
+                = new FPriorityQueueItem<(GraphVertex<T>, GraphEdge<T>), UncontrolledNumber>[graph.Vertices.Count];
             // Insert all vertices into priority queue
             foreach (GraphVertex<T> vertex in graph.Vertices)
             {
                 if (vertex == v)
                 {
-                    priorityQueue.Enqueue((vertex,null),
+                    vertexQueueItems[vertex.LatestIndex] = priorityQueue.Enqueue((vertex,null),
                     traversal.VertexWeights[vertex.LatestIndex] = 0
                     );
                 }
-                else priorityQueue.Enqueue((vertex, null),
+                else vertexQueueItems[vertex.LatestIndex] = priorityQueue.Enqueue((vertex, null),
                     traversal.VertexWeights[vertex.LatestIndex] = UncontrolledNumber.Infinity
                     );
             }
@@ -92,21 +94,18 @@ namespace SSDK.Core.Algorithms.Graphs.ShortestPath
                         // Check if this becomes newest shortest path for vertex.
                         if (newDistance < traversal.VertexWeights[to.LatestIndex])
                         {
-                            UncontrolledNumber oldDistance = traversal.VertexWeights[to.LatestIndex];
-
                             // Set distance for vertex
                             traversal.VertexWeights[to.LatestIndex] = newDistance;
 
                             // Replace priority in queue with new distance.
                             if(traversedEdge == edge) // Keep current edge
                             {
-                                priorityQueue.SetPriority((to, edge), oldDistance, newDistance);
+                                priorityQueue.SetPriority(vertexQueueItems[to.LatestIndex], newDistance);
                             }
                             else
                             {
-                                // Enqueue with new leading edge.
-                                priorityQueue.Remove((to, traversedEdge), oldDistance);
-                                priorityQueue.Enqueue((to, edge), newDistance);
+                                // Update with new leading edge.
+                                vertexQueueItems[to.LatestIndex].Element = (to, edge);
                             }
                         }
                     }
