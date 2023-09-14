@@ -42,6 +42,13 @@ namespace SSDK.Core.Structures.Graphs
         /// </summary>
         public UncontrolledNumber[] VertexWeights { get; private set; }
 
+        /// <summary>
+        /// Typically unmodified except on certain algorithms such as
+        /// topological sort, where the configuration is the topological order
+        /// (indices)
+        /// </summary>
+        public int[] Configuration { get; set; }
+
         #endregion
 
         #region Methods

@@ -106,6 +106,11 @@ Benchmarker.Do(() =>
     Console.Write($"DIST [{totalDistance}] ");
 }, "Dijkstra Traversal on 2->1: ");
 
+Benchmarker.Do(() =>
+{
+    GraphTraversal<int> traversal = graph.SortTopologically();
+}, "Topological Sort: ");
+
 Console.WriteLine("**Sorting Algorithms");
 Console.WriteLine($"All sorting algorithms are based on {INTEGER_COUNT} elements.");
 
