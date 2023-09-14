@@ -70,26 +70,28 @@ namespace SSDK.Core.Algorithms.Sorting
                     traversal.VertexStates[vertex.LatestIndex] = VTX_VISITED;
 
                     // Visit all edges to discover or cross
-                    foreach(GraphEdge<T> edge in vertex.EdgesFrom)
+                    if (vertex.HasEdgesFrom)
                     {
-                        GraphVertex<T> to = edge.Traverse(vertex);
+                        foreach (GraphEdge<T> edge in vertex.EdgesFrom)
+                        {
+                            GraphVertex<T> to = edge.Traverse(vertex);
 
-                        if (traversal.VertexStates[to.LatestIndex] == VTX_UNVISITED)
-                        {
-                            traversal.EdgeStates[edge.LatestIndex] = EDGE_DISCOVERY;
-                            // Add to stack for next iteration
-                            explorationStack.Push(to);
-                        }
-                        else
-                        {
-                            traversal.EdgeStates[edge.LatestIndex] = EDGE_FORWARD;
+                            if (traversal.VertexStates[to.LatestIndex] == VTX_UNVISITED)
+                            {
+                                traversal.EdgeStates[edge.LatestIndex] = EDGE_DISCOVERY;
+                                // Add to stack for next iteration
+                                explorationStack.Push(to);
+                            }
+                            else
+                            {
+                                traversal.EdgeStates[edge.LatestIndex] = EDGE_FORWARD;
+                            }
                         }
                     }
+                    // 'Label' element with number n
+                    left--;
+                    traversal.Configuration[left] = vertex.LatestIndex;
                 }
-
-                // 'Label' element with number n
-                left--;
-                traversal.Configuration[vertex.LatestIndex] = left;
             }
 
             return traversal;

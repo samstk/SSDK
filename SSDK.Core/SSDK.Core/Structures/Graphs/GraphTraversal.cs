@@ -64,8 +64,26 @@ namespace SSDK.Core.Structures.Graphs
             // Update vertices and edges of graph
             on.UpdateIndexReferences();
         }
-        #endregion
 
+        #endregion
+        #region Modification
+        /// <summary>
+        /// Resets all vertex/edge states in the traversal.
+        /// Does not change configuration.
+        /// </summary>
+        /// <param name="newType">if specified, overwrites the current type reference</param>
+        public void Reset(string newType = null)
+        {
+            if (newType != null)
+            {
+                Type = newType;
+            }
+
+            VertexStates = new int[VertexStates.Length];
+            EdgeStates = new int[EdgeStates.Length];
+            VertexWeights = new UncontrolledNumber[VertexWeights.Length];
+        }
+        #endregion
         #region Searching
         /// <summary>
         /// Gets the path between the initially traversed vertex and the target vertex.

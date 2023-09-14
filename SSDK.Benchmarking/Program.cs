@@ -111,6 +111,11 @@ Benchmarker.Do(() =>
     GraphTraversal<int> traversal = graph.SortTopologically();
 }, "Topological Sort: ");
 
+Benchmarker.Do(() =>
+{
+    GraphTraversal<int> traversal = graph.ShortestPathSearchDAG(g2, g3);
+}, "DAG Distances Traversal on 2->1: ");
+
 Console.WriteLine("**Sorting Algorithms");
 Console.WriteLine($"All sorting algorithms are based on {INTEGER_COUNT} elements.");
 

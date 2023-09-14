@@ -44,13 +44,12 @@ namespace SSDK.Core.Structures.Graphs
         private List<GraphEdge<T>> _EdgesFrom;
 
         /// <summary>
-        /// Gets the list of all edges from this vertex to another (read-only)
+        /// Gets the list of all edges from this vertex to another (do not modify)
         /// </summary>
-        public ReadOnlyCollection<GraphEdge<T>> EdgesFrom { 
+        public List<GraphEdge<T>> EdgesFrom { 
             get
             {
-                if (_EdgesFrom == null) return new ReadOnlyCollection<GraphEdge<T>>(new List<GraphEdge<T>>());
-                return _EdgesFrom.AsReadOnly();
+                return _EdgesFrom;
             } 
         }
 
@@ -70,14 +69,13 @@ namespace SSDK.Core.Structures.Graphs
         private List<GraphEdge<T>> _EdgesTo;
 
         /// <summary>
-        /// Gets the list of all edges from another vertex to this vertex (read-only)
+        /// Gets the list of all edges from another vertex to this vertex (do not modify)
         /// </summary>
-        public ReadOnlyCollection<GraphEdge<T>> EdgesTo
+        public List<GraphEdge<T>> EdgesTo
         {
             get
             {
-                if (_EdgesTo == null) return new ReadOnlyCollection<GraphEdge<T>>(new List<GraphEdge<T>>());
-                return _EdgesTo.AsReadOnly();
+                return _EdgesTo;
             }
         }
         #endregion
