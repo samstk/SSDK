@@ -60,9 +60,6 @@ namespace SSDK.Core.Structures.Graphs
             VertexStates = new int[on.Vertices.Count];
             EdgeStates = new int[on.Edges.Count];
             VertexWeights = new UncontrolledNumber[on.Vertices.Count];
-
-            // Update vertices and edges of graph
-            on.UpdateIndexReferences();
         }
 
         #endregion

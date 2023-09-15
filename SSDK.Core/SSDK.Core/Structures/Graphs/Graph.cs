@@ -141,7 +141,7 @@ namespace SSDK.Core.Structures.Graphs
         /// <returns>the vertex that was added</returns>
         public GraphVertex<T> Add(T vertexValue)
         {
-            GraphVertex<T> newVertex = new GraphVertex<T>(vertexValue, this);
+            GraphVertex<T> newVertex = new GraphVertex<T>(vertexValue, this) { LatestIndex = _Vertices.Count };
             _Vertices.Add(newVertex);
             return newVertex;
         }
@@ -155,7 +155,7 @@ namespace SSDK.Core.Structures.Graphs
         /// <returns>the graph edge joining the two vertices</returns>
         public GraphEdge<T> Join(GraphVertex<T> vertex1, GraphVertex<T> vertex2, UncontrolledNumber weight)
         {
-            GraphEdge<T> newEdge = new GraphEdge<T>(vertex1, vertex2, weight, true);
+            GraphEdge<T> newEdge = new GraphEdge<T>(vertex1, vertex2, weight, true) { LatestIndex = _Edges.Count };
             _Edges.Add(newEdge);
             vertex1.AddEdge(newEdge);
             vertex2.AddEdge(newEdge);
@@ -171,7 +171,7 @@ namespace SSDK.Core.Structures.Graphs
         /// <returns>the graph edge joining the two vertices</returns>
         public GraphEdge<T> Join(GraphVertex<T> vertex1, GraphVertex<T> vertex2, Func<UncontrolledNumber> altWeight)
         {
-            GraphEdge<T> newEdge = new GraphEdge<T>(vertex1, vertex2, altWeight, true);
+            GraphEdge<T> newEdge = new GraphEdge<T>(vertex1, vertex2, altWeight, true) { LatestIndex = _Edges.Count };
             _Edges.Add(newEdge);
             vertex1.AddEdge(newEdge);
             vertex2.AddEdge(newEdge);
@@ -211,7 +211,7 @@ namespace SSDK.Core.Structures.Graphs
         /// <returns>the graph edge joining the two vertices</returns>
         public GraphEdge<T> CreatePath(GraphVertex<T> vertexFrom, GraphVertex<T> vertexTo, UncontrolledNumber weight)
         {
-            GraphEdge<T> newEdge = new GraphEdge<T>(vertexFrom, vertexTo, weight, false);
+            GraphEdge<T> newEdge = new GraphEdge<T>(vertexFrom, vertexTo, weight, false) { LatestIndex = _Edges.Count };
             _Edges.Add(newEdge);
             vertexFrom.AddEdge(newEdge);
             vertexTo.AddEdge(newEdge);
@@ -227,7 +227,7 @@ namespace SSDK.Core.Structures.Graphs
         /// <returns>the graph edge joining the two vertices</returns>
         public GraphEdge<T> CreatePath(GraphVertex<T> vertexFrom, GraphVertex<T> vertexTo, Func<UncontrolledNumber> altWeight)
         {
-            GraphEdge<T> newEdge = new GraphEdge<T>(vertexFrom, vertexTo, altWeight, false);
+            GraphEdge<T> newEdge = new GraphEdge<T>(vertexFrom, vertexTo, altWeight, false) { LatestIndex = _Edges.Count };
             _Edges.Add(newEdge);
             vertexFrom.AddEdge(newEdge);
             vertexTo.AddEdge(newEdge);
@@ -261,6 +261,8 @@ namespace SSDK.Core.Structures.Graphs
 
         /// <summary>
         /// Removes the given edge from the graph.
+        /// Using this method will mess up index references, so use 
+        /// UpdateIndexReferences afterwards to avert this issue
         /// </summary>
         /// <param name="edge">the edge to remove</param>
         public void RemoveEdge(GraphEdge<T> edge)

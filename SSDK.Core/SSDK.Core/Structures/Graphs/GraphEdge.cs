@@ -35,6 +35,11 @@ namespace SSDK.Core.Structures.Graphs
         public GraphVertex<T> VertexTo { get; private set; }
 
         /// <summary>
+        /// A tag that may be used for reference purposes.
+        /// </summary>
+        public object Tag { get; set; }
+
+        /// <summary>
         /// Gets whether the graph edge can be traversed both ways
         /// (i.e. from -> to and to -> from instead of just from -> to)
         /// </summary>

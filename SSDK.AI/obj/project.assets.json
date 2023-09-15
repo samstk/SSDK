@@ -1,11 +1,30 @@
 {
   "version": 3,
   "targets": {
-    "net6.0": {}
+    "net6.0": {
+      "SSDK.Core/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "compile": {
+          "bin/placeholder/SSDK.Core.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/SSDK.Core.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "SSDK.Core/1.0.0": {
+      "type": "project",
+      "path": "../SSDK.Core/SSDK.Core/SSDK.Core.csproj",
+      "msbuildProject": "../SSDK.Core/SSDK.Core/SSDK.Core.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net6.0": []
+    "net6.0": [
+      "SSDK.Core >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\samst\\.nuget\\packages\\": {},
@@ -39,7 +58,11 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\samst\\OneDrive\\Documents\\0. Projects\\SSDK\\SSDK.Core\\SSDK.Core\\SSDK.Core.csproj": {
+              "projectPath": "C:\\Users\\samst\\OneDrive\\Documents\\0. Projects\\SSDK\\SSDK.Core\\SSDK.Core\\SSDK.Core.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
