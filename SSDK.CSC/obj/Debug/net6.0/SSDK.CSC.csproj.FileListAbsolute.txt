@@ -1,0 +1,12 @@
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\bin\Debug\net6.0\SSDK.CSC.deps.json
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\bin\Debug\net6.0\SSDK.CSC.dll
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\bin\Debug\net6.0\SSDK.CSC.pdb
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\SSDK.CSC.csproj.AssemblyReference.cache
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\SSDK.CSC.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\SSDK.CSC.AssemblyInfoInputs.cache
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\SSDK.CSC.AssemblyInfo.cs
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\SSDK.CSC.csproj.CoreCompileInputs.cache
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\SSDK.CSC.dll
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\refint\SSDK.CSC.dll
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\SSDK.CSC.pdb
+C:\Users\samst\OneDrive\Documents\0. Projects\SSDK\SSDK.CSC\obj\Debug\net6.0\ref\SSDK.CSC.dll

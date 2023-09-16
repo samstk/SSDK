@@ -28,6 +28,12 @@
             The solver which attempts to solve the problem of this agent with one or more algorithms.
             </summary>
         </member>
+        <member name="P:SSDK.AI.Agent.Agent.KnowledgeBase">
+            <summary>
+            Gets or sets the knowledge base that represents what this agent knows using 
+            propositional logic.
+            </summary>
+        </member>
         <member name="P:SSDK.AI.Agent.Agent.CurrentOperation">
             <summary>
             The current operation that the agent is undertaking to achieve said

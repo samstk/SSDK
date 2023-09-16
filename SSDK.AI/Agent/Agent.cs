@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSDK.AI.KBS;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,6 +30,12 @@ namespace SSDK.AI.Agent
         /// The solver which attempts to solve the problem of this agent with one or more algorithms.
         /// </summary>
         public AgentSolver Solver { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the knowledge base that represents what this agent knows using 
+        /// propositional logic.
+        /// </summary>
+        public KB KnowledgeBase { get; set; }
 
         /// <summary>
         /// The current operation that the agent is undertaking to achieve said
