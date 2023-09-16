@@ -29,12 +29,32 @@ namespace SSDK.AI
         public abstract void Perceive(Agent agent);
 
         /// <summary>
-        /// Calculates the distance between two problem states. May be used in some algorithms
-        /// to determine desirable actions.
+        /// Calculates the certainty distance between two problem states. May be used in some algorithms
+        /// to determine desirable actions. 
+        /// <br/>
+        /// The DistanceTo function is not to be confused with the heuristic function, which
+        /// is the estimated cost to achieve the space/state. The Distance function is more generally
+        /// how many things must change for the space to be the exact same, and is used for
+        /// state comparison (how certain this state is the exact same, 0 = same)
         /// </summary>
         /// <param name="space">the state to distantiate</param>
         /// <returns>the real number indicating a distance to the other state from this state</returns>
         public abstract double DistanceTo(AgentProblemSpace space);
+
+        /// <summary>
+        /// Estimates the distance between two problem states. May be used in some algorithms
+        /// to determine desirable actions. 
+        /// <br/>
+        /// The Heuristic function is not to be confused with the DistanceTo function, which
+        /// is the certainty distance between states. The heuristic function must provide
+        /// a guide on the cost required to reach the desired space.
+        /// </summary>
+        /// <param name="space">the state to distantiate (the desired space)</param>
+        /// <returns>
+        /// the real number indicating an estimated distance to the other state
+        /// from this state lower or equal to the actual distance
+        /// </returns>
+        public virtual UncontrolledNumber Heuristic(AgentProblemSpace space) { return 0.0; }
 
         /// <summary>
         /// Calculates the desirability of this problem space.

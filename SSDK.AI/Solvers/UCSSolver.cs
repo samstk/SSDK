@@ -20,6 +20,7 @@ namespace SSDK.AI.Solvers
     /// + Perfect rationality but heavy memory consumption for every state <br/>
     /// - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
     /// - Depends on exact state computation <br/>
+    /// - A blind search algorithm
     /// </summary>
     public class UCSSolver : AgentSolver
     {
@@ -45,19 +46,17 @@ namespace SSDK.AI.Solvers
             // Generate queue for problem spaces
             PriorityQueue<GraphVertex<AgentProblemSpace>, UncontrolledNumber> frontierQueue = new ();
             
-            // Initialise the explore hash set
+            // Initialise the explore set and frontier set (vertex may require updating so use dictionary)
             Dictionary<AgentProblemSpace, GraphVertex<AgentProblemSpace>> exploredSet = new ();
             Dictionary<AgentProblemSpace, GraphVertex<AgentProblemSpace>> frontierSet = new ();
             frontierSet.Add(agent.CurrentProblemSpace, startingNode);
             
             frontierQueue.Enqueue(startingNode, 0);
             
-            int visited = 0;
             // Explore BFS until distance from desired node to starting node is completed.
             // Form edges and graph
             while(frontierQueue.Count > 0)
             {
-                visited++;
                 // Dequeue highest priority (lowest-weighted vertex)
                 GraphVertex<AgentProblemSpace> explorationVertex = frontierQueue.Dequeue();
 
@@ -75,9 +74,8 @@ namespace SSDK.AI.Solvers
                     AgentOperation newOperation = new AgentOperation();
                     while (explorationVertex != startingNode)
                     {
-                        //
-                        newOperation.Merge((explorationVertex.EdgesTo[0].Tag as AgentOperation));
-                        explorationVertex = explorationVertex.EdgesTo[0].VertexFrom;
+                        newOperation.Merge(explorationVertex.LeadingEdge.Tag as AgentOperation);
+                        explorationVertex = explorationVertex.LeadingEdge.VertexFrom;
                     }
                     newOperation.Reverse();
                     return newOperation;
@@ -136,7 +134,7 @@ namespace SSDK.AI.Solvers
 
         public override string ToString()
         {
-            return "UCS";
+            return "Uninformed Cost Search";
         }
     }
 }

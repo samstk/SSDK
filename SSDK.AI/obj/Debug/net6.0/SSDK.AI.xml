@@ -467,11 +467,31 @@
         </member>
         <member name="M:SSDK.AI.AgentProblemSpace.DistanceTo(SSDK.AI.AgentProblemSpace)">
             <summary>
-            Calculates the distance between two problem states. May be used in some algorithms
-            to determine desirable actions.
+            Calculates the certainty distance between two problem states. May be used in some algorithms
+            to determine desirable actions. 
+            <br/>
+            The DistanceTo function is not to be confused with the heuristic function, which
+            is the estimated cost to achieve the space/state. The Distance function is more generally
+            how many things must change for the space to be the exact same, and is used for
+            state comparison (how certain this state is the exact same, 0 = same)
             </summary>
             <param name="space">the state to distantiate</param>
             <returns>the real number indicating a distance to the other state from this state</returns>
+        </member>
+        <member name="M:SSDK.AI.AgentProblemSpace.Heuristic(SSDK.AI.AgentProblemSpace)">
+            <summary>
+            Estimates the distance between two problem states. May be used in some algorithms
+            to determine desirable actions. 
+            <br/>
+            The Heuristic function is not to be confused with the DistanceTo function, which
+            is the certainty distance between states. The heuristic function must provide
+            a guide on the cost required to reach the desired space.
+            </summary>
+            <param name="space">the state to distantiate (the desired space)</param>
+            <returns>
+            the real number indicating an estimated distance to the other state
+            from this state lower or equal to the actual distance
+            </returns>
         </member>
         <member name="M:SSDK.AI.AgentProblemSpace.Desirability(SSDK.AI.Agent)">
             <summary>
@@ -538,12 +558,35 @@
             + Perfect rationality but heavy memory consumption for every state <br/>
             - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
             - Depends on exact state computation <br/>
+            - A blind search algorithm
             </summary>
         </member>
         <member name="M:SSDK.AI.Solvers.BFSSolver.Solve(SSDK.AI.Agent)">
             <summary>
             Solves the agent by using BFS to generate an operation that computes
             the closest path without accounting for action costs.
+            </summary>
+            <param name="agent">the agent to solve</param>
+            <returns>an operation attempts to lead the agent to the desired space</returns>
+        </member>
+        <member name="T:SSDK.AI.Solvers.GBFSSolver">
+            <summary>
+            Depicts a Greedy Best-First Search solver for an AI agent.
+            <br/>
+            Greedy Best-First Search has the following: <br/>
+            * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
+            * Assumes that actions are deterministic <br/>
+            * Requires Hash and Equals to be implemented in problem space <br/>
+            + Path detection, but not always optimal <br/>
+            - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
+            - Depends on exact state computation <br/>
+            - An informed search algorithm requiring a heuristically developed DistanceTo function.
+            </summary>
+        </member>
+        <member name="M:SSDK.AI.Solvers.GBFSSolver.Solve(SSDK.AI.Agent)">
+            <summary>
+            Solves the agent by using Greedy Best First Search to generate an operation that computes
+            the closest path while accounting for action costs.
             </summary>
             <param name="agent">the agent to solve</param>
             <returns>an operation attempts to lead the agent to the desired space</returns>
@@ -560,6 +603,7 @@
             + Perfect rationality but heavy memory consumption for every state <br/>
             - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
             - Depends on exact state computation <br/>
+            - A blind search algorithm
             </summary>
         </member>
         <member name="M:SSDK.AI.Solvers.UCSSolver.Solve(SSDK.AI.Agent)">

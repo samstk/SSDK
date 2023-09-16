@@ -5,66 +5,71 @@ using System.Text;
 using System.Threading.Tasks;
 using SSDK.Core;
 using SSDK.Core.Structures.Graphs;
+using SSDK.Core.Structures.Primitive;
 
 namespace SSDK.AI.Solvers
 {
     /// <summary>
-    /// Depicts a BFS solver for an AI agent.
+    /// Depicts a Greedy Best-First Search solver for an AI agent.
     /// <br/>
-    /// BFS has the following: <br/>
+    /// Greedy Best-First Search has the following: <br/>
     /// * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
     /// * Assumes that actions are deterministic <br/>
     /// * Requires Hash and Equals to be implemented in problem space <br/>
-    /// + Shortest path detection with no action cost <br/>
-    /// + Perfect rationality but heavy memory consumption for every state <br/>
+    /// + Path detection, but not always optimal <br/>
     /// - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
     /// - Depends on exact state computation <br/>
-    /// - A blind search algorithm
+    /// - An informed search algorithm requiring a heuristically developed DistanceTo function.
     /// </summary>
-    public class BFSSolver : AgentSolver
+    public class GBFSSolver : AgentSolver
     {
 
         public override bool Check(Agent agent, AgentOperation operation)
         {
-            // Always believe that an operation resulting from BFS is accurate.
+            // Always believe that an operation resulting from Greedy Best First Search is accurate.
             return true;
         }
 
         /// <summary>
-        /// Solves the agent by using BFS to generate an operation that computes
-        /// the closest path without accounting for action costs.
+        /// Solves the agent by using Greedy Best First Search to generate an operation that computes
+        /// the closest path while accounting for action costs.
         /// </summary>
         /// <param name="agent">the agent to solve</param>
         /// <returns>an operation attempts to lead the agent to the desired space</returns>
         public override AgentOperation Solve(Agent agent)
         {
-            // Solve BFS by constructing expanding graph.
+            // Solve GBFS by constructing expanding graph.
             Graph<AgentProblemSpace> graph = new Graph<AgentProblemSpace>();
             GraphVertex<AgentProblemSpace> startingNode = graph.Add(agent.CurrentProblemSpace);
 
             // Generate queue for problem spaces
-            Queue<GraphVertex<AgentProblemSpace>> frontierQueue = new Queue<GraphVertex<AgentProblemSpace>>();
-            
-            // Initialise the explore hash set
-            HashSet<AgentProblemSpace> exploredSet = new HashSet<AgentProblemSpace>();
-            HashSet<AgentProblemSpace> frontierSet = new HashSet<AgentProblemSpace>();
-            frontierSet.Add(startingNode.Value);
-            frontierQueue.Enqueue(startingNode);
+            PriorityQueue<GraphVertex<AgentProblemSpace>, UncontrolledNumber> frontierQueue = new ();
 
+            // Initialise the explore set and frontier set.
+            Dictionary<AgentProblemSpace, GraphVertex<AgentProblemSpace>> exploredSet = new ();
+            Dictionary<AgentProblemSpace, GraphVertex<AgentProblemSpace>> frontierSet = new ();
+            frontierSet.Add(agent.CurrentProblemSpace, startingNode);
+            
+            frontierQueue.Enqueue(startingNode, 0);
+            
             // Explore BFS until distance from desired node to starting node is completed.
             // Form edges and graph
             while(frontierQueue.Count > 0)
             {
+                // Dequeue highest priority (lowest-weighted vertex)
                 GraphVertex<AgentProblemSpace> explorationVertex = frontierQueue.Dequeue();
+
+                UncontrolledNumber explorationCost = explorationVertex.LeadingWeight;
                 AgentProblemSpace explorationSpace = explorationVertex.Value;
+
                 frontierSet.Remove(explorationSpace);
-                exploredSet.Add(explorationSpace);
+                exploredSet.Add(explorationSpace, explorationVertex);
 
                 // Check if desired state is found.
                 double dist = explorationSpace.DistanceTo(agent.DesiredProblemSpace);
                 if (dist <= MatchTolerance)
                 {
-                    // Generate operation based on found path (leading edge allows for backtracing)
+                    // Generate operation based on found path, where all edges to should have one element only.
                     AgentOperation newOperation = new AgentOperation();
                     while (explorationVertex != startingNode)
                     {
@@ -79,17 +84,37 @@ namespace SSDK.AI.Solvers
                 foreach(AgentOperation operation in AllOperations)
                 {
                     AgentProblemSpace newSpace = explorationSpace.Predict(agent, operation);
+
+                    UncontrolledNumber cost = operation.CalculateTotalCost(agent);
+
                     dist = explorationSpace.DistanceTo(newSpace);
 
                     if (dist <= MatchTolerance) continue;// Only add new spaces for queue
-                    
-                    if (!exploredSet.Contains(newSpace) && !frontierSet.Contains(newSpace))
+
+                    UncontrolledNumber estimatedCost = newSpace.Heuristic(agent.DesiredProblemSpace);
+                    GraphVertex<AgentProblemSpace> existingVertex = null;
+
+                    if (exploredSet.TryGetValue(newSpace, out existingVertex) || frontierSet.TryGetValue(newSpace, out existingVertex))
+                    {
+                        // Our action leads to an already explored/queued vertex, so check to see if this path is closer in cost.
+                        if (estimatedCost < existingVertex.LeadingWeight)
+                        {
+                            // Update the leading edge and weight of the vertex.
+                            GraphEdge<AgentProblemSpace> edge = graph.CreatePath(explorationVertex, existingVertex, cost);
+                            existingVertex.LeadingEdge = edge;
+                            existingVertex.LeadingWeight = estimatedCost;
+                        }
+                    }
+                    else
                     {
                         // Create node in graph and create path from start to new
                         GraphVertex<AgentProblemSpace> newVertex = graph.Add(newSpace);
-                        newVertex.LeadingEdge = graph.CreatePath(explorationVertex, newVertex, 0);
-                        newVertex.LeadingEdge.Tag = operation;
-                        frontierQueue.Enqueue(newVertex);
+                        GraphEdge<AgentProblemSpace> edge = graph.CreatePath(explorationVertex, newVertex, cost);
+                        newVertex.LeadingEdge = edge;
+                        newVertex.LeadingWeight = estimatedCost;
+                        edge.Tag = operation;
+                        frontierQueue.Enqueue(newVertex, estimatedCost);
+                        frontierSet.Add(newSpace, newVertex);
                     }
                 }
             }
@@ -107,7 +132,7 @@ namespace SSDK.AI.Solvers
 
         public override string ToString()
         {
-            return "Breadth-First Search";
+            return "Greedy Best-First Search";
         }
     }
 }
