@@ -13,22 +13,15 @@ namespace SSDK.AI.Solvers
     /// <br/>
     /// BFS has the following: <br/>
     /// * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
-    /// * All problem spaces must contain a reference to the desired space <br/>
     /// * Assumes that actions are deterministic <br/>
     /// * Requires Hash and Equals to be implemented in problem space <br/>
     /// + Shortest path detection with no action cost <br/>
     /// + Perfect rationality but heavy memory consumption for every state <br/>
-    /// - Heavy memory consumption for exponential states   <br/>
+    /// - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
     /// - Depends on exact state computation <br/>
-    /// - Desirability of a state has no effect on computation 
     /// </summary>
     public class BFSSolver : AgentSolver
     {
-        /// <summary>
-        /// The tolerance in which a state is said to be the same in BFS.
-        /// If set to 0, then the distance from one state to another to be the same must be 0.
-        /// </summary>
-        public double MatchTolerance = 0.0;
 
         public override bool Check(Agent agent, AgentOperation operation)
         {
@@ -111,6 +104,11 @@ namespace SSDK.AI.Solvers
         {
             // Simply populate list of actions, assuming that agent actions can't change.
             AllOperations = agent.ActionSpace.AllSingleStepOperations;
+        }
+
+        public override string ToString()
+        {
+            return "BFS";
         }
     }
 }

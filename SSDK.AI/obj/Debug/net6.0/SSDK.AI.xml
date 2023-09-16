@@ -477,6 +477,12 @@
             of a solver should be initiated for every agent to avoid preprocessing errors.
             </summary>
         </member>
+        <member name="F:SSDK.AI.AgentSolver.MatchTolerance">
+            <summary>
+            The tolerance in which a state is said to be the same.
+            If set to 0, then the distance from one state to another to be the same must be 0.
+            </summary>
+        </member>
         <member name="M:SSDK.AI.AgentSolver.UpdateProblem(SSDK.AI.Agent)">
             <summary>
             Updates the solver's memory to account for the new problem as per 
@@ -505,20 +511,12 @@
             <br/>
             BFS has the following: <br/>
             * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
-            * All problem spaces must contain a reference to the desired space <br/>
             * Assumes that actions are deterministic <br/>
             * Requires Hash and Equals to be implemented in problem space <br/>
             + Shortest path detection with no action cost <br/>
             + Perfect rationality but heavy memory consumption for every state <br/>
-            - Heavy memory consumption for exponential states   <br/>
+            - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
             - Depends on exact state computation <br/>
-            - Desirability of a state has no effect on computation 
-            </summary>
-        </member>
-        <member name="F:SSDK.AI.Solvers.BFSSolver.MatchTolerance">
-            <summary>
-            The tolerance in which a state is said to be the same in BFS.
-            If set to 0, then the distance from one state to another to be the same must be 0.
             </summary>
         </member>
         <member name="M:SSDK.AI.Solvers.BFSSolver.Solve(SSDK.AI.Agent)">

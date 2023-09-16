@@ -14,6 +14,12 @@ namespace SSDK.AI
     public abstract class AgentSolver
     {
         /// <summary>
+        /// The tolerance in which a state is said to be the same.
+        /// If set to 0, then the distance from one state to another to be the same must be 0.
+        /// </summary>
+        public double MatchTolerance = 0.0;
+
+        /// <summary>
         /// Updates the solver's memory to account for the new problem as per 
         /// agent.UpdateProblem.
         /// </summary>
