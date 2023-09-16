@@ -10,24 +10,24 @@ using SSDK.Core.Structures.Primitive;
 namespace SSDK.AI.Solvers
 {
     /// <summary>
-    /// Depicts a Greedy Best-First Search solver for an AI agent.
+    /// Depicts a A* Search solver for an AI agent.
     /// <br/>
-    /// Greedy Best-First Search has the following: <br/>
+    /// A* Search has the following: <br/>
     /// * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
     /// * Assumes that actions are deterministic <br/>
     /// * Requires Heuristic, Hash and Equals to be implemented in problem space <br/>
     /// + Path detection, but not always optimal <br/>
-    /// - Much faster than BFS or UCS, but performance generating an optimal path requires a good heuristic <br/>
+    /// + Unlike GBFS, considers action costs.
+    /// - Much faster than BFS or UCS, but performance generating an optimal path requires a good heuristic.  <br/>
     /// - Depends on exact state computation <br/>
     /// - An informed search algorithm requiring a heuristic function to be implemented.
-    /// - Unlike A*, does not consider action costs.
     /// </summary>
-    public class GBFSSolver : AgentSolver
+    public class AStarSolver : AgentSolver
     {
 
         public override bool Check(Agent agent, AgentOperation operation)
         {
-            // Always believe that an operation resulting from Greedy Best First Search is accurate.
+            // Always believe that an operation resulting from A* is accurate.
             return true;
         }
 
@@ -53,7 +53,7 @@ namespace SSDK.AI.Solvers
             
             frontierQueue.Enqueue(startingNode, 0);
             
-            // Explore GBFS until distance from desired node to starting node is completed.
+            // Explore A* until distance from desired node to starting node is completed.
             // Form edges and graph
             while(frontierQueue.Count > 0)
             {
@@ -92,7 +92,8 @@ namespace SSDK.AI.Solvers
 
                     if (dist <= MatchTolerance) continue;// Only add new spaces for queue
 
-                    UncontrolledNumber estimatedCost = newSpace.Heuristic(agent.DesiredProblemSpace);
+                    UncontrolledNumber reachCost = explorationCost + cost;
+                    UncontrolledNumber estimatedCost = reachCost + newSpace.Heuristic(agent.DesiredProblemSpace);
                     GraphVertex<AgentProblemSpace> existingVertex = null;
 
                     if (exploredSet.TryGetValue(newSpace, out existingVertex) || frontierSet.TryGetValue(newSpace, out existingVertex))
@@ -103,7 +104,8 @@ namespace SSDK.AI.Solvers
                             // Update the leading edge and weight of the vertex.
                             GraphEdge<AgentProblemSpace> edge = graph.CreatePath(explorationVertex, existingVertex, cost);
                             existingVertex.LeadingEdge = edge;
-                            existingVertex.LeadingWeight = estimatedCost;
+                            existingVertex.LeadingWeight = reachCost;
+                            existingVertex.SecondaryWeight = estimatedCost;
                         }
                     }
                     else
@@ -112,7 +114,8 @@ namespace SSDK.AI.Solvers
                         GraphVertex<AgentProblemSpace> newVertex = graph.Add(newSpace);
                         GraphEdge<AgentProblemSpace> edge = graph.CreatePath(explorationVertex, newVertex, cost);
                         newVertex.LeadingEdge = edge;
-                        newVertex.LeadingWeight = estimatedCost;
+                        newVertex.LeadingWeight = reachCost;
+                        newVertex.SecondaryWeight = estimatedCost;
                         edge.Tag = operation;
                         frontierQueue.Enqueue(newVertex, estimatedCost);
                         frontierSet.Add(newSpace, newVertex);
@@ -133,7 +136,7 @@ namespace SSDK.AI.Solvers
 
         public override string ToString()
         {
-            return "Greedy Best-First Search";
+            return "A* Search";
         }
     }
 }

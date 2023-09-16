@@ -36,6 +36,13 @@ namespace SSDK.Core.Structures.Graphs
         public UncontrolledNumber LeadingWeight { get; set; }
 
         /// <summary>
+        /// Gets or sets the secondary number that represents this vertex.
+        /// Used in frontier/expansion algorithms to store the distance to achieve
+        /// a vertex, while the leading weight is the distance to reach this vertex.
+        /// </summary>
+        public UncontrolledNumber SecondaryWeight { get; set; }
+
+        /// <summary>
         /// Gets or sets the edge which is best preferred to enter this
         /// vertex.
         /// Used in frontier/expansion algorithms to store the edge resulting in a 

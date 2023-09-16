@@ -53,7 +53,7 @@ namespace SSDK.AI.Solvers
             
             frontierQueue.Enqueue(startingNode, 0);
             
-            // Explore BFS until distance from desired node to starting node is completed.
+            // Explore UCS until distance from desired node to starting node is completed.
             // Form edges and graph
             while(frontierQueue.Count > 0)
             {

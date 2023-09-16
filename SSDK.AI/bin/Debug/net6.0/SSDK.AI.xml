@@ -546,6 +546,29 @@
             <param name="operation">the current operation of the agent</param>
             <returns>true if there are no problems with the operation</returns>
         </member>
+        <member name="T:SSDK.AI.Solvers.AStarSolver">
+            <summary>
+            Depicts a A* Search solver for an AI agent.
+            <br/>
+            A* Search has the following: <br/>
+            * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
+            * Assumes that actions are deterministic <br/>
+            * Requires Heuristic, Hash and Equals to be implemented in problem space <br/>
+            + Path detection, but not always optimal <br/>
+            + Unlike GBFS, considers action costs.
+            - Much faster than BFS or UCS, but performance generating an optimal path requires a good heuristic.  <br/>
+            - Depends on exact state computation <br/>
+            - An informed search algorithm requiring a heuristic function to be implemented.
+            </summary>
+        </member>
+        <member name="M:SSDK.AI.Solvers.AStarSolver.Solve(SSDK.AI.Agent)">
+            <summary>
+            Solves the agent by using Greedy Best First Search to generate an operation that computes
+            the closest path while accounting for action costs.
+            </summary>
+            <param name="agent">the agent to solve</param>
+            <returns>an operation attempts to lead the agent to the desired space</returns>
+        </member>
         <member name="T:SSDK.AI.Solvers.BFSSolver">
             <summary>
             Depicts a BFS solver for an AI agent.
@@ -576,11 +599,12 @@
             Greedy Best-First Search has the following: <br/>
             * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
             * Assumes that actions are deterministic <br/>
-            * Requires Hash and Equals to be implemented in problem space <br/>
+            * Requires Heuristic, Hash and Equals to be implemented in problem space <br/>
             + Path detection, but not always optimal <br/>
-            - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
+            - Much faster than BFS or UCS, but performance generating an optimal path requires a good heuristic <br/>
             - Depends on exact state computation <br/>
-            - An informed search algorithm requiring a heuristically developed DistanceTo function.
+            - An informed search algorithm requiring a heuristic function to be implemented.
+            - Unlike A*, does not consider action costs.
             </summary>
         </member>
         <member name="M:SSDK.AI.Solvers.GBFSSolver.Solve(SSDK.AI.Agent)">
