@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSDK.AI
+namespace SSDK.AI.Agent
 {
     /// <summary>
     /// The action handler which handles the given target of the action.
@@ -68,7 +68,7 @@ namespace SSDK.AI
         /// </param>
         /// <param name="minRange">the min target integer</param>
         /// <param name="maxRange">the max target integer inclusive</param>
-        public AgentAction(AgentActionHandler actionHandler, AgentCostFunction costHandler=null, int minRange = 0, int maxRange = 1)
+        public AgentAction(AgentActionHandler actionHandler, AgentCostFunction costHandler = null, int minRange = 0, int maxRange = 1)
         {
             Action = actionHandler;
             Cost = costHandler;

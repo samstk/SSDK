@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSDK.AI
+namespace SSDK.AI.Agent
 {
     /// <summary>
     /// An abstract class that provides the bare minimum on how an agent perceives the

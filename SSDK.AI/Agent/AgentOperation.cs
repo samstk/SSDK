@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSDK.AI
+namespace SSDK.AI.Agent
 {
     /// <summary>
     /// An agent's operation, which may have multiple sequences

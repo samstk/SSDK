@@ -5,7 +5,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSDK.AI
+namespace SSDK.AI.Agent
 {
     /// <summary>
     /// Depicts a step in the agent's operation, with reference to time.

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SSDK.AI.Agent;
 using SSDK.Core;
 using SSDK.Core.Structures.Graphs;
 
-namespace SSDK.AI.Solvers
+namespace SSDK.AI.Agent.Solvers
 {
     /// <summary>
     /// Depicts a BFS solver for an AI agent.

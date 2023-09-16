@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSDK.AI
+namespace SSDK.AI.Agent
 {
     /// <summary>
     /// The base for every AI agent, with the aim to produce 'intelligence' using a generic model,
@@ -77,7 +77,7 @@ namespace SSDK.AI
         /// </summary>
         public void Guide(params AgentProblemSpace[] sequentialSpaces)
         {
-            foreach(AgentProblemSpace space in sequentialSpaces)
+            foreach (AgentProblemSpace space in sequentialSpaces)
             {
                 ProblemDivisionQueue.Enqueue(space);
             }
@@ -104,7 +104,7 @@ namespace SSDK.AI
             // Update next desired space if current problem space matches desired space.
             if (CurrentProblemSpace.DistanceTo(DesiredProblemSpace) <= DesiredProblemSpace.MatchTolerance)
             {
-                if(ProblemDivisionQueue.Count > 0)
+                if (ProblemDivisionQueue.Count > 0)
                 {
                     DesiredProblemSpace = ProblemDivisionQueue.Dequeue();
                 }
@@ -140,9 +140,9 @@ namespace SSDK.AI
         /// </summary>
         public void Execute()
         {
-            if(CurrentOperation != null)
+            if (CurrentOperation != null)
             {
-                if(CurrentOperation.IsReady && CurrentOperation.Execute(this))
+                if (CurrentOperation.IsReady && CurrentOperation.Execute(this))
                 {
                     CurrentOperation = null;
                 }

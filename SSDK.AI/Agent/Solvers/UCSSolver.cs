@@ -3,57 +3,58 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SSDK.AI.Agent;
 using SSDK.Core;
 using SSDK.Core.Structures.Graphs;
 using SSDK.Core.Structures.Primitive;
 
-namespace SSDK.AI.Solvers
+namespace SSDK.AI.Agent.Solvers
 {
     /// <summary>
-    /// Depicts a A* Search solver for an AI agent.
+    /// Depicts a UCS solver for an AI agent.
     /// <br/>
-    /// A* Search has the following: <br/>
+    /// UCS has the following: <br/>
     /// * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
     /// * Assumes that actions are deterministic <br/>
-    /// * Requires Heuristic, Hash and Equals to be implemented in problem space <br/>
-    /// + Path detection, but not always optimal <br/>
-    /// + Unlike GBFS, considers action costs.
-    /// - Much faster than BFS or UCS, but performance generating an optimal path requires a good heuristic.  <br/>
+    /// * Requires Hash and Equals to be implemented in problem space <br/>
+    /// + Shortest path detection with action cost <br/>
+    /// + Perfect rationality but heavy memory consumption for every state <br/>
+    /// - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
     /// - Depends on exact state computation <br/>
-    /// - An informed search algorithm requiring a heuristic function to be implemented.
+    /// - A blind search algorithm
     /// </summary>
-    public class AStarSolver : AgentSolver
+    public class UCSSolver : AgentSolver
     {
 
         public override bool Check(Agent agent, AgentOperation operation)
         {
-            // Always believe that an operation resulting from A* is accurate.
+            // Always believe that an operation resulting from UCS is accurate.
             return true;
         }
 
         /// <summary>
-        /// Solves the agent by using Greedy Best First Search to generate an operation that computes
+        /// Solves the agent by using UCS to generate an operation that computes
         /// the closest path while accounting for action costs.
         /// </summary>
         /// <param name="agent">the agent to solve</param>
         /// <returns>an operation attempts to lead the agent to the desired space</returns>
         public override AgentOperation Solve(Agent agent)
         {
-            // Solve GBFS by constructing expanding graph.
+            // Solve UCS by constructing expanding graph.
             Graph<AgentProblemSpace> graph = new Graph<AgentProblemSpace>();
             GraphVertex<AgentProblemSpace> startingNode = graph.Add(agent.CurrentProblemSpace);
 
             // Generate queue for problem spaces
             PriorityQueue<GraphVertex<AgentProblemSpace>, UncontrolledNumber> frontierQueue = new ();
-
-            // Initialise the explore set and frontier set.
+            
+            // Initialise the explore set and frontier set (vertex may require updating so use dictionary)
             Dictionary<AgentProblemSpace, GraphVertex<AgentProblemSpace>> exploredSet = new ();
             Dictionary<AgentProblemSpace, GraphVertex<AgentProblemSpace>> frontierSet = new ();
             frontierSet.Add(agent.CurrentProblemSpace, startingNode);
             
             frontierQueue.Enqueue(startingNode, 0);
             
-            // Explore A* until distance from desired node to starting node is completed.
+            // Explore UCS until distance from desired node to starting node is completed.
             // Form edges and graph
             while(frontierQueue.Count > 0)
             {
@@ -92,20 +93,19 @@ namespace SSDK.AI.Solvers
 
                     if (dist <= MatchTolerance) continue;// Only add new spaces for queue
 
-                    UncontrolledNumber reachCost = explorationCost + cost;
-                    UncontrolledNumber estimatedCost = reachCost + newSpace.Heuristic(agent.DesiredProblemSpace);
+                    UncontrolledNumber newCost = explorationCost + cost;
+
                     GraphVertex<AgentProblemSpace> existingVertex = null;
 
                     if (exploredSet.TryGetValue(newSpace, out existingVertex) || frontierSet.TryGetValue(newSpace, out existingVertex))
                     {
                         // Our action leads to an already explored/queued vertex, so check to see if this path is closer in cost.
-                        if (estimatedCost < existingVertex.LeadingWeight)
+                        if (newCost < existingVertex.LeadingWeight)
                         {
                             // Update the leading edge and weight of the vertex.
                             GraphEdge<AgentProblemSpace> edge = graph.CreatePath(explorationVertex, existingVertex, cost);
                             existingVertex.LeadingEdge = edge;
-                            existingVertex.LeadingWeight = reachCost;
-                            existingVertex.SecondaryWeight = estimatedCost;
+                            existingVertex.LeadingWeight = newCost;
                         }
                     }
                     else
@@ -114,10 +114,9 @@ namespace SSDK.AI.Solvers
                         GraphVertex<AgentProblemSpace> newVertex = graph.Add(newSpace);
                         GraphEdge<AgentProblemSpace> edge = graph.CreatePath(explorationVertex, newVertex, cost);
                         newVertex.LeadingEdge = edge;
-                        newVertex.LeadingWeight = reachCost;
-                        newVertex.SecondaryWeight = estimatedCost;
+                        newVertex.LeadingWeight = newCost;
                         edge.Tag = operation;
-                        frontierQueue.Enqueue(newVertex, estimatedCost);
+                        frontierQueue.Enqueue(newVertex, newCost);
                         frontierSet.Add(newSpace, newVertex);
                     }
                 }
@@ -136,7 +135,7 @@ namespace SSDK.AI.Solvers
 
         public override string ToString()
         {
-            return "A* Search";
+            return "Uninformed Cost Search";
         }
     }
 }
