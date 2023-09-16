@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSDK.Core.Structures.Primitive;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -229,6 +230,24 @@ namespace SSDK.AI
         public static AgentOperation Single(AgentActionExecution singleExecution)
         {
             return new AgentOperation(new AgentOperationStep(0, singleExecution));
+        }
+
+        /// <summary>
+        /// Calculates the total cost of the operation
+        /// </summary>
+        /// <returns>the total cost of the operation</returns>
+        public UncontrolledNumber CalculateTotalCost(Agent agent)
+        {
+            UncontrolledNumber total = 0;
+            foreach(AgentOperationStep step in Steps)
+            {
+                foreach(AgentActionExecution execution in step.Executions)
+                {
+                    if (execution.Action.Cost == null) total += 1;
+                    else total += execution.Action.Cost(agent, execution.Target); 
+                }
+            }
+            return total;
         }
 
         public override string ToString()

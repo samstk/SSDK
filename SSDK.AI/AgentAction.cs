@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSDK.Core.Structures.Primitive;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,20 @@ using System.Threading.Tasks;
 
 namespace SSDK.AI
 {
+    /// <summary>
+    /// The action handler which handles the given target of the action.
+    /// </summary>
+    /// <param name="agent">the agent to perform the action on</param>
+    /// <param name="target">the target of the action (within min-max)</param>
+    public delegate void AgentActionHandler(Agent agent, int target);
+
+    /// <summary>
+    /// The cost handler which calculates the cost of the given action.
+    /// </summary>
+    /// <param name="agent">the agent to perform the action on</param>
+    /// <param name="target">the target of the action (within min-max)</param>
+    /// <returns>the 'cost' of the action</returns>
+    public delegate UncontrolledNumber AgentCostFunction(Agent agent, int target);
     /// <summary>
     /// An action which can be activated to a certain range.
     /// </summary>
@@ -30,13 +45,13 @@ namespace SSDK.AI
         /// Gets the action handler that performs the action on the agent's
         /// world, using an integer to specify an argument.
         /// </summary>
-        public Action<Agent, int> Action { get; private set; }
+        public AgentActionHandler Action { get; private set; }
 
         /// <summary>
         /// Gets the cost calculation which may be used on certain solvers
         /// to determine best paths.
         /// </summary>
-        public Func<Agent, int, double> Cost { get; private set; }
+        public AgentCostFunction Cost { get; private set; }
 
         /// <summary>
         /// Defines a new agent operation which takes an action handler, and allows
@@ -53,7 +68,7 @@ namespace SSDK.AI
         /// </param>
         /// <param name="minRange">the min target integer</param>
         /// <param name="maxRange">the max target integer inclusive</param>
-        public AgentAction(Action<Agent, int> actionHandler, Func<Agent, int, double> costHandler=null, int minRange = 0, int maxRange = 1)
+        public AgentAction(AgentActionHandler actionHandler, AgentCostFunction costHandler=null, int minRange = 0, int maxRange = 1)
         {
             Action = actionHandler;
             Cost = costHandler;

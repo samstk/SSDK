@@ -105,6 +105,21 @@
             a specific action to take.
             </param>
         </member>
+        <member name="T:SSDK.AI.AgentActionHandler">
+            <summary>
+            The action handler which handles the given target of the action.
+            </summary>
+            <param name="agent">the agent to perform the action on</param>
+            <param name="target">the target of the action (within min-max)</param>
+        </member>
+        <member name="T:SSDK.AI.AgentCostFunction">
+            <summary>
+            The cost handler which calculates the cost of the given action.
+            </summary>
+            <param name="agent">the agent to perform the action on</param>
+            <param name="target">the target of the action (within min-max)</param>
+            <returns>the 'cost' of the action</returns>
+        </member>
         <member name="T:SSDK.AI.AgentAction">
             <summary>
             An action which can be activated to a certain range.
@@ -138,7 +153,7 @@
             to determine best paths.
             </summary>
         </member>
-        <member name="M:SSDK.AI.AgentAction.#ctor(System.Action{SSDK.AI.Agent,System.Int32},System.Func{SSDK.AI.Agent,System.Int32,System.Double},System.Int32,System.Int32)">
+        <member name="M:SSDK.AI.AgentAction.#ctor(SSDK.AI.AgentActionHandler,SSDK.AI.AgentCostFunction,System.Int32,System.Int32)">
             <summary>
             Defines a new agent operation which takes an action handler, and allows
             a certain range of values from (min-max) inclusive, to be passed to the 
@@ -353,6 +368,12 @@
             <param name="singleExecution">the execution that represents this operation</param>
             <returns>the operation representing the execution</returns>
         </member>
+        <member name="M:SSDK.AI.AgentOperation.CalculateTotalCost(SSDK.AI.Agent)">
+            <summary>
+            Calculates the total cost of the operation
+            </summary>
+            <returns>the total cost of the operation</returns>
+        </member>
         <member name="T:SSDK.AI.AgentOperationStatus">
             <summary>
             Depicts the status of an operation
@@ -522,7 +543,29 @@
         <member name="M:SSDK.AI.Solvers.BFSSolver.Solve(SSDK.AI.Agent)">
             <summary>
             Solves the agent by using BFS to generate an operation that computes
-            the closest path which accounting for action costs.
+            the closest path without accounting for action costs.
+            </summary>
+            <param name="agent">the agent to solve</param>
+            <returns>an operation attempts to lead the agent to the desired space</returns>
+        </member>
+        <member name="T:SSDK.AI.Solvers.UCSSolver">
+            <summary>
+            Depicts a UCS solver for an AI agent.
+            <br/>
+            UCS has the following: <br/>
+            * To be used for solving a problem all at once (resulting in a set of subsequently achievable states) <br/>
+            * Assumes that actions are deterministic <br/>
+            * Requires Hash and Equals to be implemented in problem space <br/>
+            + Shortest path detection with action cost <br/>
+            + Perfect rationality but heavy memory consumption for every state <br/>
+            - Heavy memory consumption for exponential states, however guiding the agent into sub-problems may alleviate this problem.  <br/>
+            - Depends on exact state computation <br/>
+            </summary>
+        </member>
+        <member name="M:SSDK.AI.Solvers.UCSSolver.Solve(SSDK.AI.Agent)">
+            <summary>
+            Solves the agent by using UCS to generate an operation that computes
+            the closest path while accounting for action costs.
             </summary>
             <param name="agent">the agent to solve</param>
             <returns>an operation attempts to lead the agent to the desired space</returns>

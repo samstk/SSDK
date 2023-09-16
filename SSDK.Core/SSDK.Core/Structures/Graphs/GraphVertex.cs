@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSDK.Core.Structures.Primitive;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -26,6 +27,21 @@ namespace SSDK.Core.Structures.Graphs
         /// Gets or sets the value associated with this vertex
         /// </summary>
         public T Value { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number that represents this vertex.
+        /// Used in frontier/expansion algorithms to store the current distance of a 
+        /// certain vertex.
+        /// </summary>
+        public UncontrolledNumber LeadingWeight { get; set; }
+
+        /// <summary>
+        /// Gets or sets the edge which is best preferred to enter this
+        /// vertex.
+        /// Used in frontier/expansion algorithms to store the edge resulting in a 
+        /// minimum distance during a expansion.
+        /// </summary>
+        public GraphEdge<T> LeadingEdge { get; set; }
 
         /// <summary>
         /// Returns true if this vertex has edges leading from it.
