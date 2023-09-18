@@ -31,6 +31,16 @@ namespace SSDK.AI.KBS.Logic
             return !Condition.Holds() || Implication.Holds();
         }
 
+
+        public override KBFactor HasConflict()
+        {
+            KBFactor r = null;
+            if ((r = Condition.HasConflict()) as object != null) return r;
+            if ((r = Implication.HasConflict()) as object != null) return r;
+
+            return Solved && Assertion && !Holds() ? this : null;
+        }
+
         public override string ToString()
         {
             return $"({Condition} -> {Implication})";
@@ -54,7 +64,7 @@ namespace SSDK.AI.KBS.Logic
 
         public override KBSolveType CanSolveForChild(KB kb, KBFactor child)
         {
-            if (child == Condition) return KBSolveType.NoSolution; // Cannot solve for condition, p -> q only affects q on different values of p
+            if (child.Equals(Condition)) return KBSolveType.NoSolution; // Cannot solve for condition, p -> q only affects q on different values of p
             return Solved && Condition.Solved && Condition.Holds() ? KBSolveType.SolveTrue : KBSolveType.NoSolution;
         }
         // Can only solve children if condition has been solved and it is true (i.e. implication is true)
@@ -65,7 +75,7 @@ namespace SSDK.AI.KBS.Logic
 
             if (!Solved)
             {
-                KBSolveType type = parent == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
+                KBSolveType type = parent as object== null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
           
                 if (type == KBSolveType.SolveTrue)
                 {
@@ -77,6 +87,13 @@ namespace SSDK.AI.KBS.Logic
                 }
             }
             
+
+            return changes;
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            int changes = Condition.SolveProbability(kb, this) + Implication.SolveProbability(kb, this);
 
             return changes;
         }

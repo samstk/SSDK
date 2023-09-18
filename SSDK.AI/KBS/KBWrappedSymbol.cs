@@ -97,13 +97,18 @@ namespace SSDK.AI.KBS
          /// <returns>the inverse symbol</returns>
         public KBWrappedSymbol GetInverse()
         {
-            if (Inverse == null)
+            if (Inverse as object == null)
             {
                 Inverse = new KBWrappedSymbol(Outer, Inner);
                 Inverse.Inverse = this;
                 Inverse.IsInverse = true;
             }
             return Inverse;
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            return 0;
         }
     }
 }

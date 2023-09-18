@@ -438,6 +438,16 @@ namespace SSDK.Core.Structures.Primitive
             return neg+dec;
         }
 
+        /// <summary>
+        /// Converts the number back into a double.
+        /// </summary>
+        /// <returns></returns>
+        public double ToDouble()
+        {
+            if (IsInfinity) return IsNegative ? double.NegativeInfinity : double.PositiveInfinity;
+            return double.Parse(ToString());
+        }
+
         public override bool Equals(object obj)
         {
             return ((obj is UncontrolledNumber && ((UncontrolledNumber)obj == this)));

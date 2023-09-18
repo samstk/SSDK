@@ -830,6 +830,17 @@
             A list of assertions that should definitely hold true regardless of the world state.
             </summary>
         </member>
+        <member name="P:SSDK.AI.KBS.KB.QueryAssertions">
+            <summary>
+            A list of assertions passed by a query that should definitely hold true regardless of the world state. This list
+            is immediately reset after solving.
+            </summary>
+        </member>
+        <member name="P:SSDK.AI.KBS.KB.Queries">
+            <summary>
+            A lits of queries that is required to be solved or was solved.
+            </summary>
+        </member>
         <member name="P:SSDK.AI.KBS.KB.Solved">
             <summary>
             If true, the KB has been solved at least once.
@@ -840,7 +851,7 @@
             Returns the first conflict within the assertions found.
             Only applies to solved assertions.
             </summary>
-            <returns></returns>
+            <returns>a tuple of the first and second factors in a conflict, with their exception</returns>
         </member>
         <member name="P:SSDK.AI.KBS.KB.ExistingSymbols">
             <summary>
@@ -856,11 +867,27 @@
         </member>
         <member name="M:SSDK.AI.KBS.KB.Solve">
             <summary>
-            Solves the current knowledge base's assertions.
-            You will need to assert the necessary information for it to solve.
+            Solves the current knowledge base's assertions. Clear queries (and query assertions) before-hand.
+            You will need to assert the necessary information for it to solve. <br/>
             e.g. an undefined symbol (symbol that appears but is not asserted to be either true or false),
                  cannot be used to solve any other symbol.
+            <br/>
+            In order to solve for probabilities, logic must be in a simplified form (e.g. p ^ p -> p, p ^ !p -> false)
             </summary>
+        </member>
+        <member name="M:SSDK.AI.KBS.KB.If(SSDK.AI.KBS.KBFactor[])">
+            <summary>
+            Beginning of a query on a knowledge base
+            </summary>
+            <param name="queryAssertions">a new set of assertions relevant to the query</param>
+            <returns>this knowledge base</returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KB.Query(SSDK.AI.KBS.KBFactor[])">
+            <summary>
+            Resolves the knowledge base, but additional solves the query based on given assertions.
+            </summary>
+            <param name="sentencesToQuery">the sentences to query (returned as result)</param>
+            <returns>sentencesToQuery</returns>
         </member>
         <member name="M:SSDK.AI.KBS.KB.GetSymbols">
             <summary>
@@ -886,6 +913,36 @@
             Gets the null factor
             </summary>
         </member>
+        <member name="P:SSDK.AI.KBS.KBFactor.GeneralProbability">
+            <summary>
+            Gets or sets the general probability (GP) that the factor holds true.
+            </summary>
+            <remarks>
+            For example, suppose p -> q.
+            If GP of p = 0.2, and GP of q = 0.5, we know that q occurs 2.5 time more often than p.
+            So, if q is true (P(q) = 1), and suppose p -> q is true 0.8 of the time, then
+            we can find p using the general probability (bayesian statistics). In this example, we
+            calculate p to be 0.8 * 0.3 / 0.5 or (P(p -> q) * p / q)
+            </remarks>
+        </member>
+        <member name="P:SSDK.AI.KBS.KBFactor.Probability">
+            <summary>
+            Gets or sets the probability that the factor holds true.
+            If at any time the factor is solved, and asserted to be
+            a certain value, then probability defaults to 1 or 0.
+            </summary>
+        </member>
+        <member name="P:SSDK.AI.KBS.KBFactor.ProbabilitySolved">
+            <summary>
+            If true, then the probability has been solved and should be accurate.
+            </summary>
+        </member>
+        <member name="P:SSDK.AI.KBS.KBFactor.ProbabilityEnforced">
+            <summary>
+            If true, then the probability has been solved completely, and should
+            not change (i.e. assert P(x) = 0.2, P(x) should always be 0.2)
+            </summary>
+        </member>
         <member name="M:SSDK.AI.KBS.KBFactor.Holds">
             <summary>
             Returns true if the factor holds true.
@@ -904,7 +961,7 @@
             Returns true if there is a conflict within this factor.
             i.e. this is asserted to be true, but the children calculations do not match.
             </summary>
-            <returns></returns>
+            <returns>null if no conflict, or the first factor responsible for the conflict</returns>
         </member>
         <member name="M:SSDK.AI.KBS.KBFactor.InverseHolds">
             <summary>
@@ -915,6 +972,11 @@
         <member name="P:SSDK.AI.KBS.KBFactor.IsClass">
             <summary>
             Gets whether the factor/symbol is being interpreted as a class.
+            </summary>
+        </member>
+        <member name="P:SSDK.AI.KBS.KBFactor.PString">
+            <summary>
+            Returns the probability chance as a string if it is not one.
             </summary>
         </member>
         <member name="M:SSDK.AI.KBS.KBFactor.GetSymbols">
@@ -979,6 +1041,13 @@
             </summary>
             <returns>number of operations / symbols solved</returns>
         </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.SolveProbability(SSDK.AI.KBS.KB,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Solves the current factor's probability, using what is known in the knowledge base, and returns
+            the number of operations / symbols solved.
+            </summary>
+            <returns>number of operations / symbols solved</returns>
+        </member>
         <member name="M:SSDK.AI.KBS.KBFactor.SolveAssertOther(SSDK.AI.KBS.KB,SSDK.AI.KBS.KBFactor)">
             <summary>
             Asserts that this statement is a value, when solving.
@@ -1002,10 +1071,76 @@
             Resets the current solution.
             </summary>
         </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.EnforceProbability">
+            <summary>
+            Enforces the probability to ensure it is not edited.
+            </summary>
+        </member>
         <member name="M:SSDK.AI.KBS.KBFactor.Simplify">
             <summary>
             Simplifies the current factor.
             </summary>
+            <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.op_LogicalNot(SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Negation of the sentence
+            </summary>
+            <param name="sentence"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.op_OnesComplement(SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Negation of the sentence
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.op_BitwiseAnd(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            AND concatenation of the sentences
+            </summary>
+            <param name="lhs"></param>
+            <param name="rhs"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.op_BitwiseOr(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            OR concatenation of the sentences
+            </summary>
+            <param name="lhs"></param>
+            <param name="rhs"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.op_Equality(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Agreement (both values match) between the sentences.
+            </summary>
+            <param name="lhs"></param>
+            <param name="rhs"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.op_Inequality(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Agreement (both values do not match) between the sentences
+            </summary>
+            <param name="lhs"></param>
+            <param name="rhs"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.op_GreaterThanOrEqual(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Implication (lhs implies rhs)
+            </summary>
+            <param name="lhs"></param>
+            <param name="rhs"></param>
+            <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBFactor.op_LessThanOrEqual(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Implication (rhs implies lhs)
+            </summary>
+            <param name="lhs"></param>
+            <param name="rhs"></param>
             <returns></returns>
         </member>
         <member name="T:SSDK.AI.KBS.KBSymbol">
@@ -1023,6 +1158,11 @@
         <member name="F:SSDK.AI.KBS.KBSymbol.UniqueID">
             <summary>
             A unique identifier for the symbol.
+            </summary>
+        </member>
+        <member name="F:SSDK.AI.KBS.KBSymbol._AddedToKB">
+            <summary>
+            If true, then the symbol has been added to a KB.
             </summary>
         </member>
         <member name="F:SSDK.AI.KBS.KBSymbol.RelationTypes">
@@ -1063,6 +1203,18 @@
             If true, then this symbol is an inverse symbol.
             </summary>
         </member>
+        <member name="M:SSDK.AI.KBS.KBSymbol.#ctor(System.String)">
+            <summary>
+            Creates an symbol that is not linked to any KB.
+            </summary>
+            <param name="id"></param>
+        </member>
+        <member name="M:SSDK.AI.KBS.KBSymbol.AddToKB(SSDK.AI.KBS.KB)">
+            <summary>
+            Adds the symbol to the given knowledge base
+            </summary>
+            <param name="kb">knowledge base</param>
+        </member>
         <member name="P:SSDK.AI.KBS.KBSymbol.IsRelationalSymbol">
             <summary>
             If true, then the symbol is used as a class symbol.
@@ -1075,6 +1227,11 @@
             </summary>
             <param name="kb">knowledge base</param>
             <returns>the inverse symbol</returns>
+        </member>
+        <member name="P:SSDK.AI.KBS.KBSymbol.Item(SSDK.AI.KBS.KBSymbol,SSDK.AI.KBS.KBSymbol)">
+            <summary>
+            Gets a symbol relations of a class to another symbol.
+            </summary>
         </member>
         <member name="T:SSDK.AI.KBS.KBVariable">
             <summary>
@@ -1263,6 +1420,67 @@
             A Logical Connective which identifies a piece of information about a symbol
             </summary>
         </member>
+        <member name="T:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification">
+            <summary>
+            A general probability specification onto a symbol or connective.
+            Unlike the probability specification, any assertions made to this do not enforce
+            that probability to the variable, and will never be reset.
+            
+            Add using directive for static KBProbabilitySpecification for quick use of GP function.
+            e.g. GP(rain) = 0.98
+            </summary>
+        </member>
+        <member name="P:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification.On">
+            <summary>
+            The symbol or factor that this probability specifies.
+            </summary>
+        </member>
+        <member name="P:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification.Value">
+            <summary>
+            The probability value that is defined (0-1).
+            </summary>
+        </member>
+        <member name="M:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification.P(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Creates a probability specification
+            </summary>
+            <param name="factor">the factor to specify the probability on</param>
+            <param name="value">a value between 0 and 1</param>
+            <returns>the specification for the probability of the factor</returns>
+        </member>
+        <member name="T:SSDK.AI.KBS.Probability.KBProbabilitySpecification">
+            <summary>
+            A probability specification onto a symbol or connective.
+            Add using directive for static KBProbabilitySpecification for quick use of P function.
+            e.g. P(rain) = 0.98
+            </summary>
+        </member>
+        <member name="P:SSDK.AI.KBS.Probability.KBProbabilitySpecification.On">
+            <summary>
+            The symbol or factor that this probability specifies.
+            </summary>
+        </member>
+        <member name="P:SSDK.AI.KBS.Probability.KBProbabilitySpecification.Value">
+            <summary>
+            The probability value that is defined (0-1).
+            </summary>
+        </member>
+        <member name="M:SSDK.AI.KBS.Probability.KBProbabilitySpecification.P(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Creates a probability specification
+            </summary>
+            <param name="factor">the factor to specify the probability on</param>
+            <param name="value">a value between 0 and 1</param>
+            <returns>the specification for the probability of the factor</returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.Probability.KBProbabilitySpecification.GP(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
+            <summary>
+            Creates a general probability specification (without enforcing probabilities)
+            </summary>
+            <param name="factor">the factor to specify the probability on</param>
+            <param name="value">a value between 0 and 1</param>
+            <returns>the specification for the probability of the factor</returns>
+        </member>
         <member name="M:SSDK.AI.KBS.Symbols.KBSymbolExt_Days.CreateDaySymbols(SSDK.AI.KBS.KB,System.Int32,System.Int32)">
             <summary>
             Creates symbols for the days (0-Sunday, 6-Monday).
@@ -1286,6 +1504,14 @@
             <param name="symbols"></param>
             <param name="id"></param>
             <returns></returns>
+        </member>
+        <member name="M:SSDK.AI.KBS.Symbols.SymbolExt.In(SSDK.AI.KBS.KBSymbol[],SSDK.AI.KBS.KB)">
+            <summary>
+            Adds all symbols in the array to the KB.
+            </summary>
+            <param name="symbols">the list of symbols to add to the knowledge base</param>
+            <param name="kb">the knowledge base to add to</param>
+            <returns>the unmodified list of symbols</returns>
         </member>
     </members>
 </doc>

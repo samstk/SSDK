@@ -40,13 +40,13 @@ namespace SSDK.AI.KBS.Symbols
             {
                 int yesterdayIndex = (i - 1);
                 if (yesterdayIndex == -1) yesterdayIndex = 6;
-                if(yesterdayIndex < daySymbols.Length && yesterday != null)
+                if(yesterdayIndex < daySymbols.Length && yesterday as object != null)
                 {
                     sentences.Add(new KBAgreement(new KBSymbolRelation(today, kb.Is, daySymbols[i]), new KBSymbolRelation(yesterday, kb.Is, daySymbols[yesterdayIndex])));   
                 }
                 int tomorrowIndex = (i + 1);
                 if (tomorrowIndex == 8) tomorrowIndex = 0;
-                if(tomorrowIndex < daySymbols.Length && tomorrow != null)
+                if(tomorrowIndex < daySymbols.Length && tomorrow as object  != null)
                 {
                     sentences.Add(new KBAgreement(new KBSymbolRelation(today, kb.Is, daySymbols[i]), new KBSymbolRelation(tomorrow, kb.Is, daySymbols[tomorrowIndex])));
                 }

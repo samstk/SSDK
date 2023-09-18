@@ -41,11 +41,11 @@ namespace SSDK.AI.KBS.Arithmetic
         {
             if (Solved && HasAltAssertion)
             {
-                if(LHS.Solved && !RHS.Solved && child == RHS)
+                if(LHS.Solved && !RHS.Solved && child.Equals(RHS))
                 {
                     return LHS.Calculate().Apply('/', AltAssertion); // c = a / b, b = a/c
                 }
-                else if (RHS.Solved && !LHS.Solved && child == LHS)
+                else if (RHS.Solved && !LHS.Solved && child.Equals(LHS))
                 {
                     KBFactor alt= AltAssertion.Apply('*', RHS.Calculate()); // c = a / b, a = c * b
                     return alt;
@@ -85,7 +85,7 @@ namespace SSDK.AI.KBS.Arithmetic
             int changes = LHS.SolveAssertion(kb, this) + RHS.SolveAssertion(kb, this);
             if (!Solved)
             {
-                KBSolveType type = parent != null ? parent.CanSolveForChild(kb, this) : KBSolveType.NoSolution;
+                KBSolveType type = parent as object != null ? parent.CanSolveForChild(kb, this) : KBSolveType.NoSolution;
                 if (type == KBSolveType.NoSolution || type == KBSolveType.Other)
                 {
                     // attempt to solve from children.
@@ -101,6 +101,11 @@ namespace SSDK.AI.KBS.Arithmetic
                 }
             }
             return changes;
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            return 0; // No probabilities can be solved here.
         }
 
         public override string ToString()

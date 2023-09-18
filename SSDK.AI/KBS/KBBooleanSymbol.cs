@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SSDK.Core.Structures.Primitive;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -30,6 +31,12 @@ namespace SSDK.AI.KBS
             return true;
         }
 
+        public override KBFactor Calculate()
+        {
+            return this;
+        }
+
+
         public override int SolveAssertion(KB kb, KBFactor parent)
         {
             if(!Solved)
@@ -59,5 +66,7 @@ namespace SSDK.AI.KBS
         {
             return new HashSet<KBSymbol>();
         }
+
+        public static implicit operator KBBooleanSymbol(bool boolean) => new KBBooleanSymbol(boolean);
     }
 }

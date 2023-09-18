@@ -46,7 +46,7 @@ namespace SSDK.AI.KBS.Logic
 
         public override bool Holds()
         {
-            return Relation.Properties[Property] == Value;            
+            return Relation.Properties[Property].Equals(Value);            
         }
 
         public override KBSolveType CanSolveForChild(KB kb, KBFactor child)
@@ -62,7 +62,7 @@ namespace SSDK.AI.KBS.Logic
             if (!Solved)
             {
                 // We can solve a symbol classification when either ~class or class appears in the about list.
-                KBSolveType solveType = parent == null ? KBSolveType.SolveTrue
+                KBSolveType solveType = parent as object == null ? KBSolveType.SolveTrue
                     : parent.CanSolveForChild(kb, this);
 
                 if (solveType == KBSolveType.NoSolution)
@@ -93,6 +93,11 @@ namespace SSDK.AI.KBS.Logic
         {
             // The property does not exist on the target, so just ignore.
             base.SolveAssertFalse(kb);
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            return 0; // No probabilities can be solved here.
         }
 
         public override string ToString()

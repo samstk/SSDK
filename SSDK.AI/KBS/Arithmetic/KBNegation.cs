@@ -69,7 +69,7 @@ namespace SSDK.AI.KBS.Arithmetic
             int changes = Factor.SolveAssertion(kb, this);
             if (!Solved)
             {
-                KBSolveType type = parent != null ? parent.CanSolveForChild(kb, this) : KBSolveType.NoSolution;
+                KBSolveType type = parent as object != null ? parent.CanSolveForChild(kb, this) : KBSolveType.NoSolution;
                 if(type == KBSolveType.NoSolution || type == KBSolveType.Other)
                 {
                     // attempt to solve from child.
@@ -85,6 +85,11 @@ namespace SSDK.AI.KBS.Arithmetic
                 }
             }
             return changes;
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            return 0; // No probabilities can be solved here.
         }
 
         public override string ToString()

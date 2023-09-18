@@ -25,5 +25,20 @@ namespace SSDK.AI.KBS.Symbols
             }
             return null;
         }
+
+        /// <summary>
+        /// Adds all symbols in the array to the KB.
+        /// </summary>
+        /// <param name="symbols">the list of symbols to add to the knowledge base</param>
+        /// <param name="kb">the knowledge base to add to</param>
+        /// <returns>the unmodified list of symbols</returns>
+        public static KBSymbol[] In(this KBSymbol[] symbols, KB kb)
+        {
+            foreach(KBSymbol symbol in symbols)
+            {
+                symbol.AddToKB(kb);
+            }
+            return symbols;
+        }
     }
 }

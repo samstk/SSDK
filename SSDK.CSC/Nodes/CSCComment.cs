@@ -29,5 +29,19 @@ namespace SSDK.CSC.Nodes
         {
             Text = text;
         }
+
+        public override string Map(CSCResult result, CSCMapping mapping)
+        {
+            if (mapping.Comment != null)
+                return mapping.Comment(result,this);
+            return "";
+        }
+
+        public override string PreprocessMap(CSCResult result, CSCMapping mapping)
+        {
+            if (mapping.PreprocessComment != null)
+                return mapping.PreprocessComment(result, this);
+            return "";
+        }
     }
 }

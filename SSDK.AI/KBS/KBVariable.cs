@@ -44,7 +44,7 @@ namespace SSDK.AI.KBS
         public bool HasProperty(KBSymbol prop, KBSymbol value)
         {
             if (Properties.ContainsKey(prop))
-                return Properties[prop] == value;
+                return Properties[prop].Equals(value);
             return false;
         }
 

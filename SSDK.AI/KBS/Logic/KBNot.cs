@@ -24,9 +24,9 @@ namespace SSDK.AI.KBS.Logic
             return !Sentence.Holds();
         }
 
-        public override bool HasConflict()
+        public override KBFactor HasConflict()
         {
-            return Solved && Assertion && Sentence.Holds();
+            return Solved && Assertion && Sentence.Holds() ? Sentence : null;
         }
 
         public override string ToString()
@@ -54,7 +54,7 @@ namespace SSDK.AI.KBS.Logic
 
             if (!Solved)
             {
-                KBSolveType type = parent == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
+                KBSolveType type = parent as object == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
                 if (type == KBSolveType.NoSolution || type == KBSolveType.Other)
                 {
                     // Solve from child
@@ -70,6 +70,13 @@ namespace SSDK.AI.KBS.Logic
                     SolveAssertFalse(kb); changes++;
                 }
             }
+
+            return changes;
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            int changes = Sentence.SolveProbability(kb, this);
 
             return changes;
         }

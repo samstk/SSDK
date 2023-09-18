@@ -32,9 +32,13 @@ namespace SSDK.AI.KBS.Logic
             return P.Holds() == Q.Holds();
         }
 
-        public override bool HasConflict()
+        public override KBFactor HasConflict()
         {
-            return Solved && Assertion && P.Holds() != Q.Holds();
+            KBFactor r = null;
+            if ((r = P.HasConflict()) as object != null) return r;
+            if ((r = Q.HasConflict()) as object != null) return r;
+
+            return Solved && Assertion && !Holds() ? this : null;
         }
 
         public override string ToString()
@@ -60,8 +64,8 @@ namespace SSDK.AI.KBS.Logic
 
         public override KBSolveType CanSolveForChild(KB kb, KBFactor child)
         {
-            if (P.Solved && child == Q) return P.Assertion ? KBSolveType.SolveTrue : KBSolveType.SolveFalse;
-            if (Q.Solved && child == P) return Q.Assertion ? KBSolveType.SolveTrue : KBSolveType.SolveFalse;
+            if (P.Solved && child.Equals(Q)) return P.Assertion ? KBSolveType.SolveTrue : KBSolveType.SolveFalse;
+            if (Q.Solved && child.Equals(P)) return Q.Assertion ? KBSolveType.SolveTrue : KBSolveType.SolveFalse;
             return KBSolveType.NoSolution;
         }
         public override int SolveAssertion(KB kb, KBFactor parent)
@@ -70,7 +74,7 @@ namespace SSDK.AI.KBS.Logic
 
             if (!Solved)
             {
-                KBSolveType type = parent == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
+                KBSolveType type = parent as object == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
 
                 if (type == KBSolveType.SolveTrue)
                 {
@@ -82,6 +86,13 @@ namespace SSDK.AI.KBS.Logic
                 }
             }
 
+            return changes;
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            int changes = P.SolveProbability(kb, this) + Q.SolveProbability(kb, this);
+            
             return changes;
         }
 

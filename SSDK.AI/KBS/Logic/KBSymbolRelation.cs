@@ -44,9 +44,9 @@ namespace SSDK.AI.KBS.Logic
             return About.Relations.Contains(WrappedSymbol);
         }
 
-        public override bool HasConflict()
+        public override KBFactor HasConflict()
         {
-            return Solved && Assertion && !About.Relations.Contains(WrappedSymbol) || About.Relations.Contains(WrappedSymbol.GetInverse());
+            return Solved && Assertion && !About.Relations.Contains(WrappedSymbol) || About.Relations.Contains(WrappedSymbol.GetInverse()) ? About : null;
         }
 
         public override bool InverseHolds()
@@ -67,7 +67,7 @@ namespace SSDK.AI.KBS.Logic
             if(!Solved)
             {
                 // We can solve a symbol classification when either ~class or class appears in the about list.
-                KBSolveType solveType = parent == null ? KBSolveType.SolveTrue 
+                KBSolveType solveType = parent as object == null ? KBSolveType.SolveTrue 
                     : parent.CanSolveForChild(kb, this);
 
                 if (solveType == KBSolveType.NoSolution)
@@ -109,6 +109,11 @@ namespace SSDK.AI.KBS.Logic
             About.IsClass = true;
             About.Relations.Add(Class.CreateRelation(To).GetInverse());
             base.SolveAssertFalse(kb);
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            return 0;
         }
 
         public override string ToString()

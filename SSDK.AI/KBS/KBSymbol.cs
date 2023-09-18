@@ -1,4 +1,5 @@
 ﻿using SSDK.AI.KBS.Logic;
+using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Channels;
@@ -16,11 +17,16 @@ namespace SSDK.AI.KBS
         /// An identifier for the symbol
         /// </summary>
         public string ID;
-        
+
         /// <summary>
         /// A unique identifier for the symbol.
         /// </summary>
         public int UniqueID = -1;
+
+        /// <summary>
+        /// If true, then the symbol has been added to a KB.
+        /// </summary>
+        private bool _AddedToKB = false;
 
         /// <summary>
         /// A dictionary of relation types that might occur from this class.
@@ -64,7 +70,7 @@ namespace SSDK.AI.KBS
         public bool HasProperty(KBSymbol prop, KBSymbol value)
         {
             if (Properties.ContainsKey(prop))
-                return Properties[prop] == value;
+                return Properties[prop].Equals(value);
             return Relations.Any((rel) => rel.HasProperty(prop, value));
         }
 
@@ -72,17 +78,38 @@ namespace SSDK.AI.KBS
         /// Gets the inverse symbol if created (else use GetInverse)
         /// </summary>
         public KBSymbol Inverse { get; private set; }
-        
+
         /// <summary>
         /// If true, then this symbol is an inverse symbol.
         /// </summary>
         public bool IsInverse { get; internal set; }
 
+        /// <summary>
+        /// Creates an symbol that is not linked to any KB.
+        /// </summary>
+        /// <param name="id"></param>
+        public KBSymbol(string id)
+        {
+            ID = id;
+        }
+
         public KBSymbol(KB kb, string id)
         {
             ID = id;
+            AddToKB(kb);
+        }
+
+        /// <summary>
+        /// Adds the symbol to the given knowledge base
+        /// </summary>
+        /// <param name="kb">knowledge base</param>
+        internal void AddToKB(KB kb)
+        {
+            if (_AddedToKB) throw new Exception("Added to second KB");
+
             UniqueID = kb.GetNextSymbolID();
-            kb.ExistingSymbols.Add(id, this);
+            kb.ExistingSymbols.Add(ID, this);
+            _AddedToKB = true;
         }
 
         internal KBSymbol() { }
@@ -92,7 +119,7 @@ namespace SSDK.AI.KBS
         /// </summary>
         public bool IsRelationalSymbol { get; internal set; } = false;
 
-        
+
         public override bool Holds()
         {
             return Solved && Assertion || HasAltAssertion;
@@ -110,11 +137,11 @@ namespace SSDK.AI.KBS
                 KBSymbol other = (KBSymbol)obj;
                 return other.UniqueID == UniqueID && UniqueID != -1;
             }
-            
-            if(obj is KBFactor && Solved)
+
+            if (obj is KBFactor && Solved)
             {
                 KBFactor factor = (KBFactor)obj;
-                return factor.Solved && factor.Calculate() == this.Calculate();
+                return factor.Solved && factor.Calculate().Equals(this.Calculate());
             }
 
             return false;
@@ -124,17 +151,17 @@ namespace SSDK.AI.KBS
         {
             return ID;
         }
-        public string ToStringWithProperties(bool bracketsOnAssertValue=true)
+        public string ToStringWithProperties(bool bracketsOnAssertValue = true)
         {
             string propStr = "";
             List<(KBSymbol, KBFactor)> props = GetProperties();
             if (props.Count == 0) return ToString(true, bracketsOnAssertValue);
-            foreach((KBSymbol key, KBFactor val) in props) {
-                if(propStr.Length >0)
+            foreach ((KBSymbol key, KBFactor val) in props) {
+                if (propStr.Length > 0)
                 {
-                        propStr += ", ";
+                    propStr += ", ";
                 }
-                    propStr += $"{key}={val}";
+                propStr += $"{key}={val}";
             }
             return propStr.Length > 0 ? $"{ID} <{propStr}>" : ID;
         }
@@ -159,8 +186,8 @@ namespace SSDK.AI.KBS
             }
             return builder.ToString();
         }
-    
-        
+
+
 
         public override HashSet<KBSymbol> GetSymbols()
         {
@@ -179,10 +206,10 @@ namespace SSDK.AI.KBS
         public override int SolveAssertion(KB kb, KBFactor parent)
         {
             if (Solved) return 0;
-            
+
             if (!Solved)
             {
-                KBSolveType type = parent == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
+                KBSolveType type = parent as object == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
                 if (type == KBSolveType.SolveTrue)
                 {
                     SolveAssertTrue(kb); return 1;
@@ -200,6 +227,11 @@ namespace SSDK.AI.KBS
             return 0;
         }
 
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            return 0; // No probabilities can be solved here.
+        }
+
 
         public override void ResetSolution()
         {
@@ -215,7 +247,7 @@ namespace SSDK.AI.KBS
         /// <returns>the inverse symbol</returns>
         public KBSymbol GetInverse(KB kb)
         {
-            if (Inverse == null)
+            if (Inverse.Equals(null))
             {
                 Inverse = new KBSymbol(kb, "~" + ID);
                 Inverse.Inverse = this;
@@ -223,5 +255,21 @@ namespace SSDK.AI.KBS
             }
             return Inverse;
         }
+
+        public static implicit operator KBSymbol(string id) => new KBSymbol(id);
+        public static implicit operator KBSymbol((KB, string) args) {
+            return new KBSymbol(args.Item1, args.Item2);
+        }
+        
+        /// <summary>
+        /// Gets a symbol relations of a class to another symbol.
+        /// </summary>
+        public KBSymbolRelation this[KBSymbol @class, KBSymbol to]
+        {
+            get
+            {
+                return new KBSymbolRelation(this, @class, to);
+            }
+        } 
     }
 }

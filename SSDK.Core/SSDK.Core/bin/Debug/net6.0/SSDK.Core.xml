@@ -1116,6 +1116,12 @@
             that can result in an division.
             </summary>
         </member>
+        <member name="M:SSDK.Core.Structures.Primitive.UncontrolledNumber.ToDouble">
+            <summary>
+            Converts the number back into a double.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:SSDK.Core.Structures.Trees.AVLSearchTree`1">
             <summary>
             An AVL tree is a balanced binary search tree

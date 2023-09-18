@@ -43,7 +43,7 @@ namespace SSDK.AI.KBS.Arithmetic
         {
             if (Solved && Assertion)
             {
-                if (child == LHS)
+                if (child.Equals(LHS))
                     return RHS; // Child is definitely equal to the other
                 return LHS;
             }
@@ -52,14 +52,14 @@ namespace SSDK.AI.KBS.Arithmetic
 
         public override KBFactor Calculate()
         {
-            return new KBBooleanSymbol(LHS.Calculate() == RHS.Calculate());
+            return new KBBooleanSymbol(LHS.Calculate().Equals(RHS.Calculate()));
         }
 
-        public override bool HasConflict()
+        public override KBFactor HasConflict()
         {
             KBFactor left = LHS.Calculate();
             KBFactor right = RHS.Calculate();
-            return Solved && Assertion && left != null && right != null && !left.Equals(right);
+            return Solved && Assertion && left as object != null && right as object != null && !left.Equals(right) ? this : null;
         }
 
         public override bool Holds()
@@ -87,7 +87,7 @@ namespace SSDK.AI.KBS.Arithmetic
             int changes = LHS.SolveAssertion(kb, this) + RHS.SolveAssertion(kb, this);
             if(!Solved)
             {
-                KBSolveType type = parent == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
+                KBSolveType type = parent as object == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
                 if (type == KBSolveType.NoSolution || type == KBSolveType.Other)
                 {
                     if (LHS.Solved && RHS.Solved) {
@@ -106,6 +106,11 @@ namespace SSDK.AI.KBS.Arithmetic
                 }
             }
             return changes;
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            return 0; // No probabilities can be solved here.
         }
 
         public override void SolveAssertTrue(KB kb)

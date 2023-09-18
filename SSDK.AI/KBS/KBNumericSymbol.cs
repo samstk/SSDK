@@ -23,6 +23,12 @@ namespace SSDK.AI.KBS
            Number = number;
         }
 
+
+        public override KBFactor Calculate()
+        {
+            return this;
+        }
+
         public override bool Holds()
         {
             return true;
@@ -115,10 +121,10 @@ namespace SSDK.AI.KBS
 
                 case '=':
                     // Assume terms is 1 (other).
-                    return new KBBooleanSymbol(this == terms[0]);
+                    return new KBBooleanSymbol(this.Equals(terms[0]));
 
                 case '!':
-                    return new KBBooleanSymbol(this != terms[0]);
+                    return new KBBooleanSymbol(this.Equals(terms[0]));
 
                 case '^':
                     // Assume terms is 1 (other).
@@ -179,5 +185,7 @@ namespace SSDK.AI.KBS
             }
             return base.Apply(op, terms);
         }
+        public static implicit operator KBNumericSymbol(double number) => new KBNumericSymbol(number);
+        public static implicit operator KBNumericSymbol(UncontrolledNumber number) => new KBNumericSymbol(number);
     }
 }

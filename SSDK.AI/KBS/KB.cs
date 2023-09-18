@@ -41,6 +41,17 @@ namespace SSDK.AI.KBS
         public List<KBFactor> Assertions { get; private set; } = new List<KBFactor>();
 
         /// <summary>
+        /// A list of assertions passed by a query that should definitely hold true regardless of the world state. This list
+        /// is immediately reset after solving.
+        /// </summary>
+        public List<KBFactor> QueryAssertions { get; private set; } = new List<KBFactor>();
+
+        /// <summary>
+        /// A lits of queries that is required to be solved or was solved.
+        /// </summary>
+        public List<KBFactor> Queries { get; private set; } = new  List<KBFactor> { };
+
+        /// <summary>
         /// If true, the KB has been solved at least once.
         /// </summary>
         public bool Solved { get; private set; } = false;
@@ -49,7 +60,7 @@ namespace SSDK.AI.KBS
         /// Returns the first conflict within the assertions found.
         /// Only applies to solved assertions.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>a tuple of the first and second factors in a conflict, with their exception</returns>
         public (KBFactor, KBFactor, Exception) HasConflict()
         {
             if(!Solved)
@@ -61,11 +72,11 @@ namespace SSDK.AI.KBS
                 HashSet<KBSymbol> syms = Assertions[i].GetSymbols();
                 bool allSolved = syms.All((sym) => sym.Solved);
                 List<KBFactor> children = Assertions[i].GetChildren();
-                foreach(KBFactor factor in children)
+                KBFactor conflict = null;
+                foreach (KBFactor factor in children)
                 {
-                   
-                    
-                    if (factor.Solved && factor.HasConflict() || allSolved && !factor.Solved)
+                    conflict = (factor.Solved ? factor.HasConflict() : null);
+                    if (factor.Solved && conflict as object != null || allSolved && !factor.Solved)
                     {
                         string symbols = "";
                         foreach(KBSymbol sym in Assertions[i].GetSymbols())
@@ -77,11 +88,11 @@ namespace SSDK.AI.KBS
                             else
                                 symbols += sym.ToStringWithProperties(false);
                         }
-                        return (Assertions[i], factor, new Exception($"{factor} in assertion {Assertions[i]} does not hold true where {symbols}, indicating a conflict with the assertions."));
+                        return (Assertions[i], conflict, new Exception($"{conflict} in assertion {Assertions[i]} does not hold true where {symbols}, indicating a conflict with the assertions."));
                     }
                 }
 
-                if (Assertions[i].HasConflict())
+                if ((conflict = Assertions[i].HasConflict()) as object != null)
                 {
                     string symbols = "";
                     foreach (KBSymbol sym in Assertions[i].GetSymbols())
@@ -116,10 +127,12 @@ namespace SSDK.AI.KBS
             return null;
         }
         /// <summary>
-        /// Solves the current knowledge base's assertions.
-        /// You will need to assert the necessary information for it to solve.
+        /// Solves the current knowledge base's assertions. Clear queries (and query assertions) before-hand.
+        /// You will need to assert the necessary information for it to solve. <br/>
         /// e.g. an undefined symbol (symbol that appears but is not asserted to be either true or false),
         ///      cannot be used to solve any other symbol.
+        /// <br/>
+        /// In order to solve for probabilities, logic must be in a simplified form (e.g. p ^ p -> p, p ^ !p -> false)
         /// </summary>
         public void Solve()
         {
@@ -129,6 +142,11 @@ namespace SSDK.AI.KBS
             {
                 sentence.ResetSolution();
             });
+            QueryAssertions.ForEach((sentence) =>
+            {
+                sentence.ResetSolution();
+            });
+
             foreach(KBSymbol symbol in ExistingSymbols.Values)
             {
                 symbol.ResetSolution();
@@ -139,13 +157,22 @@ namespace SSDK.AI.KBS
             {
                 Assertions[i] = Assertions[i].Simplify();
             }
-            
+
+            for (int i = 0; i < QueryAssertions.Count; i++)
+            {
+                QueryAssertions[i] = QueryAssertions[i].Simplify();
+            }
+
 
             int changes = -1;
             while (changes != 0)
             {
                 changes = 0;
                 Assertions.ForEach((sentence) =>
+                {
+                    changes += sentence.SolveAssertion(this, null);
+                });
+                QueryAssertions.ForEach((sentence) =>
                 {
                     changes += sentence.SolveAssertion(this, null);
                 });
@@ -156,7 +183,83 @@ namespace SSDK.AI.KBS
             {
                 Assertions[i] = Assertions[i].Simplify();
             }
+            for (int i = 0; i < QueryAssertions.Count; i++)
+            {
+                QueryAssertions[i] = QueryAssertions[i].Simplify();
+            }
+
+            // Solve all probabilities for uncertain information
+            changes = -1;
+            while (changes != 0)
+            {
+                changes = 0;
+                Assertions.ForEach((sentence) =>
+                {
+                    changes += sentence.SolveProbability(this, null);
+                });
+                QueryAssertions.ForEach((sentence) =>
+                {
+                    changes += sentence.SolveProbability(this, null);
+                });
+            }
+
+            // Ensure no probabilities chance while solving queries.
+            Assertions.ForEach((sentence) =>
+            {
+                sentence.EnforceProbability();
+            });
+            QueryAssertions.ForEach((sentence) =>
+            {
+                sentence.EnforceProbability();
+            });
+
+            // Solve queries
+            for (int i = 0; i < Queries.Count; i++)
+            {
+                KBFactor query = Queries[i].Simplify();
+                query.SolveAssertion(this, KBSymbol.Null); // If enough information provided, then should be able to solve entirely.
+                query.SolveProbability(this, KBSymbol.Null); // Use Null to avoid directly asserting the information
+                Queries[i] = query;
+            }
+
+            QueryAssertions.Clear();
+
             Solved = true;
+        }
+
+        /// <summary>
+        /// Beginning of a query on a knowledge base
+        /// </summary>
+        /// <param name="queryAssertions">a new set of assertions relevant to the query</param>
+        /// <returns>this knowledge base</returns>
+        public KB If(params KBFactor[] queryAssertions)
+        {
+            QueryAssertions = queryAssertions.ToList();
+            return this;
+        }
+
+        /// <summary>
+        /// Resolves the knowledge base, but additional solves the query based on given assertions.
+        /// </summary>
+        /// <param name="sentencesToQuery">the sentences to query (returned as result)</param>
+        /// <returns>sentencesToQuery</returns>
+        public KBFactor[] Query(params KBFactor[] sentencesToQuery)
+        {
+            Queries = sentencesToQuery.ToList();
+            Solve();
+            for (int i = 0; i<sentencesToQuery.Length; i++)
+            {
+                KBFactor sentence = sentencesToQuery[i];
+                KBFactor solved = Queries[i];
+
+                // Carry direct result
+                sentence.ProbabilitySolved = solved.ProbabilitySolved;
+                sentence.Solved = solved.Solved;
+                sentence.Probability = solved.Probability;
+                sentence.Assertion = solved.Assertion;
+                sentence.AltAssertion = solved.AltAssertion;
+            }
+            return sentencesToQuery;
         }
 
         /// <summary>
@@ -178,10 +281,10 @@ namespace SSDK.AI.KBS
 
         public override string ToString()
         {
-            return ToString(true, true);
+            return ToString(true, false);
         }
 
-        public string ToString(bool includeSolution=true, bool showSolvedOnly=true)
+        public string ToString(bool includeSolution=true, bool showSolvedOnly=false)
         {
             StringBuilder builder = new StringBuilder();
             HashSet<KBSymbol> symbols = GetSymbols();
@@ -193,7 +296,7 @@ namespace SSDK.AI.KBS
                 bool firstSymbol = true;
                 foreach (KBSymbol symbol in symbols)
                 {
-                    if (symbol.IsRelationalSymbol || showSolvedOnly && !symbol.Solved) continue;
+                    if (symbol.IsRelationalSymbol || showSolvedOnly && !symbol.Solved && symbol.Probability == 1) continue;
 
                     if (firstSymbol)
                     {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SSDK.AI.KBS.Logic
@@ -21,9 +22,21 @@ namespace SSDK.AI.KBS.Logic
             if (sentences.Length == 0)
                 throw new Exception("At least one logical sentence must be included in an AND connective.");
         }
-        public override bool HasConflict()
+        public override KBFactor HasConflict()
         {
-            return Solved && Assertion && Sentences.Any((sentence) => !sentence.Holds());
+            if (Solved && Assertion)
+            {
+                foreach (KBFactor factor in Sentences)
+                {
+                    KBFactor conflict = factor.HasConflict();
+                    if (conflict as object != null) return conflict;
+                    if (factor.Solved && !factor.Holds())
+                    {
+                        return factor;
+                    }
+                }
+            }
+            return null;
         }
         public override bool Holds()
         {
@@ -88,15 +101,15 @@ namespace SSDK.AI.KBS.Logic
 
             if (!Solved)
             {
-                KBSolveType type = parent == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
+                KBSolveType type = parent as object == null ? KBSolveType.SolveTrue : parent.CanSolveForChild(kb, this);
                 if (type == KBSolveType.NoSolution || type == KBSolveType.Other)
                 {
                     // Solve from child
                     foreach (KBFactor sentence in Sentences)
                     {
-                        if (sentence.Solved && !sentence.Assertion)
+                        if (!sentence.Solved || !sentence.Assertion)
                         {
-                            break;
+                            return changes;
                         }
                     }
                     type = KBSolveType.SolveTrue;
@@ -110,6 +123,17 @@ namespace SSDK.AI.KBS.Logic
                     SolveAssertFalse(kb); changes++;
                 }
             }
+            return changes;
+        }
+
+        public override int SolveProbability(KB kb, KBFactor parent)
+        {
+            int changes = 0;
+            foreach(KBFactor sentence in Sentences)
+            {
+                changes += sentence.SolveProbability(kb, this);
+            }
+
             return changes;
         }
 
