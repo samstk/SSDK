@@ -309,6 +309,43 @@ namespace SSDK.AI.KBS
         }
 
         /// <summary>
+        /// Updates the general probability of the factor.
+        /// </summary>
+        /// <param name="newProbability">the new general probability of the factor</param>
+        /// <returns>true if the general probability changed</returns>
+        public bool UpdateGeneralProbability(double newProbability)
+        {
+            double lastProbability = GeneralProbability;
+            GeneralProbability = newProbability;
+            return newProbability != lastProbability;
+        }
+
+        /// <summary>
+        /// Updates the probability of the factor.
+        /// </summary>
+        /// <param name="newProbability">the new probability of the factor</param>
+        /// <returns>true if the probability changed</returns>
+        public bool UpdateProbability(double newProbability)
+        {
+            if (ProbabilityEnforced) return false;
+
+            double lastProbability = Probability;
+            Probability = newProbability;
+            ProbabilitySolved = true;
+            return newProbability != lastProbability;
+        }
+
+        /// <summary>
+        /// Returns true if the other factor is of the same set as this factor.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public virtual bool IsOfSameSet(KBFactor other)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Simplifies the current factor.
         /// </summary>
         /// <returns></returns>

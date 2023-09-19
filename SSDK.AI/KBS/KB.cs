@@ -57,6 +57,11 @@ namespace SSDK.AI.KBS
         public bool Solved { get; private set; } = false;
 
         /// <summary>
+        /// If true, when using Solve, the probabilities will be attempted to be solved.
+        /// </summary>
+        public bool SolveProbabilities { get; set; } = true;
+
+        /// <summary>
         /// Returns the first conflict within the assertions found.
         /// Only applies to solved assertions.
         /// </summary>
@@ -189,6 +194,14 @@ namespace SSDK.AI.KBS
             }
 
             // Solve all probabilities for uncertain information
+            
+            if(!SolveProbabilities)
+            {
+                QueryAssertions.Clear();
+                Solved = true;
+                return;
+            }
+            
             changes = -1;
             while (changes != 0)
             {

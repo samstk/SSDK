@@ -18,19 +18,25 @@ namespace SSDK.AI.KBS.Probability
     public class KBGeneralProbabilitySpecification : KBFactor
     {
         /// <summary>
-        /// The symbol or factor that this probability specifies.
+        /// The symbol that this general probability specifies.
         /// </summary>
-        public KBFactor On { get; private set; }
+        public KBSymbol On { get; private set; }
 
         /// <summary>
         /// The probability value that is defined (0-1).
         /// </summary>
         public KBFactor Value { get; private set; }
 
-        public KBGeneralProbabilitySpecification(KBFactor on, KBFactor val)
+        /// <summary>
+        /// The set which the general probability is defined on
+        /// </summary>
+        public KBSymbol Set { get; private set; }
+
+        public KBGeneralProbabilitySpecification(KBSymbol on, KBSymbol set, KBFactor val)
         {
             On = on;
             Value = val;
+            Set = set;
         }
 
         /// <summary>
@@ -108,10 +114,20 @@ namespace SSDK.AI.KBS.Probability
                 int changes = On.SolveProbability(kb, parent);
                 double lastProbability = On.Probability;
 
+                // Assume the general probability is set correctly.
+                double newGeneralProbability = Math.Max(On.GeneralProbability, probability.Number.ToDouble());
+                if(newGeneralProbability != On.GeneralProbability)
+                {
+                    On.GeneralProbability = newGeneralProbability;
+                    Set.UpdateGeneralProbability(On, On.GeneralProbability);
+                    On.AddToSet(Set);
+                    changes++;
+                }
                 if (!ProbabilitySolved)
                 {
                     On.ProbabilitySolved = true;
-                    On.Probability = On.GeneralProbability = Math.Max(On.Probability, Probability * probability.Number.ToDouble());
+                    On.Probability = On.GeneralProbability;
+                    return changes + 1;
                 }
 
                 return changes + (lastProbability != On.Probability ? 1 : 0);
@@ -121,31 +137,17 @@ namespace SSDK.AI.KBS.Probability
 
         public override void SolveAssertTrue(KB kb)
         {
-            KBNumericSymbol probability = Value.Calculate() as KBNumericSymbol;
-            if (probability as object != null)
-            {
-                On.ProbabilitySolved = true;
-                On.Probability = On.GeneralProbability = probability.Number.ToDouble();
-
-                // Since our probability was asserted to be true, we can
-                // now solve the probabilities in children.
-                // e.g. P(p => q) = 0.8 indicates that the chances
-                // of q being true is 0.8 * probability of p being true.
-            }
-
             base.SolveAssertTrue(kb);
         }
 
         public override void SolveAssertFalse(KB kb)
         {
-            // If the probability that it is true remains true, then the probability that it
-            // is false, does not mean much.
             base.SolveAssertFalse(kb);
         }
 
         public override string ToString()
         {
-            return $"P({On}) at least {Value}";
+            return $"P({On}) at least {Value} of {Set}";
         }
 
     }

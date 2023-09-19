@@ -45,12 +45,13 @@ namespace SSDK.AI.KBS.Probability
         /// <summary>
         /// Creates a general probability specification (without enforcing probabilities)
         /// </summary>
-        /// <param name="factor">the factor to specify the probability on</param>
+        /// <param name="symbol">the symbol to specify the general probability on</param>
         /// <param name="value">a value between 0 and 1</param>
+        /// <param name="set">the set in which the general probability depends on</param>
         /// <returns>the specification for the probability of the factor</returns>
-        public static KBGeneralProbabilitySpecification GP(KBFactor factor, KBFactor value)
+        public static KBGeneralProbabilitySpecification GP(KBSymbol symbol, KBSymbol set, KBFactor value)
         {
-            return new KBGeneralProbabilitySpecification(factor, value);
+            return new KBGeneralProbabilitySpecification(symbol, set, value);
         }
 
         public override HashSet<KBSymbol> GetSymbols()
@@ -122,6 +123,7 @@ namespace SSDK.AI.KBS.Probability
                     On.ProbabilitySolved = true;
                     On.ProbabilityEnforced = (parent as object is null) || (parent.Probability == 1);
                     On.Probability = Math.Max(On.Probability, Probability * probability.Number.ToDouble());
+                    return 1;
                 }
 
                 return changes + (lastProbability != On.Probability ? 1 : 0);

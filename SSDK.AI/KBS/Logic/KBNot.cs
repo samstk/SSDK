@@ -78,6 +78,21 @@ namespace SSDK.AI.KBS.Logic
         {
             int changes = Sentence.SolveProbability(kb, this);
 
+            // Solve from child only
+
+            if(Sentence.ProbabilitySolved)
+            {
+                if(UpdateProbability(1 - Sentence.Probability))
+                {
+                    changes++;
+                }
+                if(UpdateGeneralProbability(1 - Sentence.GeneralProbability))
+                {
+                    changes++;
+                }
+            }
+           
+
             return changes;
         }
 
