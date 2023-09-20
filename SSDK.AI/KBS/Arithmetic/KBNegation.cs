@@ -87,11 +87,6 @@ namespace SSDK.AI.KBS.Arithmetic
             return changes;
         }
 
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            return 0; // No probabilities can be solved here.
-        }
-
         public override string ToString()
         {
             return $"-{Factor}";

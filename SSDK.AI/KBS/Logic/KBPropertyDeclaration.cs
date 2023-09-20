@@ -94,12 +94,6 @@ namespace SSDK.AI.KBS.Logic
             // The property does not exist on the target, so just ignore.
             base.SolveAssertFalse(kb);
         }
-
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            return 0; // No probabilities can be solved here.
-        }
-
         public override string ToString()
         { 
             if(Relation is KBWrappedSymbol)

@@ -840,11 +840,6 @@
             If true, the KB has been solved at least once.
             </summary>
         </member>
-        <member name="P:SSDK.AI.KBS.KB.SolveProbabilities">
-            <summary>
-            If true, when using Solve, the probabilities will be attempted to be solved.
-            </summary>
-        </member>
         <member name="M:SSDK.AI.KBS.KB.HasConflict">
             <summary>
             Returns the first conflict within the assertions found.
@@ -912,36 +907,6 @@
             Gets the null factor
             </summary>
         </member>
-        <member name="P:SSDK.AI.KBS.KBFactor.GeneralProbability">
-            <summary>
-            Gets or sets the general probability (GP) that the factor holds true.
-            </summary>
-            <remarks>
-            For example, suppose p -> q.
-            If GP of p = 0.2, and GP of q = 0.5, we know that q occurs 2.5 time more often than p.
-            So, if q is true (P(q) = 1), and suppose p -> q is true 0.8 of the time, then
-            we can find p using the general probability (bayesian statistics). In this example, we
-            calculate p to be 0.8 * 0.3 / 0.5 or (P(p -> q) * p / q)
-            </remarks>
-        </member>
-        <member name="P:SSDK.AI.KBS.KBFactor.Probability">
-            <summary>
-            Gets or sets the probability that the factor holds true.
-            If at any time the factor is solved, and asserted to be
-            a certain value, then probability defaults to 1 or 0.
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.KBFactor.ProbabilitySolved">
-            <summary>
-            If true, then the probability has been solved and should be accurate.
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.KBFactor.ProbabilityEnforced">
-            <summary>
-            If true, then the probability has been solved completely, and should
-            not change (i.e. assert P(x) = 0.2, P(x) should always be 0.2)
-            </summary>
-        </member>
         <member name="M:SSDK.AI.KBS.KBFactor.Holds">
             <summary>
             Returns true if the factor holds true.
@@ -971,11 +936,6 @@
         <member name="P:SSDK.AI.KBS.KBFactor.IsClass">
             <summary>
             Gets whether the factor/symbol is being interpreted as a class.
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.KBFactor.PString">
-            <summary>
-            Returns the probability chance as a string if it is not one.
             </summary>
         </member>
         <member name="M:SSDK.AI.KBS.KBFactor.GetSymbols">
@@ -1040,13 +1000,6 @@
             </summary>
             <returns>number of operations / symbols solved</returns>
         </member>
-        <member name="M:SSDK.AI.KBS.KBFactor.SolveProbability(SSDK.AI.KBS.KB,SSDK.AI.KBS.KBFactor)">
-            <summary>
-            Solves the current factor's probability, using what is known in the knowledge base, and returns
-            the number of operations / symbols solved.
-            </summary>
-            <returns>number of operations / symbols solved</returns>
-        </member>
         <member name="M:SSDK.AI.KBS.KBFactor.SolveAssertOther(SSDK.AI.KBS.KB,SSDK.AI.KBS.KBFactor)">
             <summary>
             Asserts that this statement is a value, when solving.
@@ -1069,25 +1022,6 @@
             <summary>
             Resets the current solution.
             </summary>
-        </member>
-        <member name="M:SSDK.AI.KBS.KBFactor.EnforceProbability">
-            <summary>
-            Enforces the probability to ensure it is not edited.
-            </summary>
-        </member>
-        <member name="M:SSDK.AI.KBS.KBFactor.UpdateGeneralProbability(System.Double)">
-            <summary>
-            Updates the general probability of the factor.
-            </summary>
-            <param name="newProbability">the new general probability of the factor</param>
-            <returns>true if the general probability changed</returns>
-        </member>
-        <member name="M:SSDK.AI.KBS.KBFactor.UpdateProbability(System.Double)">
-            <summary>
-            Updates the probability of the factor.
-            </summary>
-            <param name="newProbability">the new probability of the factor</param>
-            <returns>true if the probability changed</returns>
         </member>
         <member name="M:SSDK.AI.KBS.KBFactor.IsOfSameSet(SSDK.AI.KBS.KBFactor)">
             <summary>
@@ -1239,38 +1173,6 @@
             <summary>
             If true, then the symbol is used as a class symbol.
             </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.KBSymbol.GeneralProbabilities">
-            <summary>
-            Gets the general probabilities table declared to this symbol.
-            (i.e. if this symbol is day, and a day can be raining and/or cloudy, 
-            then general probabilities on cloudy or raining may be stored (e.g. 80% of the days were raining, 60% of the days were cloudy))
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.KBSymbol.Sets">
-            <summary>
-            Gets the sets that this symbol belongs to.
-            </summary>
-        </member>
-        <member name="M:SSDK.AI.KBS.KBSymbol.AddToSet(SSDK.AI.KBS.KBSymbol)">
-            <summary>
-            Adds the set to this symbol's list of sets.
-            </summary>
-            <param name="set"></param>
-        </member>
-        <member name="M:SSDK.AI.KBS.KBSymbol.UpdateGeneralProbability(SSDK.AI.KBS.KBSymbol,System.Double)">
-            <summary>
-            Updates the general probability of this set for the given symbol.
-            </summary>
-            <param name="on">the symbol that populates this set</param>
-            <param name="probability">the general probability in the set</param>
-        </member>
-        <member name="M:SSDK.AI.KBS.KBSymbol.HasGeneralProbability(SSDK.AI.KBS.KBSymbol)">
-            <summary>
-            Returns true if the assumed set has the general probability of the given symbol.
-            </summary>
-            <param name="on">the symbol to check</param>
-            <returns>true if the general probability of the symbol exists in this set</returns>
         </member>
         <member name="M:SSDK.AI.KBS.KBSymbol.GetInverse(SSDK.AI.KBS.KB)">
             <summary>
@@ -1472,73 +1374,6 @@
             <summary>
             A Logical Connective which identifies a piece of information about a symbol
             </summary>
-        </member>
-        <member name="T:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification">
-            <summary>
-            A general probability specification onto a symbol or connective.
-            Unlike the probability specification, any assertions made to this do not enforce
-            that probability to the variable, and will never be reset.
-            
-            Add using directive for static KBProbabilitySpecification for quick use of GP function.
-            e.g. GP(rain) = 0.98
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification.On">
-            <summary>
-            The symbol that this general probability specifies.
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification.Value">
-            <summary>
-            The probability value that is defined (0-1).
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification.Set">
-            <summary>
-            The set which the general probability is defined on
-            </summary>
-        </member>
-        <member name="M:SSDK.AI.KBS.Probability.KBGeneralProbabilitySpecification.P(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
-            <summary>
-            Creates a probability specification
-            </summary>
-            <param name="factor">the factor to specify the probability on</param>
-            <param name="value">a value between 0 and 1</param>
-            <returns>the specification for the probability of the factor</returns>
-        </member>
-        <member name="T:SSDK.AI.KBS.Probability.KBProbabilitySpecification">
-            <summary>
-            A probability specification onto a symbol or connective.
-            Add using directive for static KBProbabilitySpecification for quick use of P function.
-            e.g. P(rain) = 0.98
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.Probability.KBProbabilitySpecification.On">
-            <summary>
-            The symbol or factor that this probability specifies.
-            </summary>
-        </member>
-        <member name="P:SSDK.AI.KBS.Probability.KBProbabilitySpecification.Value">
-            <summary>
-            The probability value that is defined (0-1).
-            </summary>
-        </member>
-        <member name="M:SSDK.AI.KBS.Probability.KBProbabilitySpecification.P(SSDK.AI.KBS.KBFactor,SSDK.AI.KBS.KBFactor)">
-            <summary>
-            Creates a probability specification
-            </summary>
-            <param name="factor">the factor to specify the probability on</param>
-            <param name="value">a value between 0 and 1</param>
-            <returns>the specification for the probability of the factor</returns>
-        </member>
-        <member name="M:SSDK.AI.KBS.Probability.KBProbabilitySpecification.GP(SSDK.AI.KBS.KBSymbol,SSDK.AI.KBS.KBSymbol,SSDK.AI.KBS.KBFactor)">
-            <summary>
-            Creates a general probability specification (without enforcing probabilities)
-            </summary>
-            <param name="symbol">the symbol to specify the general probability on</param>
-            <param name="value">a value between 0 and 1</param>
-            <param name="set">the set in which the general probability depends on</param>
-            <returns>the specification for the probability of the factor</returns>
         </member>
         <member name="M:SSDK.AI.KBS.Symbols.KBSymbolExt_Days.CreateDaySymbols(SSDK.AI.KBS.KB,System.Int32,System.Int32)">
             <summary>

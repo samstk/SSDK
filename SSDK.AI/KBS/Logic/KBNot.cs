@@ -74,28 +74,6 @@ namespace SSDK.AI.KBS.Logic
             return changes;
         }
 
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            int changes = Sentence.SolveProbability(kb, this);
-
-            // Solve from child only
-
-            if(Sentence.ProbabilitySolved)
-            {
-                if(UpdateProbability(1 - Sentence.Probability))
-                {
-                    changes++;
-                }
-                if(UpdateGeneralProbability(1 - Sentence.GeneralProbability))
-                {
-                    changes++;
-                }
-            }
-           
-
-            return changes;
-        }
-
         public override void SolveAssertTrue(KB kb)
         {
             // We can solve child if unsolved

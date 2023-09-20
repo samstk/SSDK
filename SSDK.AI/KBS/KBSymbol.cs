@@ -1,5 +1,4 @@
 ﻿using SSDK.AI.KBS.Logic;
-using SSDK.AI.KBS.Probability;
 using System.Data.Common;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -227,73 +226,8 @@ namespace SSDK.AI.KBS
 
             return 0;
         }
-
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            return 0; // No probabilities can be solved here.
-        }
-
-        /// <summary>
-        /// Gets the general probabilities table declared to this symbol.
-        /// (i.e. if this symbol is day, and a day can be raining and/or cloudy, 
-        /// then general probabilities on cloudy or raining may be stored (e.g. 80% of the days were raining, 60% of the days were cloudy))
-        /// </summary>
-        public Dictionary<KBSymbol, double> GeneralProbabilities { get; private set; }
-
-        /// <summary>
-        /// Gets the sets that this symbol belongs to.
-        /// </summary>
-        public HashSet<KBSymbol> Sets { get; private set; }
-
-        public override bool IsOfSameSet(KBFactor other)
-        {
-            if (Sets == null || other is not KBSymbol) return false;
-
-            foreach(KBSymbol set in Sets)
-            {
-                if (set.HasGeneralProbability(other as KBSymbol))
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Adds the set to this symbol's list of sets.
-        /// </summary>
-        /// <param name="set"></param>
-        public void AddToSet(KBSymbol set)
-        {
-            if (Sets == null) Sets = new HashSet<KBSymbol>();
-            Sets.Add(set);
-        }
-
-        /// <summary>
-        /// Updates the general probability of this set for the given symbol.
-        /// </summary>
-        /// <param name="on">the symbol that populates this set</param>
-        /// <param name="probability">the general probability in the set</param>
-        public void UpdateGeneralProbability(KBSymbol on, double probability)
-        {
-            if (GeneralProbabilities == null) GeneralProbabilities = new Dictionary<KBSymbol, double>();
-            if (!GeneralProbabilities.ContainsKey(on)) GeneralProbabilities.Add(on, probability);
-            else GeneralProbabilities[on] = probability;
-        }
-
-        /// <summary>
-        /// Returns true if the assumed set has the general probability of the given symbol.
-        /// </summary>
-        /// <param name="on">the symbol to check</param>
-        /// <returns>true if the general probability of the symbol exists in this set</returns>
-        public bool HasGeneralProbability(KBSymbol on)
-        {
-            return GeneralProbabilities != null && GeneralProbabilities.ContainsKey(on);
-        }
-
         public override void ResetSolution()
         {
-            GeneralProbabilities = null;
-            Sets = null;
             Relations.Clear();
             base.ResetSolution();
         }

@@ -57,11 +57,6 @@ namespace SSDK.AI.KBS
         public bool Solved { get; private set; } = false;
 
         /// <summary>
-        /// If true, when using Solve, the probabilities will be attempted to be solved.
-        /// </summary>
-        public bool SolveProbabilities { get; set; } = true;
-
-        /// <summary>
         /// Returns the first conflict within the assertions found.
         /// Only applies to solved assertions.
         /// </summary>
@@ -193,50 +188,7 @@ namespace SSDK.AI.KBS
                 QueryAssertions[i] = QueryAssertions[i].Simplify();
             }
 
-            // Solve all probabilities for uncertain information
-            
-            if(!SolveProbabilities)
-            {
-                QueryAssertions.Clear();
-                Solved = true;
-                return;
-            }
-            
-            changes = -1;
-            while (changes != 0)
-            {
-                changes = 0;
-                Assertions.ForEach((sentence) =>
-                {
-                    changes += sentence.SolveProbability(this, null);
-                });
-                QueryAssertions.ForEach((sentence) =>
-                {
-                    changes += sentence.SolveProbability(this, null);
-                });
-            }
-
-            // Ensure no probabilities chance while solving queries.
-            Assertions.ForEach((sentence) =>
-            {
-                sentence.EnforceProbability();
-            });
-            QueryAssertions.ForEach((sentence) =>
-            {
-                sentence.EnforceProbability();
-            });
-
-            // Solve queries
-            for (int i = 0; i < Queries.Count; i++)
-            {
-                KBFactor query = Queries[i].Simplify();
-                query.SolveAssertion(this, KBSymbol.Null); // If enough information provided, then should be able to solve entirely.
-                query.SolveProbability(this, KBSymbol.Null); // Use Null to avoid directly asserting the information
-                Queries[i] = query;
-            }
-
             QueryAssertions.Clear();
-
             Solved = true;
         }
 
@@ -266,9 +218,7 @@ namespace SSDK.AI.KBS
                 KBFactor solved = Queries[i];
 
                 // Carry direct result
-                sentence.ProbabilitySolved = solved.ProbabilitySolved;
                 sentence.Solved = solved.Solved;
-                sentence.Probability = solved.Probability;
                 sentence.Assertion = solved.Assertion;
                 sentence.AltAssertion = solved.AltAssertion;
             }
@@ -309,7 +259,7 @@ namespace SSDK.AI.KBS
                 bool firstSymbol = true;
                 foreach (KBSymbol symbol in symbols)
                 {
-                    if (symbol.IsRelationalSymbol || showSolvedOnly && !symbol.Solved && symbol.Probability == 1) continue;
+                    if (symbol.IsRelationalSymbol || showSolvedOnly && !symbol.Solved) continue;
 
                     if (firstSymbol)
                     {

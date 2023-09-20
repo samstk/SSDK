@@ -129,17 +129,6 @@ namespace SSDK.AI.KBS.Logic
 
             return changes;
         }
-
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            int changes = 0;
-            foreach (KBFactor sentence in Sentences)
-            {
-                changes += sentence.SolveProbability(kb, this);
-            }
-            return changes;
-        }
-
         public override KBFactor Simplify()
         {
             for(int i = 0; i<Sentences.Length; i++)

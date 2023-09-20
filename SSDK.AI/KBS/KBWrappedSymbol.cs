@@ -105,10 +105,5 @@ namespace SSDK.AI.KBS
             }
             return Inverse;
         }
-
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            return 0;
-        }
     }
 }

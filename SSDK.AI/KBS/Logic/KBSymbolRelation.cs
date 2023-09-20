@@ -111,11 +111,6 @@ namespace SSDK.AI.KBS.Logic
             base.SolveAssertFalse(kb);
         }
 
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            return 0;
-        }
-
         public override string ToString()
         {
             return $"{About}::{Class}({To})";

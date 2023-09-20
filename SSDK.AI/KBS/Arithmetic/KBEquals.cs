@@ -108,11 +108,6 @@ namespace SSDK.AI.KBS.Arithmetic
             return changes;
         }
 
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            return 0; // No probabilities can be solved here.
-        }
-
         public override void SolveAssertTrue(KB kb)
         {
             if (LHS.Solved && !RHS.Solved) RHS.SolveAssertOther(kb, LHS.Calculate());

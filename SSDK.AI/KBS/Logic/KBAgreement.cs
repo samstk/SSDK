@@ -89,13 +89,6 @@ namespace SSDK.AI.KBS.Logic
             return changes;
         }
 
-        public override int SolveProbability(KB kb, KBFactor parent)
-        {
-            int changes = P.SolveProbability(kb, this) + Q.SolveProbability(kb, this);
-            
-            return changes;
-        }
-
         public override KBFactor Simplify()
         {
             P = P.Simplify();
