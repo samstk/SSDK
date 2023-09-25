@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A C# namespace, which contain numerous classes, structures, and enums for compilation.
     /// </summary>
-    public sealed class CSharpNamespace
+    public sealed class CSharpNamespace : CSharpComponent
     {
         #region Properties & Fields
         /// <summary>
@@ -42,7 +43,7 @@ namespace SSDK.CSC.ScriptComponents
         /// <summary>
         /// Gets the child structs that may be referenced within the project under this namespace.
         /// </summary>
-        public CSharpStruct[] Structures { get; private set; }
+        public CSharpStruct[] Structs { get; private set; }
 
         /// <summary>
         /// Gets the child enums that may be referenced within the project under this namespace.
@@ -58,7 +59,13 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the compilation of this namespace. If this namespace is not root, then
         /// it will not have one.
         /// </summary>
-        public CompilationUnitSyntax CompilationUnit { get; private set; }  
+        public CompilationUnitSyntax CompilationUnitSyntax { get; private set; }
+
+        /// <summary>
+        /// Gets the namespace syntax. If this syntax is root, then it will
+        /// not have one.
+        /// </summary>
+        public NamespaceDeclarationSyntax Syntax { get; private set; }
         #endregion
 
         /// <summary>
@@ -67,26 +74,70 @@ namespace SSDK.CSC.ScriptComponents
         /// <param name="unitSyntax">the compilation unit</param>
         internal CSharpNamespace(CompilationUnitSyntax unitSyntax)
         {
-            // Convert using directives of 
-            List<CSharpUsingDirective> usingDirectives = new List<CSharpUsingDirective>();
-            foreach(UsingDirectiveSyntax usingDirective in unitSyntax.Usings)
-            {
-                usingDirectives.Add(new CSharpUsingDirective(usingDirective));
-            }
-            UsingDirectives = usingDirectives.ToArray();
+            CompilationUnitSyntax = unitSyntax;
+            AddUsings(unitSyntax.Usings);
+            AddMembers(unitSyntax.Members);
+        }
 
+        internal CSharpNamespace(NamespaceDeclarationSyntax namespaceSyntax)
+        {
+            Syntax = namespaceSyntax;
+            Name = namespaceSyntax.Name.ToString();
+            AddUsings(namespaceSyntax.Usings);
+            AddMembers(namespaceSyntax.Members);
+        }
+
+        /// <summary>
+        /// Converts an array syntax
+        /// </summary>
+        /// <param name="usings"></param>
+        /// <returns></returns>
+        internal void AddUsings(SyntaxList<UsingDirectiveSyntax> usings)
+        {
+            UsingDirectives = new CSharpUsingDirective[usings.Count];
+            for (int i = 0; i < usings.Count; i++)
+            {
+                UsingDirectives[i] = new CSharpUsingDirective(usings[i]);
+            }
+        }
+
+        internal void AddMembers(SyntaxList<MemberDeclarationSyntax> members){
             // Convert members
             List<CSharpDelegate> delegates = new List<CSharpDelegate>();
-            
-            foreach(MemberDeclarationSyntax member in unitSyntax.Members)
+            List<CSharpNamespace> namespaces = new List<CSharpNamespace>();
+            List<CSharpClass> classes = new List<CSharpClass>();
+            List<CSharpStruct> structs = new List<CSharpStruct>();
+            foreach (MemberDeclarationSyntax member in members)
             {
                 if (member is DelegateDeclarationSyntax)
                 {
                     delegates.Add(new CSharpDelegate((DelegateDeclarationSyntax)member));
                 }
+                else if (member is NamespaceDeclarationSyntax)
+                {
+                    namespaces.Add(new CSharpNamespace((NamespaceDeclarationSyntax)member));
+                }
+                else if (member is ClassDeclarationSyntax)
+                {
+                    classes.Add(new CSharpClass((ClassDeclarationSyntax)member));
+                }
+                else if (member is StructDeclarationSyntax)
+                {
+                    structs.Add(new CSharpStruct((StructDeclarationSyntax)member));
+                }
             }
 
             Delegates = delegates.ToArray();
+            Namespaces = namespaces.ToArray();
+            Classes = classes.ToArray();
+            Structs = structs.ToArray();
+        }
+
+        public override string ToString()
+        {
+            if (Name == null)
+                return "root namespace";
+            return $"namespace {Name}";
         }
     }
 }

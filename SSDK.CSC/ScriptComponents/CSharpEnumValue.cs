@@ -9,7 +9,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// a c# enum value.
     /// </summary>
-    public sealed class CSharpEnumValue
+    public sealed class CSharpEnumValue : CSharpComponent
     {
         #region Properties & Fields
         /// <summary>

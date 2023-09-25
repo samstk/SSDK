@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SSDK.CSC.Helpers;
+using SSDK.CSC.ScriptComponents.Statements;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +12,42 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A c# statement block, which contains a number of statements.
     /// </summary>
-    public sealed class CSharpStatementBlock
+    public sealed class CSharpStatementBlock : CSharpComponent
     {
+        #region Properties & Fields
+        /// <summary>
+        /// Gets the statements made in the block in sequence.
+        /// </summary>
+        public CSharpStatement[] Statements { get; private set; }
+        #endregion
+
+        /// <summary>
+        /// Creates a new statement block from the given block syntax
+        /// </summary>
+        /// <param name="syntax">the block syntax</param>
+        internal CSharpStatementBlock(BlockSyntax syntax)
+        {
+            Statements = new CSharpStatement[syntax.Statements.Count];
+
+            for(int i = 0; i<syntax.Statements.Count; i++)
+            {
+                Statements[i] = syntax.Statements[i].ToStatement();
+            }
+        }
+
+        internal CSharpStatementBlock() { }
+
+        /// <summary>
+        /// Creates a statement block with a single return statement for the given expression.
+        /// </summary>
+        /// <param name="syntax">the syntax containing the expression</param>
+        /// <returns>the statement block with the given expression</returns>
+        internal static CSharpStatementBlock WithReturn(ExpressionSyntax syntax)
+        {
+            return new CSharpStatementBlock()
+            {
+                Statements = new CSharpStatement[] { new CSharpReturnStatement(syntax) }
+            };
+        }
     }
 }

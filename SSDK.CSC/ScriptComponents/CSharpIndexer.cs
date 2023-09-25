@@ -11,7 +11,7 @@ namespace SSDK.CSC.ScriptComponents
     /// property-like syntax to allow index retrieval.
     /// e.g. array[i]
     /// </summary>
-    public sealed class CSharpIndexer : CSharpProperty
+    public sealed class CSharpIndexer : CSharpComponent
     {
         #region Properties & Fields
         /// <summary>

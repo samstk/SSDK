@@ -11,7 +11,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A C# attribute, which may be applied to a component.
     /// </summary>
-    public sealed class CSharpAttribute
+    public sealed class CSharpAttribute : CSharpComponent
     {
         #region Properties & Fields
         /// <summary>
@@ -39,7 +39,7 @@ namespace SSDK.CSC.ScriptComponents
 
         public override string ToString()
         {
-            return $"[{Name}(...)]";
+            return $"[{Name}({Parameters.ToReadableString()})]";
         }
     }
 }

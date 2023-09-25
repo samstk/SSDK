@@ -11,7 +11,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A c# declared type, which may be used to define variables/fields/properties, parameters or arguments.
     /// </summary>
-    public sealed class CSharpType
+    public sealed class CSharpType : CSharpComponent
     {
         /// <summary>
         /// Gets the context's type name used in the code.
@@ -29,6 +29,11 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the generic type params for this type declaration.
         /// </summary>
         public CSharpType[] GenericTypes { get; private set; }
+
+        /// <summary>
+        /// Is true if the syntax defined some generic types.
+        /// </summary>
+        public bool HasGenericTypes { get; private set; }
 
         /// <summary>
         /// Gets the array dimensions of this type. If zero, then
@@ -56,6 +61,7 @@ namespace SSDK.CSC.ScriptComponents
                 GenericNameSyntax genericNameSyntax = (GenericNameSyntax)typeSyntax;
                 Name = genericNameSyntax.Identifier.ToString();
                 GenericTypes = genericNameSyntax.TypeArgumentList.ToTypes();
+                HasGenericTypes = true;
             }
             else if (typeSyntax is IdentifierNameSyntax)
             {
@@ -77,6 +83,8 @@ namespace SSDK.CSC.ScriptComponents
             }
             else throw new Exception("Unhandled case");
         }
+
+        internal CSharpType(TypeConstraintSyntax typeSyntax) : this(typeSyntax.Type) { }
 
         internal CSharpType(TypeParameterSyntax typeSyntax)
         {

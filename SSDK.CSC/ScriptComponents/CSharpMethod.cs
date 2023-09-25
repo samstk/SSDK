@@ -9,7 +9,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A C# method, which may contain code to be executed for a particular set of parameters.
     /// </summary>
-    public sealed class CSharpMethod
+    public sealed class CSharpMethod : CSharpComponent
     {
         #region Properties & Fields
 

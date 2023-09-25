@@ -10,7 +10,7 @@ namespace SSDK.CSC.Helpers
     /// <summary>
     /// Helper methods for string representations of c# components.
     /// </summary>
-    public static class CSharpStringHelper
+    internal static class CSharpStringHelper
     {
         /// <summary>
         /// Gets a readable string representation of a number of variables.
@@ -51,6 +51,48 @@ namespace SSDK.CSC.Helpers
         }
 
         /// <summary>
+        /// Converts the general modifier to a readable prefix string (including trailing whitespace)
+        /// </summary>
+        /// <param name="modifier">the general to convert</param>
+        /// <returns>the general modifier as a string</returns>
+        public static string ToReadablePrefix(this CSharpGeneralModifier modifier)
+        {
+            string prefix = "";
+            if (modifier.HasFlag(CSharpGeneralModifier.Abstract))
+                prefix += "abstract ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Async))
+                prefix += "async ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Const))
+                prefix += "const ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Event))
+                prefix += "event ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Extern))
+                prefix += "extern ";
+            if (modifier.HasFlag(CSharpGeneralModifier.In))
+                prefix += "in ";
+            if (modifier.HasFlag(CSharpGeneralModifier.New))
+                prefix += "new ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Out))
+                prefix += "out ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Override))
+                prefix += "override ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Readonly))
+                prefix += "readonly ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Sealed))
+                prefix += "sealed ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Static))
+                prefix += "static ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Unsafe))
+                prefix += "unsafe ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Virtual))
+                prefix += "virtual ";
+            if (modifier.HasFlag(CSharpGeneralModifier.Volatile))
+                prefix += "volatile ";
+
+            return prefix;
+        }
+
+        /// <summary>
         /// Converts the attributes to a readable prefix (including trailing whitespace)
         /// </summary>
         /// <param name="attributes">the attributes to convert</param>
@@ -67,6 +109,24 @@ namespace SSDK.CSC.Helpers
             }
 
             return result + (result.Length > 0 ? " " : "");
+        }
+
+        /// <summary>
+        /// Converts the expressions to a readable string, seperated by commas
+        /// </summary>
+        /// <param name="expressions">the expressions to convert</param>
+        /// <returns>the expressions as a string</returns>
+        public static string ToReadableString(this CSharpExpression[] expressions)
+        {
+            string result = "";
+            foreach(CSharpExpression expr in expressions)
+            {
+                if (result.Length > 0)
+                    result += ",";
+                if (expr != null)
+                    result += expr.ToString();
+            }
+            return result;
         }
     }
 }

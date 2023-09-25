@@ -9,23 +9,23 @@ using System.Threading.Tasks;
 namespace SSDK.CSC.ScriptComponents.Expressions
 {
     /// <summary>
-    /// A C# binary operator expression (e.g. 2 + 3)
+    /// A C# assignment expression (e.g. x = 3)
     /// </summary>
-    public sealed class CSharpBinaryExpression : CSharpExpression
+    public sealed class CSharpAssignmentExpression : CSharpExpression
     {
         #region Properties & Fields
         /// <summary>
-        /// Gets the left-hand side expression of this binary expression.
+        /// Gets the left-hand side expression of this expression.
         /// </summary>
         public CSharpExpression Left { get; private set; }
 
         /// <summary>
-        /// Gets the right-hand side expression of this binary expression.
+        /// Gets the right-hand side expression of this expression.
         /// </summary>
         public CSharpExpression Right { get; private set; }
 
         /// <summary>
-        /// Gets the operator of this binary expression
+        /// Gets the operator of this expression
         /// </summary>
         public string Operator { get; private set; }
         #endregion
@@ -34,7 +34,8 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         /// Creates the binary expression from the syntax.
         /// </summary>
         /// <param name="syntax">the syntax to create from</param>
-        internal CSharpBinaryExpression(BinaryExpressionSyntax syntax) {
+        internal CSharpAssignmentExpression(AssignmentExpressionSyntax syntax)
+        {
             Syntax = syntax;
             Left = syntax.Left.ToExpression();
             Operator = syntax.OperatorToken.Text;
@@ -43,7 +44,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
-            map.ProcessBinaryExpression(this, result);
+            map.ProcessAssignmentExpression(this, result);
         }
 
         public override string ToString()

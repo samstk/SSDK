@@ -10,7 +10,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A C# expression, which may depict activation of a particular function.
     /// </summary>
-    public abstract class CSharpExpression
+    public abstract class CSharpExpression : CSharpComponent
     {
         #region Properties & Fields
         /// <summary>
@@ -18,5 +18,13 @@ namespace SSDK.CSC.ScriptComponents
         /// </summary>
         public ExpressionSyntax Syntax { get; protected set; }
         #endregion
+
+        /// <summary>
+        /// Processes the map in the correct corresponding function for this
+        /// expression.
+        /// </summary>
+        /// <param name="map">the conversion map</param>
+        /// <param name="result">the string builder result</param>
+        public abstract void ProcessMap(CSharpConversionMap map, StringBuilder result);
     }
 }

@@ -12,7 +12,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A C# delegate, which may define the format for an anonymous function.
     /// </summary>
-    public sealed class CSharpDelegate
+    public sealed class CSharpDelegate : CSharpComponent
     {
         #region Properties & Fields
         /// <summary>
@@ -39,6 +39,17 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the parameters of the delegate
         /// </summary>
         public CSharpVariable[] Parameters { get; private set; }
+
+        /// <summary>
+        /// Gets the type parameters of the delegate
+        /// </summary>
+        public string[] TypeParameters { get; private set; }
+
+        /// <summary>
+        /// Gets the type constraints on the parameters.
+        /// </summary>
+        public Dictionary<string, CSharpType[]> TypeConstraints { get; private set; }
+
         #endregion
 
         internal CSharpDelegate(DelegateDeclarationSyntax syntax)
@@ -52,6 +63,10 @@ namespace SSDK.CSC.ScriptComponents
             ReturnType = syntax.ReturnType.ToType();
 
             Parameters = syntax.ParameterList.ToParameters();
+
+            TypeParameters = syntax.TypeParameterList.ToNames();
+
+            TypeConstraints = syntax.ConstraintClauses.ToTypeConstraints();
         }
 
         public override string ToString()

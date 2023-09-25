@@ -52,6 +52,11 @@ namespace SSDK.CSC.ScriptComponents
             IsStatic = syntax.StaticKeyword.Value != null;
         }
 
+        public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
+        {
+            map.ProcessUsingDirective(this, result);
+        }
+
         public override string ToString()
         {
             return Alias != null ? $"using {Alias} = {Target}"

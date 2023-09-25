@@ -67,7 +67,6 @@ namespace SSDK.CSC.ScriptComponents
             for (int i = 0; i < scripts.Length; i++)
             {
                 CSharpScript script = new CSharpScript(scripts[i], scriptsAreFiles, false);
-                
                 Scripts[i] = script;
             }
         }

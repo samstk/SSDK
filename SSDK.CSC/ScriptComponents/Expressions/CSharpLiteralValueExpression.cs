@@ -11,7 +11,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
     /// <summary>
     /// A c# primitive literal value (such as string)
     /// </summary>
-    public sealed class CSharpLiteralValue : CSharpExpression
+    public sealed class CSharpLiteralValueExpression : CSharpExpression
     {
         #region Properties & Fields
         /// <summary>
@@ -23,10 +23,15 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         /// Creates the literal value from the given syntax
         /// </summary>
         /// <param name="syntax">the syntax to create from</param>
-        internal CSharpLiteralValue(LiteralExpressionSyntax syntax)
+        internal CSharpLiteralValueExpression(LiteralExpressionSyntax syntax)
         {
             Syntax = syntax;
             Value = syntax.Token.Value;
+        }
+
+        public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
+        {
+            map.ProcessLiteralValueExpression(this, result);
         }
 
         public override string ToString()

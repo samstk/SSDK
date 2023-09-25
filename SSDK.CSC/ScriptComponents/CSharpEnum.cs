@@ -9,7 +9,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A C# class, which may contain methods, properties, fields, and sub-classes
     /// </summary>
-    public sealed class CSharpEnum
+    public sealed class CSharpEnum : CSharpComponent
     {
         #region Properties & Fields
         /// <summary>
