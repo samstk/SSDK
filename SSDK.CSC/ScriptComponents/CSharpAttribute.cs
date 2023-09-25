@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SSDK.CSC.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,9 +15,9 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
-        /// Gets the base class defining this attribute.
+        /// Gets the used name of the attribute
         /// </summary>
-        public CSharpClass BaseClass { get; private set; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Gets the list of expressions depicts the parameters
@@ -23,5 +25,21 @@ namespace SSDK.CSC.ScriptComponents
         /// </summary>
         public CSharpExpression[] Parameters { get; private set; }
         #endregion
+
+        /// <summary>
+        /// Creates an c# attribute from the given syntax
+        /// </summary>
+        /// <param name="syntax">the syntax to create from</param>
+        internal CSharpAttribute(AttributeSyntax syntax)
+        {
+            Name = syntax.Name.ToString();
+
+            Parameters = syntax.ArgumentList.ToExpressions();
+        }
+
+        public override string ToString()
+        {
+            return $"[{Name}(...)]";
+        }
     }
 }

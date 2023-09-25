@@ -29,6 +29,16 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the name of the delegate
         /// </summary>
         public string Name { get; private set; }
+        
+        /// <summary>
+        /// Gets the return type of the delegate
+        /// </summary>
+        public CSharpType ReturnType { get; private set; }
+
+        /// <summary>
+        /// Gets the parameters of the delegate
+        /// </summary>
+        public CSharpVariable[] Parameters { get; private set; }
         #endregion
 
         internal CSharpDelegate(DelegateDeclarationSyntax syntax)
@@ -38,6 +48,15 @@ namespace SSDK.CSC.ScriptComponents
             (_, AccessModifier) = syntax.Modifiers.GetConcreteModifier();
 
             Name = syntax.Identifier.ToString();
+
+            ReturnType = syntax.ReturnType.ToType();
+
+            Parameters = syntax.ParameterList.ToParameters();
+        }
+
+        public override string ToString()
+        {
+            return $"{(AccessModifier.ToReadablePrefix())} delegate {ReturnType} {Name}({Parameters.ToReadableString()})";
         }
     }
 }

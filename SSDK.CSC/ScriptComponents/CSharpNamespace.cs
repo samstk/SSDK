@@ -85,6 +85,8 @@ namespace SSDK.CSC.ScriptComponents
                     delegates.Add(new CSharpDelegate((DelegateDeclarationSyntax)member));
                 }
             }
+
+            Delegates = delegates.ToArray();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,11 @@ namespace SSDK.CSC.ScriptComponents
     /// </summary>
     public abstract class CSharpExpression
     {
+        #region Properties & Fields
+        /// <summary>
+        /// Gets the expression syntax that formed this c# expression
+        /// </summary>
+        public ExpressionSyntax Syntax { get; protected set; }
+        #endregion
     }
 }
