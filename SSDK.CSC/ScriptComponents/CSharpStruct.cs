@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SSDK.CSC.Helpers;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace SSDK.CSC.ScriptComponents
 {
@@ -16,9 +17,13 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets the name of the class
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
         /// Gets the access modifier applied to this struct.
         /// </summary>
-        public CSharpAccessModifier AccessModifier { get; private set; } = CSharpAccessModifier.Internal;
+        public CSharpAccessModifier AccessModifier { get; private set; } = CSharpAccessModifier.DefaultOrNone;
 
         /// <summary>
         /// Gets the general modifier of this variable
@@ -59,6 +64,11 @@ namespace SSDK.CSC.ScriptComponents
         public CSharpStruct[] Substructs { get; private set; }
 
         /// <summary>
+        /// Gets all sub-enums of this class.
+        /// </summary>
+        public CSharpEnum[] Subenums { get; private set; }
+
+        /// <summary>
         /// Gets all delegate declarations in this struct.
         /// </summary>
         public CSharpDelegate[] Delegates { get; private set; }
@@ -72,6 +82,11 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets all instance methods of this struct.
         /// </summary>
         public CSharpMethod[] InstanceMethods { get; private set; }
+
+        /// <summary>
+        /// Gets all indexers of this class.
+        /// </summary>
+        public CSharpIndexer[] Indexers { get; private set; }
 
         /// <summary>
         /// Gets the instance constructors of this struct.
@@ -122,6 +137,11 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the type parameters of this struct.
         /// </summary>
         public string[] TypeParameters { get; private set; }
+
+        /// <summary>
+        /// Gets the type constraints on the parameters.
+        /// </summary>
+        public Dictionary<string, CSharpType[]> TypeConstraints { get; private set; }
         #endregion
 
         /// <summary>
@@ -131,9 +151,19 @@ namespace SSDK.CSC.ScriptComponents
         internal CSharpStruct(StructDeclarationSyntax syntax)
         {
             (_, AccessModifier) = syntax.Modifiers.GetConcreteModifier();
+            Name = syntax.Identifier.ToString();
             Attributes = syntax.AttributeLists.ToAttributes();
-            if(syntax.TypeParameterList!=null)
+
+            if (syntax.TypeParameterList != null)
+            {
                 TypeParameters = syntax.TypeParameterList.ToNames();
+                TypeConstraints = syntax.ConstraintClauses.ToTypeConstraints();
+            }
+            else
+            {
+                TypeParameters = CSharpClass.EmptyTypeParameters;
+                TypeConstraints = new Dictionary<string, CSharpType[]>();
+            }
 
             AddMembers(syntax.Members);
         }
@@ -142,12 +172,14 @@ namespace SSDK.CSC.ScriptComponents
         {
             List<CSharpClass> classes = new List<CSharpClass>();
             List<CSharpStruct> structs = new List<CSharpStruct>();
+            List<CSharpEnum> enums = new List<CSharpEnum>();
             List<CSharpDelegate> delegates = new List<CSharpDelegate>();
             List<CSharpMethod> staticMethods = new List<CSharpMethod>();
             List<CSharpMethod> instanceMethods = new List<CSharpMethod>();
             List<CSharpMethod> instanceConstructors = new List<CSharpMethod>();
             List<CSharpProperty> staticProperties = new List<CSharpProperty>();
             List<CSharpProperty> instanceProperties = new List<CSharpProperty>();
+            List<CSharpIndexer> indexers = new List<CSharpIndexer>();
             List<CSharpVariable> staticFields = new List<CSharpVariable>();
             List<CSharpVariable> instanceFields = new List<CSharpVariable>();
             foreach (MemberDeclarationSyntax member in members)
@@ -167,7 +199,7 @@ namespace SSDK.CSC.ScriptComponents
                 else if (member is FieldDeclarationSyntax)
                 {
                     CSharpVariable[] variables = ((FieldDeclarationSyntax)member).ToVariables();
-                    foreach(CSharpVariable variable in variables)
+                    foreach (CSharpVariable variable in variables)
                     {
                         if (variable.IsStatic || variable.IsConst)
                             staticFields.Add(variable);
@@ -177,19 +209,62 @@ namespace SSDK.CSC.ScriptComponents
                 else if (member is PropertyDeclarationSyntax)
                 {
                     CSharpProperty property = new CSharpProperty((PropertyDeclarationSyntax)member);
-                    
+
                     if (property.IsStatic || property.IsConst)
                         staticProperties.Add(property);
                     else instanceProperties.Add(property);
                 }
+                else if (member is EventFieldDeclarationSyntax)
+                {
+                    CSharpVariable[] variables = ((EventFieldDeclarationSyntax)member).ToVariables();
+                    foreach (CSharpVariable variable in variables)
+                    {
+                        if (variable.IsStatic || variable.IsConst)
+                            staticFields.Add(variable);
+                        else instanceFields.Add(variable);
+                    }
+                }
                 else if (member is EventDeclarationSyntax)
                 {
-                    
+                    CSharpVariable variable = ((EventDeclarationSyntax)member).ToVariable();
+                    if (variable.IsStatic || variable.IsConst)
+                        staticFields.Add(variable);
+                    else instanceFields.Add(variable);
+                }
+                else if (member is MethodDeclarationSyntax)
+                {
+                    CSharpMethod method = new CSharpMethod((MethodDeclarationSyntax)member);
+                    if (method.IsStatic || method.IsConst)
+                        staticMethods.Add(method);
+                    else instanceMethods.Add(method);
+                }
+                else if (member is ConstructorDeclarationSyntax)
+                {
+                    CSharpMethod method = new CSharpMethod((ConstructorDeclarationSyntax)member);
+                    if (method.IsStatic || method.IsConst)
+                        StaticConstructor = method;
+                    else instanceConstructors.Add(method);
+                }
+                else if (member is DestructorDeclarationSyntax)
+                {
+                    CSharpMethod method = new CSharpMethod((DestructorDeclarationSyntax)member);
+                    if (method.IsStatic || method.IsConst)
+                        StaticDestructor = method;
+                    else InstanceDestructor = method;
+                }
+                else if (member is EnumDeclarationSyntax)
+                {
+                    enums.Add(new CSharpEnum((EnumDeclarationSyntax)member));
+                }
+                else if (member is IndexerDeclarationSyntax)
+                {
+                    indexers.Add(new CSharpIndexer((IndexerDeclarationSyntax)member));
                 }
             }
 
             Subclasses = classes.ToArray();
             Substructs = structs.ToArray();
+            Subenums = enums.ToArray();
             Delegates = delegates.ToArray();
             StaticMethods = staticMethods.ToArray();
             InstanceMethods = instanceMethods.ToArray();
@@ -198,6 +273,7 @@ namespace SSDK.CSC.ScriptComponents
             InstanceProperties = instanceProperties.ToArray();
             StaticFields = staticFields.ToArray();
             InstanceFields = instanceFields.ToArray();
+            Indexers = indexers.ToArray();
         }
     }
 }

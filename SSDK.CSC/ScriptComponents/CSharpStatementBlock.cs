@@ -12,7 +12,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A c# statement block, which contains a number of statements.
     /// </summary>
-    public sealed class CSharpStatementBlock : CSharpComponent
+    public sealed class CSharpStatementBlock : CSharpStatement
     {
         #region Properties & Fields
         /// <summary>
@@ -32,6 +32,10 @@ namespace SSDK.CSC.ScriptComponents
             for(int i = 0; i<syntax.Statements.Count; i++)
             {
                 Statements[i] = syntax.Statements[i].ToStatement();
+                if (Statements[i] is CSharpVariable)
+                {
+                    ((CSharpVariable)Statements[i]).InStatement = true;
+                }
             }
         }
 
@@ -48,6 +52,11 @@ namespace SSDK.CSC.ScriptComponents
             {
                 Statements = new CSharpStatement[] { new CSharpReturnStatement(syntax) }
             };
+        }
+
+        public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
+        {
+            map.ProcessStatementBlock(this, result);
         }
     }
 }

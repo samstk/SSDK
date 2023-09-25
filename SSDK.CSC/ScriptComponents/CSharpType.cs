@@ -33,7 +33,7 @@ namespace SSDK.CSC.ScriptComponents
         /// <summary>
         /// Is true if the syntax defined some generic types.
         /// </summary>
-        public bool HasGenericTypes { get; private set; }
+        public bool HasGenericTypes { get; private set; } = false;
 
         /// <summary>
         /// Gets the array dimensions of this type. If zero, then
@@ -50,6 +50,17 @@ namespace SSDK.CSC.ScriptComponents
         {
             Name = name;
             GenericTypes = genericTypes;
+            HasGenericTypes = genericTypes.Length > 0;
+        }
+        
+        /// <summary>
+        /// Creates a new c# type with a special name (i.e.. a keyword)
+        /// </summary>
+        /// <param name="name">the name of the type</param>
+        /// <returns>the c# type</returns>
+        internal static CSharpType Special(string name)
+        {
+            return new CSharpType(name, Empty);
         }
 
         internal static CSharpType[] Empty = new CSharpType[0];

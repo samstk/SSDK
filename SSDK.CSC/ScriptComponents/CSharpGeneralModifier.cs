@@ -9,7 +9,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// Depicts a general modifier flags onto a class, variable, etc..
     /// </summary>
-    [Flags()]
+    [Flags]
     public enum CSharpGeneralModifier
     {
         None = 0,

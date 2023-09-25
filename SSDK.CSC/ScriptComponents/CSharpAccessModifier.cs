@@ -13,6 +13,10 @@ namespace SSDK.CSC.ScriptComponents
     public enum CSharpAccessModifier
     {
         /// <summary>
+        /// The default c# access modifier, which is internal.
+        /// </summary>
+        DefaultOrNone,
+        /// <summary>
         /// An access modifier applied to a corresponding component. <br/>
         /// has the following access: <br/>
         /// - within the same class <br/>

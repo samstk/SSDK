@@ -25,10 +25,16 @@ namespace SSDK.CSC.ScriptComponents
         public string Name { get; private set; }
 
         /// <summary>
+        /// Returns true if the variable is part of a statement, rather
+        /// than an argument/parameter list.
+        /// </summary>
+        public bool InStatement { get; internal set; } = false;
+
+        /// <summary>
         /// Gets the access modifier of this variable.
         /// Default is internal.
         /// </summary>
-        public CSharpAccessModifier AccessModifier { get; private set; } = CSharpAccessModifier.Internal;
+        public CSharpAccessModifier AccessModifier { get; private set; } = CSharpAccessModifier.DefaultOrNone;
 
         /// <summary>
         /// Gets the general modifier of this variable
@@ -81,47 +87,22 @@ namespace SSDK.CSC.ScriptComponents
         }
 
         /// <summary>
-        /// Creates a c# variable from the given syntax
-        /// </summary>
-        /// <param name="fieldSyntax">the field declaration syntax</param>
-        internal CSharpVariable(FieldDeclarationSyntax fieldSyntax)
-        {
-            (GeneralModifier, AccessModifier) = fieldSyntax.Modifiers.GetConcreteModifier();
-
-            CopyFrom(fieldSyntax.Declaration);
-        }
-
-        /// <summary>
-        /// Creates a c# variable from the given syntax
-        /// </summary>
-        /// <param name="varSyntax">the variable declaration syntax</param>
-        internal CSharpVariable(VariableDeclarationSyntax varSyntax)
-        {
-            CopyFrom(varSyntax);
-        }
-
-        /// <summary>
         /// Creates a c# variable from the given information
         /// </summary>
         /// <param name="name">name of the variable</param>
         /// <param name="generalModifier">the general modifiers of the variable (e.g. volatile)</param>
         /// <param name="accessModifier">the access modifier of the variable</param>
-        internal CSharpVariable(string name, CSharpType type, CSharpAttribute[] attributes, CSharpGeneralModifier generalModifier, CSharpAccessModifier accessModifier)
+        /// <param name="expression">the initial expression of the variable</param>
+        /// <param name="attributes">the attributes of the variable</param>
+        /// <param name="type">the type of the variable</param>
+        internal CSharpVariable(string name, CSharpType type, CSharpAttribute[] attributes, CSharpGeneralModifier generalModifier, CSharpAccessModifier accessModifier, CSharpExpression expression)
         {
             Name = name;
             Type = type;
             GeneralModifier = generalModifier;
             AccessModifier = accessModifier;
             Attributes = attributes;
-        }
-
-        /// <summary>
-        /// Copies the information from the given variable declaration syntax to this c# variable.
-        /// </summary>
-        /// <param name="varSyntax">the variable declaration syntax to copy from</param>
-        internal void CopyFrom(VariableDeclarationSyntax varSyntax)
-        {
-            
+            Expression = expression;
         }
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)

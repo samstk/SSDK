@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SSDK.CSC.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,6 +28,22 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the attributes of the enum value.
         /// </summary>
         public CSharpAttribute[] Attributes { get; private set; }
+        
+        /// <summary>
+        /// Gets the syntax that formed this enum.
+        /// </summary>
+        public EnumMemberDeclarationSyntax Syntax { get; private set; }
         #endregion
+
+        internal CSharpEnumValue(EnumMemberDeclarationSyntax syntax)
+        {
+            Name = syntax.Identifier.ToString();
+
+            Expression = syntax.EqualsValue?.Value.ToExpression();
+
+            Attributes = syntax.AttributeLists.ToAttributes();
+
+            Syntax = syntax;
+        }
     }
 }

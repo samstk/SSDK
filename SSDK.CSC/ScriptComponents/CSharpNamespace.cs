@@ -36,6 +36,11 @@ namespace SSDK.CSC.ScriptComponents
         public CSharpNamespace[] Namespaces { get; private set; }
 
         /// <summary>
+        /// Gets the different subregions (as per region directive) of this namespace.
+        /// </summary>
+        public CSharpNamespace[] Regions { get; private set; }
+
+        /// <summary>
         /// Gets the child classes that may be referenced within the project under this namespace.
         /// </summary>
         public CSharpClass[] Classes { get; private set; }
@@ -107,6 +112,7 @@ namespace SSDK.CSC.ScriptComponents
             List<CSharpNamespace> namespaces = new List<CSharpNamespace>();
             List<CSharpClass> classes = new List<CSharpClass>();
             List<CSharpStruct> structs = new List<CSharpStruct>();
+            List<CSharpEnum> enums = new List<CSharpEnum>();
             foreach (MemberDeclarationSyntax member in members)
             {
                 if (member is DelegateDeclarationSyntax)
@@ -125,12 +131,17 @@ namespace SSDK.CSC.ScriptComponents
                 {
                     structs.Add(new CSharpStruct((StructDeclarationSyntax)member));
                 }
+                else if (member is EnumDeclarationSyntax)
+                {
+                    enums.Add(new CSharpEnum((EnumDeclarationSyntax)member));
+                }
             }
 
             Delegates = delegates.ToArray();
             Namespaces = namespaces.ToArray();
             Classes = classes.ToArray();
             Structs = structs.ToArray();
+            Enums = enums.ToArray();
         }
 
         public override string ToString()

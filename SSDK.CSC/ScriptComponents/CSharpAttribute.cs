@@ -14,6 +14,7 @@ namespace SSDK.CSC.ScriptComponents
     public sealed class CSharpAttribute : CSharpComponent
     {
         #region Properties & Fields
+        internal static CSharpAttribute[] Empty = new CSharpAttribute[0];
         /// <summary>
         /// Gets the used name of the attribute
         /// </summary>

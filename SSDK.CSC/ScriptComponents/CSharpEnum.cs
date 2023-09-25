@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SSDK.CSC.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +15,11 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets the name of the class
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Gets the access modifier applied to this enum.
         /// </summary>
         public CSharpAccessModifier AccessModifier { get; private set; } = CSharpAccessModifier.Internal;
@@ -26,6 +33,36 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the possible values of this enum.
         /// </summary>
         public CSharpEnumValue[] Values { get; private set; }
+        
+        /// <summary>
+        /// Gets the syntax that formed this enum.
+        /// </summary>
+        public EnumDeclarationSyntax Syntax { get; private set; }
+
+        /// <summary>
+        /// Gets all types inherited by this enum.
+        /// </summary>
+        public CSharpType[] Inherits { get; private set; }
         #endregion
+
+        internal CSharpEnum(EnumDeclarationSyntax syntax)
+        {
+            Name = syntax.Identifier.ToString();
+
+            (_, AccessModifier) = syntax.Modifiers.GetConcreteModifier();
+
+            Attributes = syntax.AttributeLists.ToAttributes();
+
+            if (syntax.BaseList == null || syntax.BaseList.Types.Count == 0)
+                Inherits = CSharpType.Empty;
+            else Inherits = syntax.BaseList.ToTypes();
+
+            Values = new CSharpEnumValue[syntax.Members.Count];
+            for(int i = 0; i<Values.Length; i++)
+            {
+                Values[i] = new CSharpEnumValue(syntax.Members[i]);
+            }
+            Syntax = syntax;
+        }
     }
 }

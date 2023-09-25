@@ -16,9 +16,14 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
-        /// Gets the access modifier applied to this class.
+        /// Gets all attributes applied to this component.
         /// </summary>
-        public CSharpAccessModifier AccessModifier { get; private set; } = CSharpAccessModifier.Internal;
+        public CSharpAttribute[] Attributes { get; private set; }
+
+        /// <summary>
+        /// Gets the access modifier applied to this delegate.
+        /// </summary>
+        public CSharpAccessModifier AccessModifier { get; private set; } = CSharpAccessModifier.DefaultOrNone;
 
         /// <summary>
         /// Gets the syntax that constructed this delegate.
@@ -59,6 +64,8 @@ namespace SSDK.CSC.ScriptComponents
             (_, AccessModifier) = syntax.Modifiers.GetConcreteModifier();
 
             Name = syntax.Identifier.ToString();
+
+            Attributes = syntax.AttributeLists.ToAttributes();
 
             ReturnType = syntax.ReturnType.ToType();
 

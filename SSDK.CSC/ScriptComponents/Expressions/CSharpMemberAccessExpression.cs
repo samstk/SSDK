@@ -27,7 +27,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         #endregion
 
         /// <summary>
-        /// Creates the binary expression from the syntax.
+        /// Creates the member access expression from the syntax.
         /// </summary>
         /// <param name="syntax">the syntax to create from</param>
         internal CSharpMemberAccessExpression(MemberAccessExpressionSyntax syntax)

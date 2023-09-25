@@ -20,7 +20,7 @@ namespace SSDK.CSC.Helpers
         public static void StartNewLine(this StringBuilder builder)
         {
             
-            if (builder.Length > 0 && builder[builder.Length-1] != '\n')
+            if (builder.Length > 0 && builder[builder.Length-1] != '\n' && builder[builder.Length-1] != '\t')
                 builder.AppendLine();
         }
 
@@ -29,9 +29,10 @@ namespace SSDK.CSC.Helpers
         /// was not previously started.
         /// </summary>
         /// <param name="builder">the string builder</param>
-        public static void StartNewWord(this StringBuilder builder, char whitespace=' ')
+        public static void StartNewWord(this StringBuilder builder, char whitespace=' ', char[] additionalWordSeperators=null)
         {
-            if (builder.Length > 0 && builder[builder.Length - 1] != whitespace)
+            if (builder.Length > 0 && !char.IsWhiteSpace(builder[builder.Length - 1]) 
+                && (additionalWordSeperators == null || !additionalWordSeperators.Contains(builder[builder.Length - 1])))
                 builder.Append(whitespace);
         }
 
@@ -46,11 +47,12 @@ namespace SSDK.CSC.Helpers
         /// </summary>
         /// <remarks>
         /// Compatible with single-thread only.
+        /// Assumes that if the last character is a tab character, then it can continue without appending anything.
         /// </remarks>
         /// <param name="builder">the string builder</param>
         public static void Continue(this StringBuilder builder, char indentChar = '\t')
         {
-            if (CurrentIndents > 0) builder.Append("".PadLeft(CurrentIndents, indentChar));
+            if (CurrentIndents > 0 && builder[builder.Length - 1] != '\t') builder.Append("".PadLeft(CurrentIndents, indentChar));
         }
 
 
@@ -68,8 +70,6 @@ namespace SSDK.CSC.Helpers
             builder.Continue();
             builder.Append(with);
         }
-
-        
 
         /// <summary>
         /// Continues the builder string with the given string line.
@@ -101,7 +101,7 @@ namespace SSDK.CSC.Helpers
             builder.Continue();
             builder.AppendLine(with);
 
-            CurrentIndents++;
+            builder.Open();
         }
 
         /// <summary>
@@ -117,10 +117,28 @@ namespace SSDK.CSC.Helpers
         /// <param name="with">the string to append</param>
         public static void ContinueWithAsClose(this StringBuilder builder, string with, char indentChar = '\t')
         {
-            CurrentIndents--;
+            builder.Close();
 
             builder.Continue();
             builder.AppendLine(with);
+        }
+
+        /// <summary>
+        /// Opens a new level of indentation
+        /// </summary>
+        /// <param name="builder">the string builder</param>
+        public static void Open(this StringBuilder builder)
+        {
+            CurrentIndents++;
+        }
+
+        /// <summary>
+        /// Closes the current level of indentation
+        /// </summary>
+        /// <param name="builder">the string builder</param>
+        public static void Close(this StringBuilder builder)
+        {
+            CurrentIndents--;
         }
     }
 }

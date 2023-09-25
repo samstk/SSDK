@@ -80,7 +80,24 @@ namespace SSDK.CSC.Helpers
 
             for(int i = 0; i<types.Length; i++)
             {
-                types[i] = new CSharpType(typeSyntax[i] as TypeConstraintSyntax);
+                TypeParameterConstraintSyntax constraint = typeSyntax[i];
+                if (constraint is TypeConstraintSyntax)
+                {
+                    types[i] = new CSharpType(constraint as TypeConstraintSyntax);
+                }
+                else if (constraint is ConstructorConstraintSyntax)
+                {
+                    types[i] = CSharpType.Special("new");
+                }
+                else if (constraint is ClassOrStructConstraintSyntax)
+                {
+                    types[i] = CSharpType.Special(((ClassOrStructConstraintSyntax)constraint).ClassOrStructKeyword.ValueText);
+                }
+                else if (constraint is DefaultConstraintSyntax)
+                {
+                    types[i] = CSharpType.Special("default");
+                }
+                
             }
 
             return types;
@@ -109,12 +126,25 @@ namespace SSDK.CSC.Helpers
         }
 
         /// <summary>
+        /// Converts the given type syntax to a c# type
+        /// </summary>
+        /// <param name="type">the type syntax to convert</param>
+        /// <returns>the c# type</returns>
+        /// <exception cref="Exception">occurs when an unhandled type syntax happens (to be checked)</exception>
+        internal static CSharpType ToType(this BaseTypeSyntax type)
+        {
+            return new CSharpType(type.Type);
+        }
+
+
+        /// <summary>
         /// Converts the given list of type parameters to a string of arrays
         /// </summary>
         /// <param name="typeList">the type list syntax to convert</param>
         /// <returns>the c# type</returns>
         internal static string[] ToNames(this TypeParameterListSyntax typeList)
         {
+            if (typeList == null) return new string[0];
             string[] types = new string[typeList.Parameters.Count];
             for(int i = 0; i<typeList.Parameters.Count; i++)
             {
@@ -131,6 +161,16 @@ namespace SSDK.CSC.Helpers
         internal static CSharpType[] ToTypes(this TypeArgumentListSyntax argumentList)
         {
             return argumentList.Arguments.Select((typearg) => typearg.ToType()).ToArray();
+        }
+
+        /// <summary>
+        /// Gets the c# types of a given base list syntax.
+        /// </summary>
+        /// <param name="baseList">the base list to find types of</param>
+        /// <returns>an array of c# types for the argument list</returns>
+        internal static CSharpType[] ToTypes(this BaseListSyntax baseList)
+        {
+            return baseList.Types.Select((type) => type.ToType()).ToArray();
         }
 
         /// <summary>
@@ -157,6 +197,10 @@ namespace SSDK.CSC.Helpers
             else if (syntax is ExpressionStatementSyntax)
             {
                 return new CSharpExpressionStatement(((ExpressionStatementSyntax)syntax).Expression.ToExpression());
+            }
+            else if (syntax is LocalDeclarationStatementSyntax)
+            {
+                return new CSharpJointStatement(((LocalDeclarationStatementSyntax)syntax).ToVariables());
             }
             throw new Exception("Unhandled case");
         }
@@ -191,6 +235,10 @@ namespace SSDK.CSC.Helpers
             else if (syntax is MemberAccessExpressionSyntax)
             {
                 return new CSharpMemberAccessExpression(((MemberAccessExpressionSyntax)syntax));
+            }
+            else if (syntax is ThisExpressionSyntax)
+            {
+                return new CSharpThisExpression(syntax);
             }
             throw new Exception("Unhandled case"); 
         }
@@ -290,6 +338,19 @@ namespace SSDK.CSC.Helpers
         /// <summary>
         /// Gets the c# variables of a given field declaration.
         /// </summary>
+        /// <param name="eventDeclaration">the field declaration to convert</param>
+        /// <returns>the array of c# variables derived from the declaration</returns>
+        internal static CSharpVariable ToVariable (this EventDeclarationSyntax eventDeclaration)
+        {
+            (CSharpGeneralModifier gModifier, CSharpAccessModifier modifier) = eventDeclaration.Modifiers.GetConcreteModifier();
+            return new CSharpVariable(eventDeclaration.Identifier.ToString(), eventDeclaration.Type.ToType(),
+                eventDeclaration.AttributeLists.ToAttributes(), gModifier, modifier, null);
+        }
+
+
+        /// <summary>
+        /// Gets the c# variables of a given field declaration.
+        /// </summary>
         /// <param name="fieldDeclaration">the field declaration to convert</param>
         /// <returns>the array of c# variables derived from the declaration</returns>
         internal static CSharpVariable[] ToVariables(this FieldDeclarationSyntax fieldDeclaration)
@@ -300,10 +361,75 @@ namespace SSDK.CSC.Helpers
             CSharpType type = fieldDeclaration.Declaration.Type.ToType();
             for(int i = 0; i < fieldDeclaration.Declaration.Variables.Count; i++)
             {
-                variables[i] = new CSharpVariable(fieldDeclaration.Declaration.Variables[i].Identifier.ToString(), 
-                    type, attributes, gModifier, modifier);
+                VariableDeclaratorSyntax varDeclarator = fieldDeclaration.Declaration.Variables[i];
+                variables[i] = new CSharpVariable(varDeclarator.Identifier.ToString(), 
+                    type, attributes, gModifier, modifier,
+                    varDeclarator.Initializer?.Value.ToExpression());
             }
             
+            return variables;
+        }
+
+        /// <summary>
+        /// Gets the c# variables of a given field declaration.
+        /// </summary>
+        /// <param name="parameterListSyntax">the syntax to convert</param>
+        /// <returns>the array of c# variables derived from the declaration</returns>
+        internal static CSharpVariable[] ToVariables(this BracketedParameterListSyntax parameterListSyntax)
+        {
+            CSharpVariable[] variables = new CSharpVariable[parameterListSyntax.Parameters.Count];
+            
+            for (int i = 0; i < parameterListSyntax.Parameters.Count; i++)
+            {
+                ParameterSyntax varDeclarator = parameterListSyntax.Parameters[i];
+                CSharpType type = varDeclarator.Type.ToType();
+                variables[i] = new CSharpVariable(varDeclarator.Identifier.ToString(),
+                    type, CSharpAttribute.Empty, CSharpGeneralModifier.None, CSharpAccessModifier.DefaultOrNone,
+                    varDeclarator.Default?.Value.ToExpression());
+            }
+
+            return variables;
+        }
+
+        /// <summary>
+        /// Gets the c# variables of a given variable declaration.
+        /// </summary>
+        /// <param name="varDeclaration">the variable declaration to convert</param>
+        /// <returns>the array of c# variables derived from the declaration</returns>
+        internal static CSharpVariable[] ToVariables(this LocalDeclarationStatementSyntax varDeclaration)
+        {
+            (CSharpGeneralModifier gModifier, CSharpAccessModifier modifier) = varDeclaration.Modifiers.GetConcreteModifier();
+            CSharpVariable[] variables = new CSharpVariable[varDeclaration.Declaration.Variables.Count];
+            CSharpAttribute[] attributes = varDeclaration.AttributeLists.ToAttributes();
+            CSharpType type = varDeclaration.Declaration.Type.ToType();
+            for (int i = 0; i < varDeclaration.Declaration.Variables.Count; i++)
+            {
+                VariableDeclaratorSyntax varDeclarator = varDeclaration.Declaration.Variables[i];
+                variables[i] = new CSharpVariable(varDeclarator.Identifier.ToString(),
+                    type, attributes, gModifier, modifier,
+                    varDeclarator.Initializer?.Value.ToExpression());
+            }
+
+            return variables;
+        }
+
+        /// <summary>
+        /// Gets the c# variables of a given field declaration.
+        /// </summary>
+        /// <param name="fieldDeclaration">the field declaration to convert</param>
+        /// <returns>the array of c# variables derived from the declaration</returns>
+        internal static CSharpVariable[] ToVariables(this EventFieldDeclarationSyntax eventDeclaration)
+        {
+            (CSharpGeneralModifier gModifier, CSharpAccessModifier modifier) = eventDeclaration.Modifiers.GetConcreteModifier();
+            CSharpVariable[] variables = new CSharpVariable[eventDeclaration.Declaration.Variables.Count];
+            CSharpAttribute[] attributes = eventDeclaration.AttributeLists.ToAttributes();
+            CSharpType type = eventDeclaration.Declaration.Type.ToType();
+            for (int i = 0; i < eventDeclaration.Declaration.Variables.Count; i++)
+            {
+                variables[i] = new CSharpVariable(eventDeclaration.Declaration.Variables[i].Identifier.ToString(),
+                    type, attributes, gModifier, modifier, null);
+            }
+
             return variables;
         }
 
@@ -411,7 +537,7 @@ namespace SSDK.CSC.Helpers
                 hasPublic ? CSharpAccessModifier.Public
                 : hasPrivate ? (hasProtected ? CSharpAccessModifier.PrivateProtected : CSharpAccessModifier.Private)
                 : hasProtected ? (hasInternal ? CSharpAccessModifier.ProtectedInternal : CSharpAccessModifier.Protected)
-                : CSharpAccessModifier.Internal);
+                : CSharpAccessModifier.DefaultOrNone);
         }
     }
 }

@@ -32,12 +32,17 @@ namespace SSDK.CSC.ScriptComponents
         /// <summary>
         /// Gets the get access of this property.
         /// </summary>
-        public CSharpAccessModifier GetAccess { get; private set; } = CSharpAccessModifier.Internal;
+        public CSharpAccessModifier GetAccess { get; private set; } = CSharpAccessModifier.DefaultOrNone;
 
         /// <summary>
         /// Gets the statement block for getting this property.
         /// </summary>
         public CSharpStatementBlock Get { get; private set; }
+
+        /// <summary>
+        /// If true, this property has get access
+        /// </summary>
+        public bool HasGetAccess { get; private set; }
 
         /// <summary>
         /// Gets the statement block for setting this property.
@@ -47,7 +52,12 @@ namespace SSDK.CSC.ScriptComponents
         /// <summary>
         /// Gets the set access of this property.
         /// </summary>
-        public CSharpAccessModifier SetAccess { get; private set; } = CSharpAccessModifier.Internal;
+        public CSharpAccessModifier SetAccess { get; private set; } = CSharpAccessModifier.DefaultOrNone;
+
+        /// <summary>
+        /// If true, this property has set access
+        /// </summary>
+        public bool HasSetAccess { get; private set; }
 
         /// <summary>
         /// Gets the general modifier of this property.
@@ -58,6 +68,11 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the access modifier of this property.
         /// </summary>
         public CSharpAccessModifier AccessModifier { get; private set; }
+
+        /// <summary>
+        /// Gets the default expression of this property.
+        /// </summary>
+        public CSharpExpression Expression;
 
         #region General Modifier Properties
         public bool IsAbstract { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Abstract); } }
@@ -85,6 +100,10 @@ namespace SSDK.CSC.ScriptComponents
             Name = syntax.Identifier.ToString();
             Type = syntax.Type.ToType();
             Attributes = syntax.AttributeLists.ToAttributes();
+            if(syntax.ExpressionBody != null)
+            {
+                Expression = syntax.Initializer.ToExpression();
+            }
 
             foreach(AccessorDeclarationSyntax accessor in syntax.AccessorList.Accessors)
             {
@@ -99,6 +118,7 @@ namespace SSDK.CSC.ScriptComponents
                     {
                         Get = CSharpStatementBlock.WithReturn(accessor.ExpressionBody.Expression);
                     }
+                    HasGetAccess = true;
                 }
                 else if (accessor.Keyword.RawKind == (int)SyntaxKind.SetKeyword)
                 {
@@ -111,6 +131,7 @@ namespace SSDK.CSC.ScriptComponents
                     {
                         Set = CSharpStatementBlock.WithReturn(accessor.ExpressionBody.Expression);
                     }
+                    HasSetAccess = true;
                 }
             }
         }
