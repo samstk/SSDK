@@ -192,17 +192,96 @@ namespace SSDK.CSC.Helpers
         {
             if (syntax is ReturnStatementSyntax)
             {
-                return new CSharpReturnStatement(((ReturnStatementSyntax)syntax).Expression);
+                return new CSharpReturnStatement(((ReturnStatementSyntax)syntax).Expression, syntax);
             }
             else if (syntax is ExpressionStatementSyntax)
             {
-                return new CSharpExpressionStatement(((ExpressionStatementSyntax)syntax).Expression.ToExpression());
+                return new CSharpExpressionStatement(((ExpressionStatementSyntax)syntax).Expression.ToExpression(), syntax);
             }
             else if (syntax is LocalDeclarationStatementSyntax)
             {
-                return new CSharpJointStatement(((LocalDeclarationStatementSyntax)syntax).ToVariables());
+                return new CSharpJointStatement(((LocalDeclarationStatementSyntax)syntax).ToVariables(), syntax);
+            }
+            else if (syntax is SwitchStatementSyntax)
+            {
+                return new CSharpSwitchStatement((SwitchStatementSyntax)syntax);
+            }
+            else if (syntax is IfStatementSyntax)
+            {
+                return new CSharpIfStatement((IfStatementSyntax)syntax);
+            }
+            else if (syntax is ForStatementSyntax)
+            {
+                return new CSharpForStatement((ForStatementSyntax)syntax);
+            }
+            else if (syntax is WhileStatementSyntax)
+            {
+                return new CSharpWhileStatement((WhileStatementSyntax)syntax);
+            }
+            else if (syntax is ForEachStatementSyntax)
+            {
+                return new CSharpForeachStatement((ForEachStatementSyntax)syntax);
+            }
+            else if (syntax is UsingStatementSyntax)
+            {
+                return null;
+            }
+            else if (syntax is ThrowStatementSyntax)
+            {
+                return null;
+            }
+            else if (syntax is TryStatementSyntax)
+            {
+                return null;
             }
             throw new Exception("Unhandled case");
+        }
+
+
+        /// <summary>
+        /// Converts the given compatible syntax to c# expressions.
+        /// </summary>
+        /// <param name="syntax">the compatible syntax</param>
+        /// <returns>the c# expressions resulting from the syntax</returns>
+        internal static CSharpExpression[] ToExpressions(this SeparatedSyntaxList<ExpressionSyntax> syntax)
+        {
+            return syntax.Select((expr) => expr.ToExpression()).ToArray();
+        }
+
+        /// <summary>
+        /// Converts the given compatible syntax to c# expressions.
+        /// </summary>
+        /// <param name="syntax">the compatible syntax</param>
+        /// <returns>the c# expressions resulting from the syntax</returns>
+        internal static CSharpExpression[] ToExpressions(this SeparatedSyntaxList<ArgumentSyntax> syntax)
+        {
+            return syntax.Select((expr) => expr.ToExpression()).ToArray();
+        }
+
+        /// <summary>
+        /// Converts the given compatible syntax to c# expressions.
+        /// </summary>
+        /// <param name="syntax">the compatible syntax</param>
+        /// <returns>the c# expressions resulting from the syntax</returns>
+        internal static CSharpExpression[] ToExpressions(this BracketedArgumentListSyntax syntax)
+        {
+            return syntax.Arguments.Select((expr) => expr.ToExpression()).ToArray();
+        }
+
+        /// <summary>
+        /// Converts the given compatible syntax to c# expressions.
+        /// </summary>
+        /// <param name="syntax">the compatible syntax</param>
+        /// <returns>the c# expressions resulting from the syntax</returns>
+        internal static CSharpExpression[] ToExpressions(this SyntaxList<SwitchLabelSyntax> syntax)
+        {
+            return syntax.Select((expr) => {
+                if (expr.Keyword.RawKind == (int)SyntaxKind.DefaultKeyword)
+                    return null;
+                if (expr is CaseSwitchLabelSyntax)
+                    return ((CaseSwitchLabelSyntax)expr).Value.ToExpression();
+                throw new Exception("Unhandled switch case");
+                }).ToArray();
         }
 
         /// <summary>
@@ -215,6 +294,22 @@ namespace SSDK.CSC.Helpers
             if (syntax is BinaryExpressionSyntax)
             {
                 return new CSharpBinaryExpression((BinaryExpressionSyntax)syntax);
+            }
+            else if (syntax is ParenthesizedExpressionSyntax)
+            {
+                return new CSharpClosedExpression((ParenthesizedExpressionSyntax)syntax);
+            }
+            else if (syntax is CastExpressionSyntax)
+            {
+                return new CSharpCastExpression((CastExpressionSyntax)syntax);
+            }
+            else if (syntax is PrefixUnaryExpressionSyntax)
+            {
+                return new CSharpPrefixUnaryExpression((PrefixUnaryExpressionSyntax)syntax);
+            }
+            else if (syntax is PostfixUnaryExpressionSyntax)
+            {
+                return new CSharpPostfixUnaryExpression((PostfixUnaryExpressionSyntax)syntax);
             }
             else if (syntax is LiteralExpressionSyntax)
             {
@@ -240,6 +335,31 @@ namespace SSDK.CSC.Helpers
             {
                 return new CSharpThisExpression(syntax);
             }
+            else if (syntax is ObjectCreationExpressionSyntax)
+            {
+                return new CSharpInstantiationExpression((ObjectCreationExpressionSyntax)syntax);
+            }
+            else if (syntax is ArrayCreationExpressionSyntax)
+            {
+                return new CSharpArrayCreationExpression((ArrayCreationExpressionSyntax)syntax);
+            }
+            else if (syntax is InterpolatedStringExpressionSyntax)
+            {
+                return new CSharpInterpolatedStringExpression((InterpolatedStringExpressionSyntax)syntax);
+            }
+            else if (syntax is ElementAccessExpressionSyntax)
+            {
+                return new CSharpIndexAccessExpression((ElementAccessExpressionSyntax)syntax);
+            }
+            else if (syntax is TupleExpressionSyntax)
+            {
+                return new CSharpTupleExpression((TupleExpressionSyntax)syntax);
+            }
+            else if (syntax is TypeSyntax)
+            {
+                return new CSharpType((TypeSyntax)syntax);
+            }
+            else
             throw new Exception("Unhandled case"); 
         }
 

@@ -66,16 +66,32 @@ namespace SSDK.CSC
         public abstract void ProcessThisExpression(CSharpThisExpression expression, StringBuilder result);
         public abstract void ProcessAssignmentExpression(CSharpAssignmentExpression expression, StringBuilder result);
         public abstract void ProcessBinaryExpression(CSharpBinaryExpression expression, StringBuilder result);
+        public abstract void ProcessClosedExpression(CSharpClosedExpression expression, StringBuilder result);
+        public abstract void ProcessCastExpression(CSharpCastExpression expression, StringBuilder result);
+        public abstract void ProcessPrefixUnaryExpression(CSharpPrefixUnaryExpression expression, StringBuilder result);
         public abstract void ProcessIdentifierExpression(CSharpIdentifierExpression expression, StringBuilder result);
         public abstract void ProcessInvocationExpression(CSharpInvocationExpression expression, StringBuilder result);
+        public abstract void ProcessInstantiationExpression(CSharpInstantiationExpression expression, StringBuilder result);
         public abstract void ProcessLiteralValueExpression(CSharpLiteralValueExpression expression, StringBuilder result);
         public abstract void ProcessMemberAccessExpression(CSharpMemberAccessExpression expression, StringBuilder result);
+        public abstract void ProcessInterpolatedStringExpression(CSharpInterpolatedStringExpression expression, StringBuilder result);
+        public abstract void ProcessArrayCreationExpression(CSharpArrayCreationExpression expression, StringBuilder result);
+        public abstract void ProcessIndexAccessExpression(CSharpIndexAccessExpression expression, StringBuilder result);
+        public abstract void ProcessPostfixUnaryExpression(CSharpPostfixUnaryExpression expression, StringBuilder result);
+        public abstract void ProcessTupleExpression(CSharpTupleExpression expression, StringBuilder result);
         #endregion
         #region Statements
         public abstract void ProcessUsingDirective(CSharpUsingDirective usingDirective, StringBuilder result);
         public abstract void ProcessExpressionStatement(CSharpExpressionStatement statement, StringBuilder result);
         public abstract void ProcessReturnStatement(CSharpReturnStatement statement, StringBuilder result);
         public abstract void ProcessJointStatement(CSharpJointStatement statement, StringBuilder result);
+        public abstract void ProcessSwitchStatement(CSharpSwitchStatement statement, StringBuilder result);
+        public abstract void ProcessIfStatement(CSharpIfStatement statement, StringBuilder result);
+
+        public abstract void ProcessWhileStatement(CSharpWhileStatement statement, StringBuilder result);
+        public abstract void ProcessForStatement(CSharpForStatement statement, StringBuilder result);
+        public abstract void ProcessForeachStatement(CSharpForeachStatement statement, StringBuilder result);
+        public abstract void ProcessTryStatement(CSharpTryStatement statement, StringBuilder result);
         #endregion
 
         #region Trivia

@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.Classification;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using SSDK.CSC.Helpers;
 using SSDK.CSC.ScriptComponents;
 using SSDK.CSC.ScriptComponents.Expressions;
@@ -231,8 +232,15 @@ namespace SSDK.CSC.Conversions
                 ProcessMethod(@class.StaticDestructor, result);
             }
 
+            // Indexers
+            foreach (CSharpIndexer indexer in @class.Indexers)
+            {
+                result.StartNewLine();
+                ProcessIndexer(indexer, result);
+            }
+
             // Static methods
-            foreach(CSharpMethod method in @class.StaticMethods)
+            foreach (CSharpMethod method in @class.StaticMethods)
             {
                 result.StartNewLine();
                 ProcessMethod(method, result);
@@ -375,7 +383,59 @@ namespace SSDK.CSC.Conversions
 
         public override void ProcessIndexer(CSharpIndexer indexer, StringBuilder result)
         {
-            throw new NotImplementedException();
+            ProcessAttributes(indexer.Attributes, result);
+
+            result.Continue();
+            ProcessAccessModifier(indexer.AccessModifier, result);
+
+            result.StartNewWord();
+            ProcessGeneralModifier(indexer.GeneralModifier, result);
+
+            result.StartNewWord();
+            ProcessType(indexer.Type, result);
+
+            result.StartNewWord();
+            result.Append("this[");
+            ProcessParameters(indexer.Parameters, result);
+            result.AppendLine("]");
+            result.ContinueWithAndOpen("{");
+            if (indexer.HasGetAccess)
+            {
+                if (indexer.Get == null)
+                {
+                    result.Continue();
+                    ProcessAccessModifier(indexer.GetAccess, result);
+                    result.StartNewWord();
+                    result.AppendLine("get;");
+                }
+                else
+                {
+                    result.Continue();
+                    ProcessAccessModifier(indexer.GetAccess, result);
+                    result.StartNewWord();
+                    result.AppendLine("get");
+                    ProcessStatementBlock(indexer.Get, result);
+                }
+            }
+            if (indexer.HasSetAccess)
+            {
+                if (indexer.Set == null)
+                {
+                    result.Continue();
+                    ProcessAccessModifier(indexer.SetAccess, result);
+                    result.StartNewWord();
+                    result.AppendLine("set;");
+                }
+                else
+                {
+                    result.Continue();
+                    ProcessAccessModifier(indexer.SetAccess, result);
+                    result.StartNewWord();
+                    result.AppendLine("set");
+                    ProcessStatementBlock(indexer.Set, result);
+                }
+            }
+            result.ContinueWithAsClose("}");
         }
 
         public override void ProcessInvocationExpression(CSharpInvocationExpression expression, StringBuilder result)
@@ -384,6 +444,21 @@ namespace SSDK.CSC.Conversions
             result.Append("(");
             ProcessExpressions(expression.Arguments, result);
             result.Append(")");
+        }
+
+        public override void ProcessInstantiationExpression(CSharpInstantiationExpression expression, StringBuilder result)
+        {
+            result.Append("new ");
+            ProcessType(expression.Type, result);
+            result.Append("(");
+            ProcessExpressions(expression.Arguments, result);
+            result.Append(")");
+            if (expression.Initializer.Length > 0)
+            {
+                result.Append("{ ");
+                ProcessExpressions(expression.Initializer, result);
+                result.Append(" }");
+            }
         }
 
         public override void ProcessLiteralValueExpression(CSharpLiteralValueExpression expression, StringBuilder result)
@@ -692,6 +767,13 @@ namespace SSDK.CSC.Conversions
                 ProcessMethod(@struct.StaticDestructor, result);
             }
 
+            // Indexers
+            foreach (CSharpIndexer indexer in @struct.Indexers)
+            {
+                result.StartNewLine();
+                ProcessIndexer(indexer, result);
+            }
+
             // Static methods
             foreach (CSharpMethod method in @struct.StaticMethods)
             {
@@ -896,6 +978,76 @@ namespace SSDK.CSC.Conversions
         }
 
         public override void ProcessTriviaComment(CSharpComment comment, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessSwitchStatement(CSharpSwitchStatement statement, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessIfStatement(CSharpIfStatement statement, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessClosedExpression(CSharpClosedExpression expression, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessCastExpression(CSharpCastExpression expression, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessPrefixUnaryExpression(CSharpPrefixUnaryExpression expression, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessInterpolatedStringExpression(CSharpInterpolatedStringExpression expression, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessArrayCreationExpression(CSharpArrayCreationExpression expression, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessIndexAccessExpression(CSharpIndexAccessExpression expression, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessPostfixUnaryExpression(CSharpPostfixUnaryExpression expression, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessWhileStatement(CSharpWhileStatement statement, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessForStatement(CSharpForStatement statement, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessForeachStatement(CSharpForeachStatement statement, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessTupleExpression(CSharpTupleExpression expression, StringBuilder result)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void ProcessTryStatement(CSharpTryStatement statement, StringBuilder result)
         {
             throw new NotImplementedException();
         }

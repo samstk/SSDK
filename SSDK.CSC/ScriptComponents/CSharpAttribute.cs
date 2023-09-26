@@ -34,7 +34,6 @@ namespace SSDK.CSC.ScriptComponents
         internal CSharpAttribute(AttributeSyntax syntax)
         {
             Name = syntax.Name.ToString();
-
             Parameters = syntax.ArgumentList.ToExpressions();
         }
 

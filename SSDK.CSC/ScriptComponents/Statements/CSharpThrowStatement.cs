@@ -9,35 +9,37 @@ using System.Threading.Tasks;
 namespace SSDK.CSC.ScriptComponents.Statements
 {
     /// <summary>
-    /// A c# statement for any expression.
+    /// A c# throw statement for a given expression.
     /// </summary>
-    public sealed class CSharpExpressionStatement : CSharpStatement
+    public sealed class CSharpThrowStatement : CSharpStatement
     {
         #region Properties & Fields
         /// <summary>
-        /// Gets the assignment expression
+        /// Gets the expression thrown
         /// </summary>
         public CSharpExpression Expression { get; private set; }
         #endregion
 
+
         /// <summary>
-        /// Creates a statement for any given c# expression
+        /// Creates the throw statement from the given syntax.
         /// </summary>
-        /// <param name="expression">the expression to embed in this statement</param>
-        public CSharpExpressionStatement(CSharpExpression expression, StatementSyntax syntax)
+        /// <param name="throwSyntax">the syntax to create from</param>
+        internal CSharpThrowStatement(ThrowStatementSyntax throwSyntax)
         {
-            Expression = expression;
-            Syntax = syntax;
+            if (throwSyntax.Expression != null)
+                Expression = throwSyntax.Expression.ToExpression();
+            Syntax = throwSyntax;
         }
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
-            map.ProcessExpressionStatement(this, result);
+            map.ProcessThrowStatement(this, result);
         }
 
         public override string ToString()
         {
-            return $"{Expression};";
+            return $"throw {Expression};";
         }
     }
 }

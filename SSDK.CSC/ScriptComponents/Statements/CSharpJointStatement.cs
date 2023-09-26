@@ -11,6 +11,7 @@ namespace SSDK.CSC.ScriptComponents
 {
     /// <summary>
     /// A c# joint statement, which contains a number of statements in order (e.g. multiple variable declarations)
+    /// No syntax is stored for this type of statement.
     /// </summary>
     public sealed class CSharpJointStatement : CSharpStatement
     {
@@ -25,8 +26,9 @@ namespace SSDK.CSC.ScriptComponents
         /// Creates a new statement block from the given block syntax
         /// </summary>
         /// <param name="syntax">the block syntax</param>
-        internal CSharpJointStatement(CSharpStatement[] statements)
+        internal CSharpJointStatement(CSharpStatement[] statements, StatementSyntax syntax)
         {
+            Syntax = syntax;
             Statements = statements;
             for(int i = 0; i< Statements.Length; i++)
             {

@@ -9,28 +9,28 @@ using System.Threading.Tasks;
 namespace SSDK.CSC.ScriptComponents.Expressions
 {
     /// <summary>
-    /// A C# invocation expression (e.g. a.ToString(true))
+    /// A C# index access expression (e.g. a[3])
     /// </summary>
-    public sealed class CSharpInvocationExpression : CSharpExpression
+    public sealed class CSharpIndexAccessExpression : CSharpExpression
     {
         #region Properties & Fields
         /// <summary>
-        /// Gets the left-hand side expression of this invocation
+        /// Gets the left-hand side expression of this index access
         /// indicating the target.
         /// </summary>
         public CSharpExpression Member { get; private set; }
 
         /// <summary>
-        /// Gets the arguments to be used in this invocation.
+        /// Gets the arguments to be used in this index access.
         /// </summary>
         public CSharpExpression[] Arguments { get; private set; }
         #endregion
 
         /// <summary>
-        /// Creates the invocation expression from the syntax.
+        /// Creates the IndexAccess expression from the syntax.
         /// </summary>
         /// <param name="syntax">the syntax to create from</param>
-        internal CSharpInvocationExpression(InvocationExpressionSyntax syntax)
+        internal CSharpIndexAccessExpression(ElementAccessExpressionSyntax syntax)
         {
             Syntax = syntax;
             Member = syntax.Expression.ToExpression();
@@ -39,12 +39,12 @@ namespace SSDK.CSC.ScriptComponents.Expressions
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
-            map.ProcessInvocationExpression(this, result);
+            map.ProcessIndexAccessExpression(this, result);
         }
 
         public override string ToString()
         {
-            return $"{Member}({Arguments.ToReadableString()})";
+            return $"{Member}[{Arguments.ToReadableString()}]";
         }
     }
 }

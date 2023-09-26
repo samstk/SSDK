@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,10 @@ namespace SSDK.CSC.ScriptComponents
     /// </summary>
     public abstract class CSharpStatement : CSharpComponent
     {
+        /// <summary>
+        /// Gets the syntax that formed this statement.
+        /// </summary>
+        public StatementSyntax Syntax { get; protected set; }
         /// <summary>
         /// Processes the map in the correct corresponding function for this
         /// statement.

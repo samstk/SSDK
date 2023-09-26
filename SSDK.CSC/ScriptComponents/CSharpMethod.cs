@@ -115,7 +115,7 @@ namespace SSDK.CSC.ScriptComponents
             Name = syntax.Identifier.ToString();
 
             Attributes = syntax.AttributeLists.ToAttributes();
-
+            
             ReturnType = syntax.ReturnType.ToType();
 
             Parameters = syntax.ParameterList.ToParameters();

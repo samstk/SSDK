@@ -11,6 +11,10 @@ namespace SSDK.CSC.ScriptComponents.Statements
     /// <summary>
     /// A c# return statement for a given expression.
     /// </summary>
+    /// <remarks>
+    /// Statement Syntax may not be stored for a return statement resulting
+    /// from the arrow operator (e.g. public static int X() => 0);
+    /// </remarks>
     public sealed class CSharpReturnStatement : CSharpStatement
     {
         #region Properties & Fields
@@ -29,16 +33,18 @@ namespace SSDK.CSC.ScriptComponents.Statements
         {
             if (returnSyntax.Expression != null)
                 Expression = returnSyntax.Expression.ToExpression();
+            Syntax = returnSyntax;
         }
 
         /// <summary>
         /// Creates the return statement from the given syntax.
         /// </summary>
         /// <param name="expression">the syntax to create from</param>
-        internal CSharpReturnStatement(ExpressionSyntax expression)
+        internal CSharpReturnStatement(ExpressionSyntax expression, StatementSyntax syntax)
         {
             if(expression != null)
                 Expression = expression.ToExpression();
+            Syntax = syntax;
         }
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)

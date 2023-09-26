@@ -11,7 +11,7 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A c# declared type, which may be used to define variables/fields/properties, parameters or arguments.
     /// </summary>
-    public sealed class CSharpType : CSharpComponent
+    public sealed class CSharpType : CSharpExpression
     {
         /// <summary>
         /// Gets the context's type name used in the code.
@@ -40,6 +40,12 @@ namespace SSDK.CSC.ScriptComponents
         /// it is not an array.
         /// </summary>
         public int ArrayDimensions { get; private set; } = 0;
+
+        /// <summary>
+        /// If true, then the element type contains the actual
+        /// type, and this is a pointer to that type (i.e. elementType*)
+        /// </summary>
+        public bool Pointer { get; private set; } = false;
 
         /// <summary>
         /// Creates a new c# type reference with the given context name and generic types.
@@ -92,6 +98,13 @@ namespace SSDK.CSC.ScriptComponents
                 ArrayDimensions = array.RankSpecifiers[0].Rank;
                 GenericTypes = Empty;
             }
+            else if (typeSyntax is PointerTypeSyntax)
+            {
+                PointerTypeSyntax pointer = ((PointerTypeSyntax)typeSyntax);
+                ElementType = pointer.ElementType.ToType();
+                Pointer = true;
+                Name = "Pointer";
+            }
             else throw new Exception("Unhandled case");
         }
 
@@ -126,6 +139,11 @@ namespace SSDK.CSC.ScriptComponents
             }
 
             return $"{Name}{suffix.ToString()}";
+        }
+
+        public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
+        {
+            map.ProcessType(this, result);
         }
     }
 }

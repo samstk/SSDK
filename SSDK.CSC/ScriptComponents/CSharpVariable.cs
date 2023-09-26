@@ -69,6 +69,11 @@ namespace SSDK.CSC.ScriptComponents
         /// (default expression)
         /// </summary>
         public CSharpExpression Expression { get; private set; }
+
+        /// <summary>
+        /// Gets whether the variable had this specified before it (e.g. this string a)
+        /// </summary>
+        public bool ThisSpecified { get; private set; }
         #endregion
     
         /// <summary>
@@ -84,6 +89,15 @@ namespace SSDK.CSC.ScriptComponents
             {
                 Expression = paramSyntax.Default.ToExpression();
             }
+        }
+
+        /// <summary>
+        /// Creates a c# variable from the given syntax
+        /// </summary>
+        /// <param name="varSyntax">the variablee syntax</param>
+        internal CSharpVariable(VariableDesignationSyntax varSyntax)
+        {
+            
         }
 
         /// <summary>

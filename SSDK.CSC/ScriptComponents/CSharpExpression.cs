@@ -26,5 +26,7 @@ namespace SSDK.CSC.ScriptComponents
         /// <param name="map">the conversion map</param>
         /// <param name="result">the string builder result</param>
         public abstract void ProcessMap(CSharpConversionMap map, StringBuilder result);
+
+        internal static CSharpExpression[] Empty = new CSharpExpression[0];
     }
 }

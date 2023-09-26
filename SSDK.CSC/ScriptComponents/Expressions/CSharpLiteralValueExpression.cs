@@ -29,6 +29,16 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             Value = syntax.Token.Value;
         }
 
+        /// <summary>
+        /// Creates the literal value from the given syntax
+        /// </summary>
+        /// <param name="syntax">the syntax to create from</param>
+        internal CSharpLiteralValueExpression(InterpolatedStringTextSyntax syntax)
+        {
+            Syntax = syntax.Parent as ExpressionSyntax;
+            Value = syntax.TextToken.ValueText;
+        }
+
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
             map.ProcessLiteralValueExpression(this, result);
@@ -38,10 +48,5 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         {
             return $"{Value} ({Value.GetType().Name.ToLower()})";
         }
-    }
-
-    public enum CSharpLiteralType
-    {
-        String,
     }
 }
