@@ -9,27 +9,27 @@ using System.Threading.Tasks;
 namespace SSDK.CSC.ScriptComponents.Statements
 {
     /// <summary>
-    /// A c# break statement.
+    /// A c# continue statement.
     /// </summary>
-    public sealed class CSharpBreakStatement : CSharpStatement
+    public sealed class CSharpContinueStatement : CSharpStatement
     {
         /// <summary>
-        /// Creates the break statement from the given syntax.
+        /// Creates the continue statement from the given syntax.
         /// </summary>
         /// <param name="syntax">the syntax to create from</param>
-        internal CSharpBreakStatement(BreakStatementSyntax syntax)
+        internal CSharpContinueStatement(ContinueStatementSyntax syntax)
         {
             Syntax = syntax;
         }
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
-            map.ProcessBreakStatement(this, result);
+            map.ProcessContinueStatement(this, result);
         }
 
         public override string ToString()
         {
-            return $"break;";
+            return $"continue;";
         }
     }
 }

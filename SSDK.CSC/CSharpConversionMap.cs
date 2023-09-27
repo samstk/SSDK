@@ -42,19 +42,21 @@ namespace SSDK.CSC
         public abstract void ProcessMethod(CSharpMethod method, StringBuilder result);
         public abstract void ProcessNamespace(CSharpNamespace @namespace, StringBuilder result);
         public abstract void ProcessProperty(CSharpProperty property, StringBuilder result);
-        public abstract void ProcessStatementBlock(CSharpStatementBlock statementBlock, StringBuilder result);
+        public abstract void ProcessStatementBlock(CSharpStatementBlock statementBlock, StringBuilder result, bool opened=false);
         public abstract void ProcessVariable(CSharpVariable variable, StringBuilder result);
         public abstract void ProcessParameters(CSharpVariable[] parameters, StringBuilder result);
         public virtual void ProcessExpressions(CSharpExpression[] expressions, StringBuilder result)
         {
             if(expressions.Length > 0)
             {
-                expressions[0].ProcessMap(this, result);
+                if (expressions != null && expressions[0] != null)
+                    expressions[0].ProcessMap(this, result);
 
                 for(int i = 1; i<expressions.Length; i++)
                 {
                     result.Append(", ");
-                    expressions[i].ProcessMap(this, result);
+                    if (expressions[i] != null)
+                        expressions[i].ProcessMap(this, result);
                 }
             }
         }
@@ -79,6 +81,7 @@ namespace SSDK.CSC
         public abstract void ProcessIndexAccessExpression(CSharpIndexAccessExpression expression, StringBuilder result);
         public abstract void ProcessPostfixUnaryExpression(CSharpPostfixUnaryExpression expression, StringBuilder result);
         public abstract void ProcessTupleExpression(CSharpTupleExpression expression, StringBuilder result);
+        public abstract void ProcessCheckedContextExpression(CSharpCheckedContextExpression expression, StringBuilder result);
         #endregion
         #region Statements
         public abstract void ProcessUsingDirective(CSharpUsingDirective usingDirective, StringBuilder result);
@@ -87,11 +90,23 @@ namespace SSDK.CSC
         public abstract void ProcessJointStatement(CSharpJointStatement statement, StringBuilder result);
         public abstract void ProcessSwitchStatement(CSharpSwitchStatement statement, StringBuilder result);
         public abstract void ProcessIfStatement(CSharpIfStatement statement, StringBuilder result);
-
         public abstract void ProcessWhileStatement(CSharpWhileStatement statement, StringBuilder result);
+        public abstract void ProcessDoWhileStatement(CSharpDoWhileStatement statement, StringBuilder result);
         public abstract void ProcessForStatement(CSharpForStatement statement, StringBuilder result);
         public abstract void ProcessForeachStatement(CSharpForeachStatement statement, StringBuilder result);
         public abstract void ProcessTryStatement(CSharpTryStatement statement, StringBuilder result);
+        public abstract void ProcessThrowStatement(CSharpThrowStatement statement, StringBuilder result);
+        public abstract void ProcessBreakStatement(CSharpBreakStatement statement, StringBuilder result);
+        public abstract void ProcessContinueStatement(CSharpContinueStatement statement, StringBuilder result);
+        public abstract void ProcessYieldStatement(CSharpYieldStatement statement, StringBuilder result);
+        public abstract void ProcessGotoStatement(CSharpGotoStatement statement, StringBuilder result);
+        public abstract void ProcessLabelStatement(CSharpLabelStatement statement, StringBuilder result);
+        public abstract void ProcessCheckedContextStatement(CSharpCheckedContextStatement statement, StringBuilder result);
+        public abstract void ProcessUnsafeContextStatement(CSharpUnsafeContextStatement statement, StringBuilder result);
+        public abstract void ProcessFixedContextStatement(CSharpFixedContextStatement statement, StringBuilder result);
+        public abstract void ProcessLockedContextStatement(CSharpLockedContextStatement statement, StringBuilder result);
+
+        public abstract void ProcessUsingStatement(CSharpUsingStatement statement, StringBuilder result);
         #endregion
 
         #region Trivia

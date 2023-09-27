@@ -32,7 +32,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
 
 
         /// <summary>
-        /// Creates the return statement from the given syntax.
+        /// Creates the switch statement from the given syntax.
         /// </summary>
         /// <param name="returnSyntax">the syntax to create from</param>
         internal CSharpSwitchSection(SwitchSectionSyntax syntax)

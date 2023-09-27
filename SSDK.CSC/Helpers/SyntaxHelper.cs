@@ -218,22 +218,63 @@ namespace SSDK.CSC.Helpers
             {
                 return new CSharpWhileStatement((WhileStatementSyntax)syntax);
             }
+            else if (syntax is DoStatementSyntax)
+            {
+                return new CSharpDoWhileStatement((DoStatementSyntax)syntax);
+            }
             else if (syntax is ForEachStatementSyntax)
             {
                 return new CSharpForeachStatement((ForEachStatementSyntax)syntax);
             }
             else if (syntax is UsingStatementSyntax)
             {
-                return null;
+                return new CSharpUsingStatement((UsingStatementSyntax)syntax);
             }
             else if (syntax is ThrowStatementSyntax)
             {
-                return null;
+                return new CSharpThrowStatement((ThrowStatementSyntax)syntax);
             }
             else if (syntax is TryStatementSyntax)
             {
-                return null;
+                return new CSharpTryStatement((TryStatementSyntax)syntax);
             }
+            else if (syntax is BreakStatementSyntax)
+            {
+                return new CSharpBreakStatement((BreakStatementSyntax)syntax);
+            }
+            else if (syntax is ContinueStatementSyntax)
+            {
+                return new CSharpContinueStatement((ContinueStatementSyntax)syntax);
+            }
+            else if (syntax is GotoStatementSyntax)
+            {
+                return new CSharpGotoStatement((GotoStatementSyntax)syntax);
+            }
+            else if (syntax is LabeledStatementSyntax)
+            {
+                return new CSharpLabelStatement((LabeledStatementSyntax)syntax);
+            }
+            else if (syntax is YieldStatementSyntax)
+            {
+                return new CSharpYieldStatement((YieldStatementSyntax)syntax);
+            }
+            else if (syntax is UnsafeStatementSyntax)
+            {
+                return new CSharpUnsafeContextStatement((UnsafeStatementSyntax)syntax);
+            }
+            else if (syntax is FixedStatementSyntax)
+            {
+                return new CSharpFixedContextStatement((FixedStatementSyntax)syntax);
+            }
+            else if (syntax is LockStatementSyntax)
+            {
+                return new CSharpLockedContextStatement((LockStatementSyntax)syntax);
+            }
+            else if (syntax is CheckedStatementSyntax)
+            {
+                return new CSharpCheckedContextStatement((CheckedStatementSyntax)syntax);
+            }
+
             throw new Exception("Unhandled case");
         }
 
@@ -358,6 +399,10 @@ namespace SSDK.CSC.Helpers
             else if (syntax is TypeSyntax)
             {
                 return new CSharpType((TypeSyntax)syntax);
+            }
+            else if (syntax is CheckedExpressionSyntax)
+            {
+                return new CSharpCheckedContextExpression((CheckedExpressionSyntax)syntax);
             }
             else
             throw new Exception("Unhandled case"); 
@@ -533,6 +578,7 @@ namespace SSDK.CSC.Helpers
             return variables;
         }
 
+
         /// <summary>
         /// Gets the c# variables of a given field declaration.
         /// </summary>
@@ -548,6 +594,25 @@ namespace SSDK.CSC.Helpers
             {
                 variables[i] = new CSharpVariable(eventDeclaration.Declaration.Variables[i].Identifier.ToString(),
                     type, attributes, gModifier, modifier, null);
+            }
+
+            return variables;
+        }
+
+        /// <summary>
+        /// Gets the c# variables of a given field declaration.
+        /// </summary>
+        /// <param name="fieldDeclaration">the field declaration to convert</param>
+        /// <returns>the array of c# variables derived from the declaration</returns>
+        internal static CSharpVariable[] ToVariables(this VariableDeclarationSyntax varDeclaration)
+        {
+            CSharpVariable[] variables = new CSharpVariable[varDeclaration.Variables.Count];
+            CSharpAttribute[] attributes = CSharpAttribute.Empty;
+            CSharpType type = varDeclaration.Type.ToType();
+            for (int i = 0; i < varDeclaration.Variables.Count; i++)
+            {
+                variables[i] = new CSharpVariable(varDeclaration.Variables[i].Identifier.ToString(),
+                    type, attributes, CSharpGeneralModifier.None, CSharpAccessModifier.DefaultOrNone, null);
             }
 
             return variables;

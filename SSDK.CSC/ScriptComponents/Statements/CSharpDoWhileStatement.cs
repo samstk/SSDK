@@ -9,7 +9,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
     /// <summary>
     /// A c# while statement for a given expression.
     /// </summary>
-    public sealed class CSharpWhileStatement : CSharpStatement
+    public sealed class CSharpDoWhileStatement : CSharpStatement
     {
         #region Properties & Fields
         /// <summary>
@@ -27,7 +27,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
         /// Creates the while statement from the given syntax.
         /// </summary>
         /// <param name="syntax">the syntax to create from</param>
-        internal CSharpWhileStatement(WhileStatementSyntax syntax)
+        internal CSharpDoWhileStatement(DoStatementSyntax syntax)
         {
             Condition = syntax.Condition.ToExpression();
             Block = new CSharpStatementBlock(syntax.Statement);
@@ -36,12 +36,12 @@ namespace SSDK.CSC.ScriptComponents.Statements
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
-            map.ProcessWhileStatement(this, result);
+            map.ProcessDoWhileStatement(this, result);
         }
 
         public override string ToString()
         {
-            return $"while ({Condition})";
+            return $"do ... while ({Condition})";
         }
     }
 }

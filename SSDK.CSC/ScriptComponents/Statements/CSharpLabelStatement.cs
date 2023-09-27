@@ -9,27 +9,36 @@ using System.Threading.Tasks;
 namespace SSDK.CSC.ScriptComponents.Statements
 {
     /// <summary>
-    /// A c# break statement.
+    /// A c# label statement for a given label.
     /// </summary>
-    public sealed class CSharpBreakStatement : CSharpStatement
+    public sealed class CSharpLabelStatement : CSharpStatement
     {
+        #region Properties & Fields
         /// <summary>
-        /// Creates the break statement from the given syntax.
+        /// Gets the name of the label
+        /// </summary>
+        public string Name { get; set; }
+        #endregion
+
+
+        /// <summary>
+        /// Creates the label statement from the given syntax.
         /// </summary>
         /// <param name="syntax">the syntax to create from</param>
-        internal CSharpBreakStatement(BreakStatementSyntax syntax)
+        internal CSharpLabelStatement(LabeledStatementSyntax syntax)
         {
+            Name = syntax.Identifier.ToString();
             Syntax = syntax;
         }
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
-            map.ProcessBreakStatement(this, result);
+            map.ProcessLabelStatement(this, result);
         }
 
         public override string ToString()
         {
-            return $"break;";
+            return $"{Name}:";
         }
     }
 }
