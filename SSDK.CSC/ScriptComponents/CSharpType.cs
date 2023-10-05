@@ -21,9 +21,10 @@ namespace SSDK.CSC.ScriptComponents
         public string Name { get; private set; }
 
         /// <summary>
-        /// Gets the element type when array dimensions > 0
+        /// Gets the access type when array dimensions > 0, or
+        /// the type being accessed has a namespace included (e.g. System.String)
         /// </summary>
-        public CSharpType ElementType { get; private set; }
+        public CSharpType AccessType { get; private set; }
 
         /// <summary>
         /// Gets the generic type params for this type declaration.
@@ -46,6 +47,13 @@ namespace SSDK.CSC.ScriptComponents
         /// type, and this is a pointer to that type (i.e. elementType*)
         /// </summary>
         public bool Pointer { get; private set; } = false;
+
+        /// <summary>
+        /// If true, then this type is simply a wrapper for a scope
+        /// reference. The name of this type is that of the scope,
+        /// and the access type is set to the actual type (or another ref)
+        /// </summary>
+        public bool IsRefOnly { get; private set; } = false;
 
         /// <summary>
         /// Creates a new c# type reference with the given context name and generic types.
@@ -93,17 +101,24 @@ namespace SSDK.CSC.ScriptComponents
             else if (typeSyntax is ArrayTypeSyntax)
             {
                 ArrayTypeSyntax array = ((ArrayTypeSyntax)typeSyntax);
-                ElementType = new CSharpType(array.ElementType);
-                Name = ElementType.ToString();
+                AccessType = new CSharpType(array.ElementType);
+                Name = AccessType.ToString();
                 ArrayDimensions = array.RankSpecifiers[0].Rank;
                 GenericTypes = Empty;
             }
             else if (typeSyntax is PointerTypeSyntax)
             {
                 PointerTypeSyntax pointer = ((PointerTypeSyntax)typeSyntax);
-                ElementType = pointer.ElementType.ToType();
+                AccessType = pointer.ElementType.ToType();
                 Pointer = true;
                 Name = "Pointer";
+            }
+            else if (typeSyntax is QualifiedNameSyntax)
+            {
+                QualifiedNameSyntax name = ((QualifiedNameSyntax)typeSyntax);
+                Name = ((IdentifierNameSyntax)name.Left).Identifier.ToString();
+                AccessType = name.Right.ToType();
+                IsRefOnly = true;
             }
             else throw new Exception("Unhandled case");
         }
@@ -113,6 +128,38 @@ namespace SSDK.CSC.ScriptComponents
         internal CSharpType(TypeParameterSyntax typeSyntax)
         {
             throw new Exception("Unhandled case");
+        }
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
+        public override bool Equals(object? obj)
+        {
+            if (obj is not CSharpType)
+                return false;
+
+            CSharpType other = (CSharpType)obj;
+
+            if(!(HasGenericTypes != other.HasGenericTypes
+                || ArrayDimensions != other.ArrayDimensions
+                || Pointer != other.Pointer
+                || IsRefOnly != other.IsRefOnly
+                || AccessType != other.AccessType
+                || GenericTypes.Length != other.GenericTypes.Length))
+            {
+                return false;
+            }
+
+            for(int i = 0; i<GenericTypes.Length; i++)
+            {
+                if (other.GenericTypes[i] != GenericTypes[i])
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public override string ToString()

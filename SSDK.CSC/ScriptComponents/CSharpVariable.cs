@@ -57,6 +57,7 @@ namespace SSDK.CSC.ScriptComponents
         public bool IsUnsafe { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Unsafe); } }
         public bool IsVirtual { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Virtual); } }
         public bool IsVolatile { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Volatile); } }
+        public bool IsParams { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Params); } }
         #endregion
 
         /// <summary>
@@ -85,19 +86,11 @@ namespace SSDK.CSC.ScriptComponents
             Name = paramSyntax.Identifier.ToString();
             Type = paramSyntax.Type.ToType();
             Attributes = paramSyntax.AttributeLists.ToAttributes();
+            (GeneralModifier, AccessModifier) = paramSyntax.Modifiers.GetConcreteModifier();
             if (paramSyntax.Default != null)
             {
                 Expression = paramSyntax.Default.ToExpression();
             }
-        }
-
-        /// <summary>
-        /// Creates a c# variable from the given syntax
-        /// </summary>
-        /// <param name="varSyntax">the variablee syntax</param>
-        internal CSharpVariable(VariableDesignationSyntax varSyntax)
-        {
-            
         }
 
         /// <summary>

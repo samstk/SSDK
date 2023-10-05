@@ -8,6 +8,7 @@ using SSDK.CSC.ScriptComponents.Statements;
 using SSDK.CSC.ScriptComponents.Trivia;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Security.Claims;
@@ -91,6 +92,12 @@ namespace SSDK.CSC.Conversions
 
             if (modifier.HasFlag(CSharpGeneralModifier.Volatile))
                 result.Append("volatile");
+
+            if (modifier.HasFlag(CSharpGeneralModifier.Params))
+                result.Append("params");
+
+            if (modifier.HasFlag(CSharpGeneralModifier.Ref))
+                result.Append("ref");
         }
 
         public override void ProcessAssignmentExpression(CSharpAssignmentExpression expression, StringBuilder result)
@@ -136,7 +143,9 @@ namespace SSDK.CSC.Conversions
 
         public override void ProcessBinaryExpression(CSharpBinaryExpression expression, StringBuilder result)
         {
-            throw new NotImplementedException();
+            expression.Left.ProcessMap(this, result);
+            result.Append($" {expression.Operator} ");
+            expression.Right.ProcessMap(this, result);
         }
 
         public override void ProcessClass(CSharpClass @class, StringBuilder result)
@@ -448,11 +457,15 @@ namespace SSDK.CSC.Conversions
 
         public override void ProcessInstantiationExpression(CSharpInstantiationExpression expression, StringBuilder result)
         {
-            result.Append("new ");
-            ProcessType(expression.Type, result);
-            result.Append("(");
-            ProcessExpressions(expression.Arguments, result);
-            result.Append(")");
+            if (!expression.IsArrayInitializer)
+            {
+                result.Append("new ");
+                if (!expression.IsImplicit)
+                    ProcessType(expression.Type, result);
+                result.Append("(");
+                ProcessExpressions(expression.Arguments, result);
+                result.Append(")");
+            }
             if (expression.Initializer.Length > 0)
             {
                 result.Append("{ ");
@@ -463,7 +476,9 @@ namespace SSDK.CSC.Conversions
 
         public override void ProcessLiteralValueExpression(CSharpLiteralValueExpression expression, StringBuilder result)
         {
-            result.Append(((LiteralExpressionSyntax)expression.Syntax).Token.Text);
+            if (expression.Syntax is LiteralExpressionSyntax)
+                result.Append(((LiteralExpressionSyntax)expression.Syntax).Token.Text);
+            else result.Append(expression.Value.ToString());
         }
 
         public override void ProcessMemberAccessExpression(CSharpMemberAccessExpression expression, StringBuilder result)
@@ -482,7 +497,8 @@ namespace SSDK.CSC.Conversions
             result.StartNewWord();
             ProcessGeneralModifier(method.GeneralModifier, result);
 
-            if(!method.IsConstructor) {
+            if (!method.IsConstructor)
+            {
                 result.StartNewWord();
                 ProcessType(method.ReturnType, result);
             }
@@ -519,8 +535,13 @@ namespace SSDK.CSC.Conversions
                     }
                 }
             }
-            result.AppendLine();
-            ProcessStatementBlock(method.Block, result);
+            if (method.Block == null)
+                result.AppendLine(";");
+            else
+            {
+                result.AppendLine();
+                ProcessStatementBlock(method.Block, result);
+            }
         }
 
         public override void ProcessNamespace(CSharpNamespace @namespace, StringBuilder result)
@@ -661,12 +682,25 @@ namespace SSDK.CSC.Conversions
         {
             foreach (CSharpStatement s in statement.Statements)
             {
+                result.StartNewLine();
+                result.Continue();
                 s.ProcessMap(this, result);
                 result.Append(";");
+                
             }
         }
-        public override void ProcessStatementBlock(CSharpStatementBlock statementBlock, StringBuilder result, bool opened = false)
+        public override void ProcessStatementBlock(CSharpStatementBlock statementBlock, StringBuilder result, bool opened = false, bool allowSingleLineBlock = true)
         {
+            if (statementBlock.Statements != null && statementBlock.Statements.Length == 1
+                && !statementBlock.IsMethodBlock && allowSingleLineBlock)
+            {
+                result.Open();
+                result.StartNewLine();
+                result.Continue();
+                statementBlock.Statements[0].ProcessMap(this, result);
+                result.Close();
+                return;
+            }
             if(!opened)
             result.ContinueWithAndOpen("{");
             foreach(CSharpStatement statement in statementBlock.Statements)
@@ -797,9 +831,20 @@ namespace SSDK.CSC.Conversions
 
         public override void ProcessType(CSharpType type, StringBuilder result)
         {
-            if (type.ArrayDimensions > 0)
+            if (type == null)
             {
-                ProcessType(type.ElementType, result);
+                result.Append(" ");
+                return;
+            }
+            if (type.Pointer)
+            {
+                ProcessType(type.AccessType, result);
+                result.Append("*");
+                return;
+            }
+            else if (type.ArrayDimensions > 0)
+            {
+                ProcessType(type.AccessType, result);
                 result.Append("[");
                 for (int i = 1; i < type.ArrayDimensions; i++)
                 {
@@ -839,7 +884,7 @@ namespace SSDK.CSC.Conversions
         /// Additional word seperators that a word can have behind it.
         /// </summary>
         public static char[] WordSeperators = new char[] { '(', '[' };
-        public override void ProcessVariable(CSharpVariable variable, StringBuilder result)
+        public override void ProcessVariable(CSharpVariable variable, StringBuilder result, bool includeType = true)
         {
             ProcessAttributes(variable.Attributes, result);
 
@@ -854,8 +899,11 @@ namespace SSDK.CSC.Conversions
             result.StartNewWord(additionalWordSeperators: WordSeperators);
             ProcessGeneralModifier(variable.GeneralModifier, result);
 
-            result.StartNewWord(additionalWordSeperators: WordSeperators);
-            ProcessType(variable.Type, result);
+            if (includeType)
+            {
+                result.StartNewWord(additionalWordSeperators: WordSeperators);
+                ProcessType(variable.Type, result);
+            }
 
             result.StartNewWord();
             result.Append(variable.Name);
@@ -1017,7 +1065,20 @@ namespace SSDK.CSC.Conversions
             result.Append("if (");
             statement.Condition.ProcessMap(this, result);
             result.Append(")");
+            result.StartNewLine();
             ProcessStatementBlock(statement.Block, result);
+            result.StartNewLine();
+            if (statement.ElseIf != null)
+            {
+                result.ContinueWith("else ");
+                ProcessIfStatement(statement.ElseIf, result);
+            }
+            else if (statement.Else != null)
+            {
+                result.ContinueWith("else ");
+                result.StartNewLine();
+                ProcessStatementBlock(statement.Else, result);
+            }
         }
 
         public override void ProcessClosedExpression(CSharpClosedExpression expression, StringBuilder result)
@@ -1094,17 +1155,38 @@ namespace SSDK.CSC.Conversions
 
         public override void ProcessWhileStatement(CSharpWhileStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append("while (");
+            statement.Condition.ProcessMap(this, result);
+            result.Append(")");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result);
         }
 
         public override void ProcessForStatement(CSharpForStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append("for (");
+            ProcessExpressions(statement.Initializers, result);
+            result.Append("; ");
+            statement.Condition.ProcessMap(this, result);   
+            result.Append("; ");
+            ProcessExpressions(statement.Incrementors, result);
+            result.Append(")");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result);
         }
 
         public override void ProcessForeachStatement(CSharpForeachStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append("foreach (");
+            ProcessType(statement.Type, result);
+            result.StartNewWord();
+            result.Append(statement.Name);
+            result.StartNewWord();
+            result.Append("in ");
+            statement.Target.ProcessMap(this, result);
+            result.Append(")");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result);
         }
 
         public override void ProcessTupleExpression(CSharpTupleExpression expression, StringBuilder result)
@@ -1134,72 +1216,247 @@ namespace SSDK.CSC.Conversions
 
         public override void ProcessTryStatement(CSharpTryStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.StartNewLine();
+            result.ContinueWith("try");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result, allowSingleLineBlock: false);
+            for (int i = 0; i < statement.Catches.Length; i++)
+            {
+                CSharpTryCatch c = statement.Catches[i];
+                result.StartNewLine();
+                result.ContinueWith("catch");
+                if(c.Filter != null)
+                {
+                    result.Append(" (");
+                    c.Filter.ProcessMap(this, result);
+                    result.Append(")");
+                }
+                else if (c.Variable != null)
+                {
+                    result.Append(" (");
+                    ProcessVariable(c.Variable, result);
+                    result.Append(")");
+                }
+                result.StartNewLine();
+                ProcessStatementBlock(statement.FinalBlock, result, allowSingleLineBlock: false);
+            }
+            if(statement.FinalBlock != null)
+            {
+                result.StartNewLine();
+                result.ContinueWith("finally");
+                result.StartNewLine();
+                ProcessStatementBlock(statement.FinalBlock, result, allowSingleLineBlock: false);
+            }
         }
 
         public override void ProcessCheckedContextExpression(CSharpCheckedContextExpression expression, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append(expression.Checked ? "checked(" : "unchecked(");
+            expression.Expression.ProcessMap(this, result);
+            result.Append(")");
         }
 
         public override void ProcessDoWhileStatement(CSharpDoWhileStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append("do");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result);
+            result.StartNewLine();
+            result.ContinueWith("while (");
+            statement.Condition.ProcessMap(this, result);
+            result.Append(")");
         }
 
         public override void ProcessThrowStatement(CSharpThrowStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append("throw ");
+            statement.Expression.ProcessMap(this, result);
+            result.Append(";");
         }
 
         public override void ProcessBreakStatement(CSharpBreakStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append("break;");
         }
 
         public override void ProcessContinueStatement(CSharpContinueStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append("continue;");
         }
 
         public override void ProcessYieldStatement(CSharpYieldStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append($"yield {(statement.IsBreak ? "break" : "return ")}");
+            statement.Expression?.ProcessMap(this, result);
+            result.Append(";");
         }
 
         public override void ProcessGotoStatement(CSharpGotoStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.Append("goto ");
+            statement.Expression.ProcessMap(this, result);
+            result.Append(";");
         }
 
         public override void ProcessLabelStatement(CSharpLabelStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.StartNewLine();
+            result.SetLastIndent();
+            result.ContinueWith(statement.Name);
+            result.Append(":");
+            result.StartNewLine();
         }
 
         public override void ProcessCheckedContextStatement(CSharpCheckedContextStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.StartNewLine();
+            result.Append(statement.Checked ? "checked" : "unchecked");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result);
         }
 
         public override void ProcessUnsafeContextStatement(CSharpUnsafeContextStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.StartNewLine();
+            result.Append("unsafe");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result);
         }
 
         public override void ProcessFixedContextStatement(CSharpFixedContextStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.StartNewLine();
+            result.Append("fixed (");
+            ProcessVariable(statement.Variables[0], result);
+            for (int i = 1; i < statement.Variables.Length; i++)
+            {
+                result.Append(", ");
+                ProcessVariable(statement.Variables[i], result, false);
+            }
+            result.Append(")");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result, allowSingleLineBlock: false);
         }
 
         public override void ProcessLockedContextStatement(CSharpLockedContextStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.StartNewLine();
+            result.Append("locked (");
+            statement.LockTarget.ProcessMap(this, result);
+            result.Append(")");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result, allowSingleLineBlock: false);
         }
 
         public override void ProcessUsingStatement(CSharpUsingStatement statement, StringBuilder result)
         {
-            throw new NotImplementedException();
+            result.StartNewLine();
+            result.Append("using (");
+            if (statement.Expression != null)
+            {
+                statement.Expression.ProcessMap(this, result);
+            }
+            else
+            {
+                ProcessVariable(statement.Variables[0], result);
+                for (int i = 1; i < statement.Variables.Length; i++)
+                {
+                    result.Append(", ");
+                    ProcessVariable(statement.Variables[i], result, false);
+                }
+            }
+            result.Append(")");
+            result.StartNewLine();
+            ProcessStatementBlock(statement.Block, result, allowSingleLineBlock: false);
+        }
+
+        public override void ProcessEmptyStatement(CSharpEmptyStatement statement, StringBuilder result)
+        {
+            result.Append(";");
+        }
+
+        public override void ProcessPatternExpression(CSharpPatternExpression expression, StringBuilder result)
+        {
+            switch(expression.PatternType)
+            {
+                case CSharpPatternType.BinaryAnd:
+                    result.Append("(");
+                    expression.BinaryLeftPattern.ProcessMap(this, result);
+                    result.StartNewWord();
+                    result.Append("and ");
+                    expression.BinaryRightPattern.ProcessMap(this, result);
+                    result.Append(")");
+                    break;
+                case CSharpPatternType.BinaryOr:
+                    result.Append("(");
+                    expression.BinaryLeftPattern.ProcessMap(this, result);
+                    result.StartNewWord();
+                    result.Append("or ");
+                    expression.BinaryRightPattern.ProcessMap(this, result);
+                    result.Append(")");
+                    break;
+                case CSharpPatternType.Constant:
+                    expression.UnaryExpression.ProcessMap(this, result);
+                    break;
+                case CSharpPatternType.Discard:
+                    result.Append("_");
+                    break;
+            }
+        }
+
+        public void ProcessSwitchArm(CSharpSwitchArm arm, StringBuilder result)
+        {
+            result.Continue();
+            arm.Pattern.ProcessMap(this, result);
+            result.StartNewWord();
+            result.Append("=> ");
+            arm.Expression.ProcessMap(this, result);
+        }
+
+        public override void ProcessSwitchExpression(CSharpSwitchExpression expression, StringBuilder result)
+        {
+            expression.Expression.ProcessMap(this, result);
+            result.StartNewWord();
+            result.Append("switch");
+            result.StartNewLine();
+            result.ContinueWithAndOpen("{");
+            if(expression.Arms.Length > 0)
+            {
+                ProcessSwitchArm(expression.Arms[0], result);
+                for(int i = 1; i < expression.Arms.Length; i++)
+                {
+                    result.Append(",");
+                    result.StartNewLine();
+                    ProcessSwitchArm(expression.Arms[i], result);
+                }
+            }
+            result.Close();
+            result.StartNewLine();
+            result.ContinueWith("}");
+            
+        }
+
+        public override void ProcessThrowExpression(CSharpThrowExpression expression, StringBuilder result)
+        {
+            result.Append("throw ");
+            expression.Expression.ProcessMap(this, result);
+        }
+
+        public override void ProcessConditionalExpression(CSharpConditionalExpression expression, StringBuilder result)
+        {
+            expression.Condition.ProcessMap(this, result);
+            result.StartNewWord();
+            result.Append("? ");
+            expression.ExpressionOnTrue.ProcessMap(this, result);
+            result.StartNewWord();
+            result.Append(": ");
+            expression.ExpressionOnFalse.ProcessMap(this, result);
+        }
+
+        public override void ProcessConditionalAccessExpression(CSharpConditionalAccessExpression expression, StringBuilder result)
+        {
+            expression.Target.ProcessMap(this, result);
+            result.Append("?");
         }
     }
 }

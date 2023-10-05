@@ -80,6 +80,15 @@ namespace SSDK.CSC.ScriptComponents
         /// Indicates that a field might be modified by multiple threads that are executing
         /// at the same time.
         /// </summary>
-        Volatile = 16384
+        Volatile = 16384,
+        /// <summary>
+        /// Indicates that the variable is a reference only
+        /// </summary>
+        Ref = 32768,
+        /// <summary>
+        /// Indicates that the variable (inside method parameters) represents all
+        /// parameters after it in an array.
+        /// </summary>
+        Params = 65536
     }
 }

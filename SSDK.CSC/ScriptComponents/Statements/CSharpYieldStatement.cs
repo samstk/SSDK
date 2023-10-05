@@ -30,6 +30,18 @@ namespace SSDK.CSC.ScriptComponents.Statements
                 return Expression == null;
             }
         }
+
+        /// <summary>
+        /// Gets whether the yield statement is simply a yield return
+        /// (i.e. with expression)
+        /// </summary>
+        public bool IsReturn
+        {
+            get
+            {
+                return Expression != null;
+            }
+        }
         #endregion
 
 

@@ -45,6 +45,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
         internal CSharpForeachStatement(ForEachStatementSyntax syntax)
         {
             IsAwaited = syntax.RawKind == (int)SyntaxKind.AwaitKeyword;
+            Name = syntax.Identifier.ToString();
             Target = syntax.Expression.ToExpression();
             Type = syntax.Type.ToType();
             Block = new CSharpStatementBlock(syntax.Statement);

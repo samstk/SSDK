@@ -274,7 +274,14 @@ namespace SSDK.CSC.Helpers
             {
                 return new CSharpCheckedContextStatement((CheckedStatementSyntax)syntax);
             }
-
+            else if (syntax is EmptyStatementSyntax)
+            {
+                return new CSharpEmptyStatement(syntax);
+            }
+            else if (syntax is BlockSyntax)
+            {
+                return new CSharpStatementBlock((BlockSyntax)syntax);
+            }
             throw new Exception("Unhandled case");
         }
 
@@ -321,6 +328,8 @@ namespace SSDK.CSC.Helpers
                     return null;
                 if (expr is CaseSwitchLabelSyntax)
                     return ((CaseSwitchLabelSyntax)expr).Value.ToExpression();
+                if (expr is CasePatternSwitchLabelSyntax)
+                    return new CSharpPatternExpression(((CasePatternSwitchLabelSyntax)expr).Pattern);
                 throw new Exception("Unhandled switch case");
                 }).ToArray();
         }
@@ -380,6 +389,10 @@ namespace SSDK.CSC.Helpers
             {
                 return new CSharpInstantiationExpression((ObjectCreationExpressionSyntax)syntax);
             }
+            else if (syntax is ImplicitObjectCreationExpressionSyntax)
+            {
+                return new CSharpInstantiationExpression((ImplicitObjectCreationExpressionSyntax)syntax);
+            }
             else if (syntax is ArrayCreationExpressionSyntax)
             {
                 return new CSharpArrayCreationExpression((ArrayCreationExpressionSyntax)syntax);
@@ -404,7 +417,26 @@ namespace SSDK.CSC.Helpers
             {
                 return new CSharpCheckedContextExpression((CheckedExpressionSyntax)syntax);
             }
-            else
+            else if (syntax is SwitchExpressionSyntax)
+            {
+                return new CSharpSwitchExpression((SwitchExpressionSyntax)syntax);
+            }
+            else if (syntax is ThrowExpressionSyntax)
+            {
+                return new CSharpThrowExpression((ThrowExpressionSyntax)syntax);
+            }
+            else if (syntax is ConditionalExpressionSyntax)
+            {
+                return new CSharpConditionalExpression((ConditionalExpressionSyntax)syntax);
+            }
+            else if (syntax is ConditionalAccessExpressionSyntax)
+            {
+                return new CSharpConditionalAccessExpression((ConditionalAccessExpressionSyntax)syntax);
+            }
+            else if (syntax is InitializerExpressionSyntax)
+            {
+                return new CSharpInstantiationExpression((InitializerExpressionSyntax)syntax);
+            }
             throw new Exception("Unhandled case"); 
         }
 
@@ -593,7 +625,8 @@ namespace SSDK.CSC.Helpers
             for (int i = 0; i < eventDeclaration.Declaration.Variables.Count; i++)
             {
                 variables[i] = new CSharpVariable(eventDeclaration.Declaration.Variables[i].Identifier.ToString(),
-                    type, attributes, gModifier, modifier, null);
+                    type, attributes, gModifier, modifier, 
+                    eventDeclaration.Declaration.Variables[i].Initializer?.ToExpression());
             }
 
             return variables;
@@ -612,7 +645,8 @@ namespace SSDK.CSC.Helpers
             for (int i = 0; i < varDeclaration.Variables.Count; i++)
             {
                 variables[i] = new CSharpVariable(varDeclaration.Variables[i].Identifier.ToString(),
-                    type, attributes, CSharpGeneralModifier.None, CSharpAccessModifier.DefaultOrNone, null);
+                    type, attributes, CSharpGeneralModifier.None, CSharpAccessModifier.DefaultOrNone,
+                    varDeclaration.Variables[i].Initializer?.ToExpression());
             }
 
             return variables;
@@ -713,6 +747,14 @@ namespace SSDK.CSC.Helpers
                     else if (token.RawKind == (int)SyntaxKind.VolatileKeyword)
                     {
                         generalModifier |= CSharpGeneralModifier.Volatile;
+                    }
+                    else if (token.RawKind == (int)SyntaxKind.ParamsKeyword)
+                    {
+                        generalModifier |= CSharpGeneralModifier.Params;
+                    }
+                    else if (token.RawKind == (int)SyntaxKind.RefKeyword)
+                    {
+                        generalModifier |= CSharpGeneralModifier.Ref;
                     }
                 }
             }

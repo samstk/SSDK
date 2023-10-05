@@ -127,10 +127,12 @@ namespace SSDK.CSC.ScriptComponents
             if(syntax.Body != null)
             {
                 Block = new CSharpStatementBlock(syntax.Body);
+                Block.IsMethodBlock = true;
             }
             else if (syntax.ExpressionBody != null)
             {
                 Block = CSharpStatementBlock.WithReturn(syntax.ExpressionBody.Expression);
+                Block.IsMethodBlock = true;
             }
         }
 
@@ -157,10 +159,12 @@ namespace SSDK.CSC.ScriptComponents
             if (syntax.Body != null)
             {
                 Block = new CSharpStatementBlock(syntax.Body);
+                Block.IsMethodBlock = true;
             }
             else if (syntax.ExpressionBody != null)
             {
                 Block = CSharpStatementBlock.WithReturn(syntax.ExpressionBody.Expression);
+                Block.IsMethodBlock = true;
             }
         }
 
@@ -187,10 +191,12 @@ namespace SSDK.CSC.ScriptComponents
             if (syntax.Body != null)
             {
                 Block = new CSharpStatementBlock(syntax.Body);
+                Block.IsMethodBlock = true;
             }
             else if (syntax.ExpressionBody != null)
             {
                 Block = CSharpStatementBlock.WithReturn(syntax.ExpressionBody.Expression);
+                Block.IsMethodBlock = true;
             }
         }
 

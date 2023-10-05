@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SSDK.CSC.Exceptions;
 using SSDK.CSC.Helpers;
 using SSDK.CSC.ScriptComponents.Statements;
 using System;
@@ -37,6 +38,10 @@ namespace SSDK.CSC.ScriptComponents
             Syntax = syntax;
             Block = new CSharpStatementBlock(syntax.Statement);
             Variables = syntax.Declaration.ToVariables();
+            if(Variables.Length != 1 && Variables.Any((v) => v.Type != Variables[0].Type))
+            {
+                throw new SyntaxOrSemanticException(Syntax);
+            }
         }
 
 

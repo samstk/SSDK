@@ -42,8 +42,8 @@ namespace SSDK.CSC
         public abstract void ProcessMethod(CSharpMethod method, StringBuilder result);
         public abstract void ProcessNamespace(CSharpNamespace @namespace, StringBuilder result);
         public abstract void ProcessProperty(CSharpProperty property, StringBuilder result);
-        public abstract void ProcessStatementBlock(CSharpStatementBlock statementBlock, StringBuilder result, bool opened=false);
-        public abstract void ProcessVariable(CSharpVariable variable, StringBuilder result);
+        public abstract void ProcessStatementBlock(CSharpStatementBlock statementBlock, StringBuilder result, bool opened=false, bool allowSingleLineBlock=true);
+        public abstract void ProcessVariable(CSharpVariable variable, StringBuilder result, bool includeType=true);
         public abstract void ProcessParameters(CSharpVariable[] parameters, StringBuilder result);
         public virtual void ProcessExpressions(CSharpExpression[] expressions, StringBuilder result)
         {
@@ -82,6 +82,11 @@ namespace SSDK.CSC
         public abstract void ProcessPostfixUnaryExpression(CSharpPostfixUnaryExpression expression, StringBuilder result);
         public abstract void ProcessTupleExpression(CSharpTupleExpression expression, StringBuilder result);
         public abstract void ProcessCheckedContextExpression(CSharpCheckedContextExpression expression, StringBuilder result);
+        public abstract void ProcessPatternExpression(CSharpPatternExpression expression, StringBuilder result);
+        public abstract void ProcessSwitchExpression(CSharpSwitchExpression expression, StringBuilder result);
+        public abstract void ProcessThrowExpression(CSharpThrowExpression expression, StringBuilder result);
+        public abstract void ProcessConditionalExpression(CSharpConditionalExpression expression, StringBuilder result);
+        public abstract void ProcessConditionalAccessExpression(CSharpConditionalAccessExpression expression, StringBuilder result);
         #endregion
         #region Statements
         public abstract void ProcessUsingDirective(CSharpUsingDirective usingDirective, StringBuilder result);
@@ -105,12 +110,18 @@ namespace SSDK.CSC
         public abstract void ProcessUnsafeContextStatement(CSharpUnsafeContextStatement statement, StringBuilder result);
         public abstract void ProcessFixedContextStatement(CSharpFixedContextStatement statement, StringBuilder result);
         public abstract void ProcessLockedContextStatement(CSharpLockedContextStatement statement, StringBuilder result);
-
+        public abstract void ProcessEmptyStatement(CSharpEmptyStatement statement, StringBuilder result);
         public abstract void ProcessUsingStatement(CSharpUsingStatement statement, StringBuilder result);
         #endregion
 
         #region Trivia
+        /// <summary>
+        /// As of this version, no documentation is supported.
+        /// </summary>
         public abstract void ProcessTriviaDocumentation(CSharpDoc doc, StringBuilder result);
+        /// <summary>
+        /// As of this version, no documentation is supported.
+        /// </summary>
         public abstract void ProcessTriviaComment(CSharpComment comment, StringBuilder result);
         #endregion
     }

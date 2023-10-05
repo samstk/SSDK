@@ -24,6 +24,11 @@ namespace SSDK.CSC.ScriptComponents.Statements
         public CSharpExpression Filter { get; private set; }
 
         /// <summary>
+        /// Gets the variable declaration (e.g. Exception exc)
+        /// </summary>
+        public CSharpVariable Variable { get; private set; }
+
+        /// <summary>
         /// Gets the syntax that formed this catch
         /// </summary>
         public CatchClauseSyntax Syntax { get; private set; }
@@ -38,6 +43,15 @@ namespace SSDK.CSC.ScriptComponents.Statements
             if(syntax.Filter != null)
             {
                 Filter = syntax.Filter.FilterExpression.ToExpression();
+            }
+            if(syntax.Declaration != null)
+            {
+                Variable = new CSharpVariable(
+                    syntax.Declaration.Identifier.ToString(),
+                    syntax.Declaration.Type.ToType(),
+                    new CSharpAttribute[0],
+                    CSharpGeneralModifier.None, CSharpAccessModifier.DefaultOrNone,
+                    null);
             }
             Block = new CSharpStatementBlock(syntax.Block);
             Syntax = syntax;

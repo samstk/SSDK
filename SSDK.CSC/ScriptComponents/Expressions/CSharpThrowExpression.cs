@@ -10,41 +10,35 @@ using System.Threading.Tasks;
 namespace SSDK.CSC.ScriptComponents.Expressions
 {
     /// <summary>
-    /// A c# cast expression
+    /// A c# throw expression
     /// </summary>
-    public sealed class CSharpCastExpression : CSharpExpression
+    public sealed class CSharpThrowExpression : CSharpExpression
     {
         #region Properties & Fields
         /// <summary>
-        /// Gets the expression to be casted to the type..
+        /// Gets the expression of the exception to be thrown...
         /// </summary>
         public CSharpExpression Expression { get; private set; }
-
-        /// <summary>
-        /// Gets the cast type
-        /// </summary>
-        public CSharpType Type { get; private set; }
         #endregion
 
         /// <summary>
-        /// Creates the cast from the given syntax
+        /// Creates the literal value from the given syntax
         /// </summary>
         /// <param name="syntax">the syntax to create from</param>
-        internal CSharpCastExpression(CastExpressionSyntax syntax)
+        internal CSharpThrowExpression(ThrowExpressionSyntax syntax)
         {
             Syntax = syntax;
             Expression = syntax.Expression.ToExpression();
-            Type = syntax.Type.ToType();
         }
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
-            map.ProcessCastExpression(this, result);
+            map.ProcessThrowExpression(this, result);
         }
 
         public override string ToString()
         {
-            return $"({Type}){Expression}";
+            return $"throw {Expression}";
         }
     }
 }

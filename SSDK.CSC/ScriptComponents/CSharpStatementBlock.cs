@@ -20,6 +20,12 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the statements made in the block in sequence.
         /// </summary>
         public CSharpStatement[] Statements { get; private set; }
+
+        /// <summary>
+        /// If true, then the statement block is the execution block of a
+        /// method.
+        /// </summary>
+        public bool IsMethodBlock { get; internal set; }
         #endregion
 
         /// <summary>

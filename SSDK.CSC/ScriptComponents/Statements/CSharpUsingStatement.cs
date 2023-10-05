@@ -13,7 +13,9 @@ namespace SSDK.CSC.ScriptComponents.Statements
     {
         #region Properties & Fields
         /// <summary>
-        /// Gets the expression that is evaluated to be true or false.
+        /// Gets the expression that is evaluated.
+        /// If not set, then this using statement has a 
+        /// declaration instead.
         /// </summary>
         public CSharpExpression Expression { get; private set; }
 
@@ -21,6 +23,12 @@ namespace SSDK.CSC.ScriptComponents.Statements
         /// Gets the execution block of this while statement.
         /// </summary>
         public CSharpStatementBlock Block { get; private set; }
+
+
+        /// <summary>
+        /// Gets the variables declared for this using context.
+        /// </summary>
+        public CSharpVariable[] Variables { get; private set; }
         #endregion
 
         /// <summary>
@@ -29,7 +37,8 @@ namespace SSDK.CSC.ScriptComponents.Statements
         /// <param name="syntax">the syntax to create from</param>
         internal CSharpUsingStatement(UsingStatementSyntax syntax)
         {
-            Expression = syntax.Expression.ToExpression();
+            Expression = syntax.Expression?.ToExpression();
+            Variables = syntax.Declaration?.ToVariables();
             Block = new CSharpStatementBlock(syntax.Statement);
             Syntax = syntax;
         }
@@ -41,7 +50,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
 
         public override string ToString()
         {
-            return $"using ({Expression}) ...";
+            return $"using ({Variables.ToReadableString()}) ...";
         }
     }
 }

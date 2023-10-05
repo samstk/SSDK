@@ -17,10 +17,10 @@ namespace SSDK.CSC.Helpers
         /// was not previously started.
         /// </summary>
         /// <param name="builder">the string builder</param>
-        public static void StartNewLine(this StringBuilder builder)
+        public static void StartNewLine(this StringBuilder builder, char indentChar='\t')
         {
             
-            if (builder.Length > 0 && builder[builder.Length-1] != '\n' && builder[builder.Length-1] != '\t')
+            if (builder.Length > 0 && builder[builder.Length-1] != '\n' && builder[builder.Length-1] != indentChar)
                 builder.AppendLine();
         }
 
@@ -52,7 +52,17 @@ namespace SSDK.CSC.Helpers
         /// <param name="builder">the string builder</param>
         public static void Continue(this StringBuilder builder, char indentChar = '\t')
         {
-            if (CurrentIndents > 0 && builder[builder.Length - 1] != '\t') builder.Append("".PadLeft(CurrentIndents, indentChar));
+            if (CurrentIndents > 0 && builder[builder.Length - 1] != indentChar) builder.Append("".PadLeft(CurrentIndents, indentChar));
+        }
+
+        /// <summary>
+        /// Removes the last indent from the builder
+        /// </summary>
+        /// <param name="builder">the string builder</param>
+        public static void SetLastIndent(this StringBuilder builder, char indentChar = '\t')
+        {
+            if(builder.Length > 0 && builder[builder.Length-1] == indentChar)
+                builder.Length--;
         }
 
 
@@ -67,7 +77,7 @@ namespace SSDK.CSC.Helpers
         /// <param name="with">the string to append</param>
         public static void ContinueWith(this StringBuilder builder, string with, char indentChar='\t')
         {
-            builder.Continue();
+            builder.Continue(indentChar);
             builder.Append(with);
         }
 
@@ -82,7 +92,7 @@ namespace SSDK.CSC.Helpers
         /// <param name="with">the string to append</param>
         public static void ContinueWithLine(this StringBuilder builder, string with, char indentChar = '\t')
         {
-            builder.Continue();
+            builder.Continue(indentChar);
             builder.AppendLine(with);
         }
 
@@ -98,7 +108,7 @@ namespace SSDK.CSC.Helpers
         /// <param name="with">the string to append</param>
         public static void ContinueWithAndOpen(this StringBuilder builder, string with, char indentChar='\t')
         {
-            builder.Continue();
+            builder.Continue(indentChar);
             builder.AppendLine(with);
 
             builder.Open();
@@ -119,7 +129,7 @@ namespace SSDK.CSC.Helpers
         {
             builder.Close();
 
-            builder.Continue();
+            builder.Continue(indentChar);
             builder.AppendLine(with);
         }
 
