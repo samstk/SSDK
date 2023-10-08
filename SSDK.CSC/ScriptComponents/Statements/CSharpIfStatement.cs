@@ -58,6 +58,17 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessIfStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("if{", parentSymbol, this, false);
+            Block?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Block?.ResolveMembers(project);
+        }
+
         public override string ToString()
         {
             return $"if ({Condition.ToString()})";

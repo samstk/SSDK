@@ -62,5 +62,25 @@ namespace SSDK.CSC.ScriptComponents
             Syntax = SyntaxFactory.ParseSyntaxTree(script);
             RootNamespace = new CSharpNamespace((CompilationUnitSyntax)Syntax.GetRoot());
         }
+
+        /// <summary>
+        /// Correlates all identifiers / members of this script's
+        /// expressions to a created member.
+        /// </summary>
+        /// <remarks>
+        /// Assumes CreateMemberSymbols is called first on every script.
+        /// </remarks>
+        public void ResolveMembers(CSharpProject project)
+        {
+
+        }
+
+        /// <summary>
+        /// Creates new member symbols for the scripts.
+        /// </summary>
+        public void CreateMemberSymbols(CSharpProject project)
+        {
+            RootNamespace?.CreateMemberSymbols(project, null);
+        }
     }
 }

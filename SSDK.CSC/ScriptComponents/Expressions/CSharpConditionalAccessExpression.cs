@@ -36,9 +36,20 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessConditionalAccessExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("?", parentSymbol, this, false);
+            Target?.CreateMemberSymbols(project, Symbol);
+        }
+
         public override string ToString()
         {
             return $"{Target}?";
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Target?.ResolveMembers(project);
         }
     }
 }

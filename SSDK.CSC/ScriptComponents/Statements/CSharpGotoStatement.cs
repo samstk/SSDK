@@ -37,6 +37,16 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessGotoStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+
+        }
+
         public override string ToString()
         {
             return $"goto {Expression};";

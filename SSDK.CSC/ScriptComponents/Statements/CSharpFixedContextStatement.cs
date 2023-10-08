@@ -44,10 +44,19 @@ namespace SSDK.CSC.ScriptComponents
             }
         }
 
-
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("fixed{", parentSymbol, this, false);
+            Block?.CreateMemberSymbols(project, Symbol);
+        }
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
             map.ProcessFixedContextStatement(this, result);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Block?.ResolveMembers(project);
         }
 
         public override string ToString()

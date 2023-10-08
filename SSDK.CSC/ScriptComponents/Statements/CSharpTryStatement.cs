@@ -53,6 +53,27 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessTryStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("try{", parentSymbol, this, false);
+            Block?.CreateMemberSymbols(project, Symbol);
+            foreach(CSharpTryCatch @catch in Catches)
+            {
+                @catch.CreateMemberSymbols(project, Symbol);
+            }
+            FinalBlock?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Block?.ResolveMembers(project);
+            foreach (CSharpTryCatch @catch in Catches)
+            {
+                @catch.ResolveMembers(project);
+            }
+            FinalBlock?.ResolveMembers(project);
+        }
+
         public override string ToString()
         {
             return $"try ... catch ...";

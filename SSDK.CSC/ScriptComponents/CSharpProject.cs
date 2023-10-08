@@ -43,6 +43,12 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the root-level delegates that may be referenced within the project without using directives.
         /// </summary>
         public CSharpDelegate[] Delegates { get; private set; }
+
+        /// <summary>
+        /// Gets all errors that resulted from either a conversion map, or
+        /// resolving all member accesses.
+        /// </summary>
+        public List<string> Errors { get; private set; } = new List<string>();
         #endregion
 
         /// <summary>
@@ -68,6 +74,26 @@ namespace SSDK.CSC.ScriptComponents
             {
                 CSharpScript script = new CSharpScript(scripts[i], scriptsAreFiles, false);
                 Scripts[i] = script;
+            }
+        }
+
+        /// <summary>
+        /// Resolves all member accesses of this project, and
+        /// correlates all simple identifiers with symbols.
+        /// </summary>
+        /// <remarks>
+        /// Adds to the errors list for every detected error.
+        /// </remarks>
+        public void ResolveMembers()
+        {
+            foreach(CSharpScript script in Scripts)
+            {
+                script.CreateMemberSymbols(this);
+            }
+
+            foreach(CSharpScript script in Scripts)
+            {
+                script.ResolveMembers(this);
             }
         }
     }

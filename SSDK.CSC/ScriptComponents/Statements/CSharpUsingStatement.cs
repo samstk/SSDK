@@ -24,7 +24,6 @@ namespace SSDK.CSC.ScriptComponents.Statements
         /// </summary>
         public CSharpStatementBlock Block { get; private set; }
 
-
         /// <summary>
         /// Gets the variables declared for this using context.
         /// </summary>
@@ -46,6 +45,25 @@ namespace SSDK.CSC.ScriptComponents.Statements
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
             map.ProcessUsingStatement(this, result);
+        }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("using{", parentSymbol, this, false);
+            foreach(CSharpVariable variable in Variables)
+            {
+                variable.CreateMemberSymbols(project, Symbol);
+            }
+            Block?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpVariable variable in Variables)
+            {
+                variable.ResolveMembers(project);
+            }
+            Block?.ResolveMembers(project);
         }
 
         public override string ToString()

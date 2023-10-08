@@ -46,6 +46,23 @@ namespace SSDK.CSC.ScriptComponents
             map.ProcessJointStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("(<st>,<st>,..)", parentSymbol, this, false);
+            foreach(CSharpStatement statement in Statements)
+            {
+                statement.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpStatement statement in Statements)
+            {
+                statement.ResolveMembers(project);
+            }
+        }
+
         public override string ToString()
         {
             string result = "";

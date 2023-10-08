@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
 namespace SSDK.CSC.ScriptComponents.Expressions
@@ -44,6 +45,19 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
             map.ProcessBinaryExpression(this, result);
+        }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("expr<a?b>(", parentSymbol, this, false);
+            Left?.CreateMemberSymbols(project, Symbol);
+            Right?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Left?.ResolveMembers(project);
+            Right?.ResolveMembers(project);
         }
 
         public override string ToString()

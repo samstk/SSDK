@@ -9,10 +9,16 @@ namespace SSDK.CSC.ScriptComponents.Statements
     /// <summary>
     /// A c# catch for a try statement.
     /// </summary>
-    public sealed class CSharpTryCatch
+    public sealed class CSharpTryCatch : CSharpComponent
     {
         #region Properties & Fields
-
+        /// <summary>
+        /// Gets the symbol that represents this catch.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project to be set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; internal set; }
         /// <summary>
         /// Gets the execution block of this try statement.
         /// </summary>
@@ -55,6 +61,22 @@ namespace SSDK.CSC.ScriptComponents.Statements
             }
             Block = new CSharpStatementBlock(syntax.Block);
             Syntax = syntax;
+        }
+
+        /// <summary>
+        /// Creates a member symbol for this component
+        /// </summary>
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("catch{", parentSymbol, this, false);
+            Variable?.CreateMemberSymbols(project, Symbol);
+            Block?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Variable?.ResolveMembers(project);
+            Block?.ResolveMembers(project);
         }
 
         public override string ToString()

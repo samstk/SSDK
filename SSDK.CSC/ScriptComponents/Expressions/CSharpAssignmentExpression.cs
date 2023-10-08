@@ -47,9 +47,22 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessAssignmentExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("assign", parentSymbol, this, false);
+            Left?.CreateMemberSymbols(project, Symbol);
+            Right?.CreateMemberSymbols(project, Symbol);
+        }
+
         public override string ToString()
         {
             return $"{Left} {Operator} {Right}";
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Left?.ResolveMembers(project);
+            Right?.ResolveMembers(project);
         }
     }
 }

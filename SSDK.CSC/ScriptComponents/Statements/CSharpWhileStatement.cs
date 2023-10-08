@@ -43,5 +43,16 @@ namespace SSDK.CSC.ScriptComponents.Statements
         {
             return $"while ({Condition})";
         }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("while{", parentSymbol, this, false);
+            Block?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Block?.ResolveMembers(project);
+        }
     }
 }

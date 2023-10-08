@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Operations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,16 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
             map.ProcessLiteralValueExpression(this, result);
+        }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("literal", parentSymbol, this, false);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+
         }
 
         public override string ToString()

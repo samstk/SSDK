@@ -51,6 +51,18 @@ namespace SSDK.CSC.ScriptComponents.Statements
         {
             map.ProcessReturnStatement(this, result);
         }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("return", parentSymbol, this, false);
+            Expression?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Expression?.ResolveMembers(project);
+        }
+
         public override string ToString()
         {
             return Expression != null ? $"return {Expression};" : "return;";

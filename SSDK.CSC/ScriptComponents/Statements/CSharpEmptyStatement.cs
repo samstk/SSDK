@@ -27,6 +27,16 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessEmptyStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            // There doesn't exist a symbol for terminating, non-referencing components.
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        { 
+
+        }
+
         public override string ToString()
         {
             return $";";

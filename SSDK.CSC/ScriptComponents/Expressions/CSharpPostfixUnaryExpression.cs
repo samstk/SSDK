@@ -42,6 +42,17 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessPostfixUnaryExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("expr<a?>", parentSymbol, this, false);
+            On?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            On?.ResolveMembers(project);
+        }
+
         public override string ToString()
         {
             return $"{On}{Operator}";

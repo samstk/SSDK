@@ -89,6 +89,21 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessPatternExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("pattern", parentSymbol, this, false);
+            BinaryLeftPattern?.CreateMemberSymbols(project, Symbol);
+            BinaryRightPattern?.CreateMemberSymbols(project, Symbol);
+            UnaryExpression?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            BinaryLeftPattern?.ResolveMembers(project);
+            BinaryRightPattern?.ResolveMembers(project);
+            UnaryExpression?.ResolveMembers(project);
+        }
+
         public override string ToString()
         {
             return $"<pattern>";

@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using SSDK.CSC.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +17,22 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets the symbol that represents this component.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project before being set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; private set; }
+
+        /// <summary>
         /// Gets the name of this namespace.
         /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// Gets the attributes of the namespace.
+        /// </summary>
+        public CSharpAttribute[] Attributes { get; private set; }
 
         /// <summary>
         /// Gets the using directives of this namespace.
@@ -34,11 +48,6 @@ namespace SSDK.CSC.ScriptComponents
         /// Contains all child namespaces that may contain code.
         /// </summary>
         public CSharpNamespace[] Namespaces { get; private set; }
-
-        /// <summary>
-        /// Gets the different subregions (as per region directive) of this namespace.
-        /// </summary>
-        public CSharpNamespace[] Regions { get; private set; }
 
         /// <summary>
         /// Gets the child classes that may be referenced within the project under this namespace.
@@ -80,12 +89,14 @@ namespace SSDK.CSC.ScriptComponents
         internal CSharpNamespace(CompilationUnitSyntax unitSyntax)
         {
             CompilationUnitSyntax = unitSyntax;
+            Attributes = unitSyntax.AttributeLists.ToAttributes();
             AddUsings(unitSyntax.Usings);
             AddMembers(unitSyntax.Members);
         }
 
         internal CSharpNamespace(NamespaceDeclarationSyntax namespaceSyntax)
         {
+            Attributes = namespaceSyntax.AttributeLists.ToAttributes();
             Syntax = namespaceSyntax;
             Name = namespaceSyntax.Name.ToString();
             AddUsings(namespaceSyntax.Usings);
@@ -102,7 +113,7 @@ namespace SSDK.CSC.ScriptComponents
             UsingDirectives = new CSharpUsingDirective[usings.Count];
             for (int i = 0; i < usings.Count; i++)
             {
-                UsingDirectives[i] = new CSharpUsingDirective(usings[i]);
+                UsingDirectives[i] = new CSharpUsingDirective(usings[i], this);
             }
         }
 
@@ -121,7 +132,7 @@ namespace SSDK.CSC.ScriptComponents
                 }
                 else if (member is NamespaceDeclarationSyntax)
                 {
-                    namespaces.Add(new CSharpNamespace((NamespaceDeclarationSyntax)member));
+                    namespaces.Add(new CSharpNamespace((NamespaceDeclarationSyntax)member) { Parent = this });
                 }
                 else if (member is ClassDeclarationSyntax)
                 {
@@ -142,6 +153,69 @@ namespace SSDK.CSC.ScriptComponents
             Classes = classes.ToArray();
             Structs = structs.ToArray();
             Enums = enums.ToArray();
+        }
+
+        /// <summary>
+        /// Creates new member symbols for the members of the namespace,
+        /// and the namespace itself.
+        /// </summary>
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            if (Name != null)
+                Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+
+            foreach (CSharpClass @class in Classes)
+            {
+                @class.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpStruct @struct in Structs)
+            {
+                @struct.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpEnum @enum in Enums)
+            {
+                @enum.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpDelegate @delegate in Delegates)
+            {
+                @delegate.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpNamespace @namespace in Namespaces)
+            {
+                @namespace.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpClass @class in Classes)
+            {
+                @class.ResolveMembers(project);
+            }
+
+            foreach (CSharpStruct @struct in Structs)
+            {
+                @struct.ResolveMembers(project);
+            }
+
+            foreach (CSharpEnum @enum in Enums)
+            {
+                @enum.ResolveMembers(project);
+            }
+
+            foreach (CSharpDelegate @delegate in Delegates)
+            {
+                @delegate.ResolveMembers(project);
+            }
+
+            foreach (CSharpNamespace @namespace in Namespaces)
+            {
+                @namespace.ResolveMembers(project);
+            }
         }
 
         public override string ToString()

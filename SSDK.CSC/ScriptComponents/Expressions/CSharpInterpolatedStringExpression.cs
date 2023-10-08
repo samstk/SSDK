@@ -52,5 +52,22 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         {
             return $"$\"...\"";
         }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("$\"", parentSymbol, this, false);
+            foreach(CSharpExpression expression in Contents)
+            {
+                expression?.CreateMemberSymbols(project, parentSymbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpExpression expression in Contents)
+            {
+                expression?.ResolveMembers(project);
+            }
+        }
     }
 }

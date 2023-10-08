@@ -12,9 +12,17 @@ namespace SSDK.CSC.ScriptComponents
     /// <summary>
     /// A c# property, which has get and set permissions that may differ each property.
     /// </summary>
-    public class CSharpProperty
+    public class CSharpProperty : CSharpComponent
     {
         #region Properties & Fields
+        /// <summary>
+        /// Gets the symbol that represents this component.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project before being set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; private set; }
+
         /// <summary>
         /// Gets the attributes of the variable
         /// </summary>
@@ -92,6 +100,7 @@ namespace SSDK.CSC.ScriptComponents
         public bool IsVolatile { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Volatile); } }
         #endregion
         #endregion
+        
 
         internal CSharpProperty(PropertyDeclarationSyntax syntax)
         {
@@ -134,6 +143,22 @@ namespace SSDK.CSC.ScriptComponents
                     HasSetAccess = true;
                 }
             }
+        }
+
+        /// <summary>
+        /// Creates a member symbol for this component
+        /// </summary>
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+
+            Get?.CreateMemberSymbols(project, Symbol);
+            Set?.CreateMemberSymbols(project, Symbol);
+        }
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Get?.ResolveMembers(project);
+            Set?.ResolveMembers(project);
         }
     }
 }

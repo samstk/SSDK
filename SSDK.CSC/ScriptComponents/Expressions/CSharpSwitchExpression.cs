@@ -3,6 +3,8 @@ using SSDK.CSC;
 using System.Text;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SSDK.CSC.Helpers;
+using SSDK.CSC.ScriptComponents.Statements;
+using static System.Collections.Specialized.BitVector32;
 
 namespace SSDK.CSC.ScriptComponents.Expressions
 {
@@ -42,6 +44,24 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
             map.ProcessSwitchExpression(this, result);
+        }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("switch(", parentSymbol, this, false);
+
+            foreach (CSharpSwitchArm arm in Arms)
+            {
+                arm?.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpSwitchArm arm in Arms)
+            {
+                arm?.ResolveMembers(project);
+            }
         }
 
         public override string ToString()

@@ -192,5 +192,16 @@ namespace SSDK.CSC.ScriptComponents
         {
             map.ProcessType(this, result);
         }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            // Technically, a type in the CSC package is simply a reference to a symbol, so
+            // it must be set in the ResolveMembers.
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            
+        }
     }
 }

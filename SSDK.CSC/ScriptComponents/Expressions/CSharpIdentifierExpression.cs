@@ -35,6 +35,17 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessIdentifierExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            // Technically, an identifier is a reference to something, so it must be set
+            // in ResolveMembers (through parent reference).
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+
+        }
+
         public override string ToString()
         {
             return $"{Name}";

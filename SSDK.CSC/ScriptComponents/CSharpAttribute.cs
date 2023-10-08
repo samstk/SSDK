@@ -41,5 +41,22 @@ namespace SSDK.CSC.ScriptComponents
         {
             return $"[{Name}({Parameters.ToReadableString()})]";
         }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("attr[", parentSymbol, this, false);
+            foreach(CSharpExpression param in Parameters)
+            {
+                param.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpExpression param in Parameters)
+            {
+                param.ResolveMembers(project);
+            }
+        }
     }
 }

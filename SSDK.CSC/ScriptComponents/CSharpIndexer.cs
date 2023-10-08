@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SSDK.CSC.Helpers;
 using SSDK.CSC.ScriptComponents.Expressions;
@@ -7,15 +8,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace SSDK.CSC.ScriptComponents
 {
     /// <summary>
     /// A c# indexer, which has get and set permissions on a index (e.g. this[x])
     /// </summary>
-    public class CSharpIndexer
+    public class CSharpIndexer : CSharpComponent
     {
         #region Properties & Fields
+        /// <summary>
+        /// Gets the symbol that represents this component.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project before being set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; private set; }
+
         /// <summary>
         /// Gets the attributes of the indexer
         /// </summary>
@@ -126,6 +136,23 @@ namespace SSDK.CSC.ScriptComponents
             }
 
             Parameters = syntax.ParameterList.ToVariables();
+        }
+
+        /// <summary>
+        /// Creates a member symbol for this component
+        /// </summary>
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("[]", parentSymbol, this);
+
+            Get?.CreateMemberSymbols(project, Symbol);
+            Set?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Get?.ResolveMembers(project);
+            Set?.ResolveMembers(project);
         }
     }
 }

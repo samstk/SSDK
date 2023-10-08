@@ -15,9 +15,12 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SSDK.CSC.Conversions
+namespace SSDK.CSC.ConversionsMaps
 {
-
+    /// <summary>
+    /// A conversion map (mainly for testing purposes). Removes all 
+    /// trivia from the c# code (including pragma, region directives)
+    /// </summary>
     public sealed class CSharpUnstyleConversionMap : CSharpConversionMap
     {
         public bool IncludeTrivia = true;
@@ -261,6 +264,13 @@ namespace SSDK.CSC.Conversions
                 result.StartNewLine();
                 ProcessMethod(method, result);
             }
+
+            // Operator methods
+            foreach (CSharpMethod method in @class.Operators)
+            {
+                result.StartNewLine();
+                ProcessMethod(method, result);
+            }
         }
         public override void ProcessParameters(CSharpVariable[] parameters, StringBuilder result)
         {
@@ -497,13 +507,31 @@ namespace SSDK.CSC.Conversions
             result.StartNewWord();
             ProcessGeneralModifier(method.GeneralModifier, result);
 
-            if (!method.IsConstructor)
+            if (!method.IsConstructor && !method.IsImplicitOperator && !method.IsExplicitOperator)
             {
                 result.StartNewWord();
                 ProcessType(method.ReturnType, result);
             }
+
             result.StartNewWord();
-            result.Append(method.Name);
+            
+            if (method.IsOperator)
+            {
+                if (method.IsImplicitOperator)
+                    result.Append("implicit ");
+                else if (method.IsExplicitOperator)
+                    result.Append("explicit ");
+                result.Append("operator ");
+            }
+
+            if (method.IsImplicitOperator || method.IsExplicitOperator)
+            {
+                ProcessType(method.ReturnType, result);
+            }
+            else
+            {
+                result.Append(method.Name);
+            }
 
             if (method.TypeParameters.Length > 0)
             {
@@ -546,7 +574,9 @@ namespace SSDK.CSC.Conversions
 
         public override void ProcessNamespace(CSharpNamespace @namespace, StringBuilder result)
         {
-            foreach(CSharpUsingDirective usingDirective in @namespace.UsingDirectives)
+            ProcessAttributes(@namespace.Attributes, result);
+
+            foreach (CSharpUsingDirective usingDirective in @namespace.UsingDirectives)
             {
                 result.StartNewLine();
                 ProcessUsingDirective(usingDirective, result);
@@ -1341,7 +1371,7 @@ namespace SSDK.CSC.Conversions
         public override void ProcessLockedContextStatement(CSharpLockedContextStatement statement, StringBuilder result)
         {
             result.StartNewLine();
-            result.Append("locked (");
+            result.Append("lock (");
             statement.LockTarget.ProcessMap(this, result);
             result.Append(")");
             result.StartNewLine();

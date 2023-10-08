@@ -85,6 +85,37 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessInstantiationExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("new(", parentSymbol, this, false);
+            if (Arguments != null)
+            {
+                foreach (CSharpExpression expression in Arguments)
+                {
+                    expression?.CreateMemberSymbols(project, Symbol);
+                }
+            }
+            foreach(CSharpExpression expression in Initializer)
+            {
+                expression?.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            if (Arguments != null)
+            {
+                foreach (CSharpExpression expression in Arguments)
+                {
+                    expression?.ResolveMembers(project);
+                }
+            }
+            foreach (CSharpExpression expression in Initializer)
+            {
+                expression?.ResolveMembers(project);
+            }
+        }
+
         public override string ToString()
         {
             return $"new {Type}({Arguments.ToReadableString()}) "+"{ "+Initializer.ToReadableString()+" }";

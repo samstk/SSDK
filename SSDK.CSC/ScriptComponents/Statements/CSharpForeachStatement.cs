@@ -57,6 +57,21 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessForeachStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("foreach{", parentSymbol, this, false);
+            new CSharpMemberSymbol(Name, Symbol, null, true);
+
+            Target?.CreateMemberSymbols(project, Symbol);
+            Block?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Target?.ResolveMembers(project);
+            Block?.ResolveMembers(project);
+        }
+
         public override string ToString()
         {
             return $"foreach ()";

@@ -15,6 +15,14 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets the symbol that represents this component.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project before being set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; private set; }
+
+        /// <summary>
         /// Gets the type of the variable
         /// </summary>
         public CSharpType Type { get; private set; }
@@ -120,6 +128,18 @@ namespace SSDK.CSC.ScriptComponents
         public override string ToString()
         {
             return $"{Attributes.ToReadablePrefix()}{AccessModifier.ToReadablePrefix()} {GeneralModifier.ToReadablePrefix()}{Type} {Name}{(Expression != null ? $" = {Expression}" : "")}";
+        }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+
+            Expression?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Expression?.ResolveMembers(project);
         }
     }
 }

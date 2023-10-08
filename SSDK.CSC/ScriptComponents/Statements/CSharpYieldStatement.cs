@@ -65,5 +65,16 @@ namespace SSDK.CSC.ScriptComponents.Statements
         {
             return $"yield {(IsBreak ? "break": "return")} {Expression};";
         }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("yield(", parentSymbol, this, false);
+            Expression?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Expression?.ResolveMembers(project);
+        }
     }
 }

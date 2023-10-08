@@ -46,9 +46,19 @@ namespace SSDK.CSC.ScriptComponents
             map.ProcessLockedContextStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("lock{", parentSymbol, this, false);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+
+        }
+
         public override string ToString()
         {
-            return $"locked ({LockTarget}) ...";
+            return $"lock ({LockTarget}) ...";
         }
     }
 }

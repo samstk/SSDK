@@ -47,6 +47,17 @@ namespace SSDK.CSC.ScriptComponents
             map.ProcessCheckedContextExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol(Checked ? "checked(" : "unchecked(", parentSymbol, this, false);
+            Expression?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Expression?.ResolveMembers(project);
+        }
+
         public override string ToString()
         {
             return Checked ? "checked (...)" : "unchecked (...)";

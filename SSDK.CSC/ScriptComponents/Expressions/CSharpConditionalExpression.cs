@@ -48,6 +48,21 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessConditionalExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("?:(", parentSymbol, this, false);
+            Condition?.CreateMemberSymbols(project, Symbol);
+            ExpressionOnTrue?.CreateMemberSymbols(project, Symbol);
+            ExpressionOnFalse?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Condition?.ResolveMembers(project);
+            ExpressionOnTrue?.ResolveMembers(project);
+            ExpressionOnFalse?.ResolveMembers(project);
+        }
+
         public override string ToString()
         {
             return $"{Condition} ? {ExpressionOnTrue} : {ExpressionOnFalse}";

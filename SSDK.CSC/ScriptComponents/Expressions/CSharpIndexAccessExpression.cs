@@ -42,6 +42,25 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessIndexAccessExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("[", parentSymbol, this, false);
+            Member?.CreateMemberSymbols(project, parentSymbol);
+            foreach(CSharpExpression expr in Arguments)
+            {
+                expr?.CreateMemberSymbols(project, parentSymbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Member?.ResolveMembers(project);
+            foreach (CSharpExpression expr in Arguments)
+            {
+                expr?.ResolveMembers(project);
+            }
+        }
+
         public override string ToString()
         {
             return $"{Member}[{Arguments.ToReadableString()}]";

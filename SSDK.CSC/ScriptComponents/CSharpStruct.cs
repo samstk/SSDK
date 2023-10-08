@@ -17,6 +17,14 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets the symbol that represents this component.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project before being set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; private set; }
+
+        /// <summary>
         /// Gets the name of the class
         /// </summary>
         public string Name { get; private set; }
@@ -182,6 +190,7 @@ namespace SSDK.CSC.ScriptComponents
             List<CSharpIndexer> indexers = new List<CSharpIndexer>();
             List<CSharpVariable> staticFields = new List<CSharpVariable>();
             List<CSharpVariable> instanceFields = new List<CSharpVariable>();
+            List<CSharpMethod> operators = new List<CSharpMethod>();
             foreach (MemberDeclarationSyntax member in members)
             {
                 if (member is ClassDeclarationSyntax)
@@ -260,6 +269,10 @@ namespace SSDK.CSC.ScriptComponents
                 {
                     indexers.Add(new CSharpIndexer((IndexerDeclarationSyntax)member));
                 }
+                else if (member is OperatorDeclarationSyntax)
+                {
+                    operators.Add(new CSharpMethod((OperatorDeclarationSyntax)member));
+                }
             }
 
             Subclasses = classes.ToArray();
@@ -274,6 +287,156 @@ namespace SSDK.CSC.ScriptComponents
             StaticFields = staticFields.ToArray();
             InstanceFields = instanceFields.ToArray();
             Indexers = indexers.ToArray();
+            Operators = operators.ToArray();
+        }
+
+        /// <summary>
+        /// Creates a member symbol for this component
+        /// </summary>
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+
+            foreach (CSharpClass @class in Subclasses)
+            {
+                @class.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpStruct @struct in Substructs)
+            {
+                @struct.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpEnum @enum in Subenums)
+            {
+                @enum.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpDelegate @delegate in Delegates)
+            {
+                @delegate.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpMethod method in StaticMethods)
+            {
+                method.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpMethod method in InstanceMethods)
+            {
+                method.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpMethod method in InstanceConstructors)
+            {
+                method.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpMethod method in Operators)
+            {
+                method.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpIndexer indexer in Indexers)
+            {
+                indexer.CreateMemberSymbols(project, Symbol);
+            }
+
+            InstanceDestructor?.CreateMemberSymbols(project, Symbol);
+            StaticConstructor?.CreateMemberSymbols(project, Symbol);
+            StaticDestructor?.CreateMemberSymbols(project, Symbol);
+
+            foreach (CSharpProperty property in InstanceProperties)
+            {
+                property.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpProperty property in StaticProperties)
+            {
+                property.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpVariable field in InstanceFields)
+            {
+                field.CreateMemberSymbols(project, Symbol);
+            }
+
+            foreach (CSharpVariable field in StaticFields)
+            {
+                field.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpClass @class in Subclasses)
+            {
+                @class.ResolveMembers(project);
+            }
+
+            foreach (CSharpStruct @struct in Substructs)
+            {
+                @struct.ResolveMembers(project);
+            }
+
+            foreach (CSharpEnum @enum in Subenums)
+            {
+                @enum.ResolveMembers(project);
+            }
+
+            foreach (CSharpDelegate @delegate in Delegates)
+            {
+                @delegate.ResolveMembers(project);
+            }
+
+            foreach (CSharpMethod method in StaticMethods)
+            {
+                method.ResolveMembers(project);
+            }
+
+            foreach (CSharpMethod method in InstanceMethods)
+            {
+                method.ResolveMembers(project);
+            }
+
+            foreach (CSharpMethod method in InstanceConstructors)
+            {
+                method.ResolveMembers(project);
+            }
+
+            foreach (CSharpMethod method in Operators)
+            {
+                method.ResolveMembers(project);
+            }
+
+            foreach (CSharpIndexer indexer in Indexers)
+            {
+                indexer.ResolveMembers(project);
+            }
+
+            InstanceDestructor?.ResolveMembers(project);
+            StaticConstructor?.ResolveMembers(project);
+            StaticDestructor?.ResolveMembers(project);
+
+            foreach (CSharpProperty property in InstanceProperties)
+            {
+                property.ResolveMembers(project);
+            }
+
+            foreach (CSharpProperty property in StaticProperties)
+            {
+                property.ResolveMembers(project);
+            }
+
+            foreach (CSharpVariable field in InstanceFields)
+            {
+                field.ResolveMembers(project);
+            }
+
+            foreach (CSharpVariable field in StaticFields)
+            {
+                field.ResolveMembers(project);
+            }
         }
     }
 }

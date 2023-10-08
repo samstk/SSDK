@@ -35,6 +35,17 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessExpressionStatement(this, result);
         }
 
+        internal override void ResolveMembers(CSharpProject project)
+        {
+
+        }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("(", parentSymbol, this, false);
+            Expression?.CreateMemberSymbols(project, Symbol);
+        }
+
         public override string ToString()
         {
             return $"{Expression};";

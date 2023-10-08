@@ -31,5 +31,15 @@ namespace SSDK.CSC.ScriptComponents.Statements
         {
             return $"break;";
         }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("break", parentSymbol, this, false);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+
+        }
     }
 }

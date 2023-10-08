@@ -38,9 +38,14 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the syntax that declared this directive.
         /// </summary>
         public new UsingDirectiveSyntax Syntax { get; private set; }
+
+        /// <summary>
+        /// Gets the parent namespace that requires this using directive.
+        /// </summary>
+        public CSharpNamespace ParentNamespace { get; private set; }
         #endregion
 
-        internal CSharpUsingDirective(UsingDirectiveSyntax syntax)
+        internal CSharpUsingDirective(UsingDirectiveSyntax syntax, CSharpNamespace parentNamespace)
         {
             Syntax = syntax;
             
@@ -49,12 +54,32 @@ namespace SSDK.CSC.ScriptComponents
             
             Target = syntax.Name.ToString();
 
+            ParentNamespace = parentNamespace;
+
             IsStatic = syntax.StaticKeyword.Value != null;
         }
 
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
         {
             map.ProcessUsingDirective(this, result);
+        }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            if (Alias != null)
+            {
+                Symbol = new CSharpMemberSymbol(Alias, parentSymbol, this);
+            } // else a using directive does not create a symbol, instead
+              // it simply loads all symbols of that referenced namespace
+              // under the using's parent symbol.
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            if(Alias == null)
+            {
+                // ParentNamespace?.Symbol.LoadSymbols(project.GetChildrenOfSymbol(Target));
+            }
         }
 
         public override string ToString()

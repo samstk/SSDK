@@ -27,6 +27,16 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessContinueStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("continue", parentSymbol, this, false);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+
+        }
+
         public override string ToString()
         {
             return $"continue;";

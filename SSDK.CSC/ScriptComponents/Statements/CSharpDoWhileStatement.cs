@@ -39,6 +39,17 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessDoWhileStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("do{", parentSymbol, this, false);
+            Block?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Condition?.ResolveMembers(project);
+            Block?.ResolveMembers(project);
+        }
         public override string ToString()
         {
             return $"do ... while ({Condition})";

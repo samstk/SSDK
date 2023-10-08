@@ -65,9 +65,43 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             map.ProcessArrayCreationExpression(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("expr", parentSymbol, this, false);
+            foreach (CSharpExpression[] rank in Ranks)
+            {
+                CSharpMemberSymbol sym = new CSharpMemberSymbol("rank[", parentSymbol, this, false);
+                foreach(CSharpExpression rankExpr in rank)
+                {
+                    rankExpr?.CreateMemberSymbols(project, sym);
+                }
+            }
+            foreach(CSharpExpression init in Initializer)
+            {
+                init?.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+
+
         public override string ToString()
         {
             return $"new {Type}[] " + "{ " + Initializer.ToReadableString() + " }";
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpExpression[] rank in Ranks)
+            {
+                foreach (CSharpExpression rankExpr in rank)
+                {
+                    rankExpr?.ResolveMembers(project);
+                }
+            }
+            foreach (CSharpExpression init in Initializer)
+            {
+                init?.ResolveMembers(project);
+            }
         }
     }
 }

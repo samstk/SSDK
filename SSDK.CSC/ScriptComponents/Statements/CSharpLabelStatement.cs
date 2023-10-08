@@ -36,6 +36,16 @@ namespace SSDK.CSC.ScriptComponents.Statements
             map.ProcessLabelStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol(Name, parentSymbol, this, true);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            
+        }
+
         public override string ToString()
         {
             return $"{Name}:";

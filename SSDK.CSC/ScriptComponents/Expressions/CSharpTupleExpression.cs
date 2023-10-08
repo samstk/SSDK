@@ -69,5 +69,34 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         {
             return $"({TupleElements.ToReadableString()})";
         }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("tuple", parentSymbol, this, false);
+
+            // Tuple designations occur in the context of the parent symbol
+            foreach(CSharpVariable variable in Designations)
+            {
+                variable?.CreateMemberSymbols(project, parentSymbol);
+            }
+
+            foreach(CSharpExpression expression in TupleElements)
+            {
+                expression?.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            foreach (CSharpVariable variable in Designations)
+            {
+                variable?.ResolveMembers(project);
+            }
+
+            foreach (CSharpExpression expression in TupleElements)
+            {
+                expression?.ResolveMembers(project);
+            }
+        }
     }
 }

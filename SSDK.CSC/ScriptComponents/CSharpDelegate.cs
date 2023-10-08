@@ -16,6 +16,14 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets the symbol that represents this component.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project before being set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; private set; }
+
+        /// <summary>
         /// Gets all attributes applied to this component.
         /// </summary>
         public CSharpAttribute[] Attributes { get; private set; }
@@ -74,6 +82,19 @@ namespace SSDK.CSC.ScriptComponents
             TypeParameters = syntax.TypeParameterList.ToNames();
 
             TypeConstraints = syntax.ConstraintClauses.ToTypeConstraints();
+        }
+
+        /// <summary>
+        /// Creates a member symbol for this component
+        /// </summary>
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            
         }
 
         public override string ToString()

@@ -15,6 +15,14 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets the symbol that represents this component.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project before being set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; private set; }
+
+        /// <summary>
         /// Gets the name of the class
         /// </summary>
         public string Name { get; private set; }
@@ -63,6 +71,24 @@ namespace SSDK.CSC.ScriptComponents
                 Values[i] = new CSharpEnumValue(syntax.Members[i]);
             }
             Syntax = syntax;
+        }
+
+        /// <summary>
+        /// Creates a member symbol for this component
+        /// </summary>
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+
+            foreach (CSharpEnumValue value in Values)
+            {
+                value.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+
         }
     }
 }

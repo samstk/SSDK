@@ -43,6 +43,25 @@ namespace SSDK.CSC.ScriptComponents.Statements {
             map.ProcessSwitchStatement(this, result);
         }
 
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("switch{", parentSymbol, this, false);
+            Expression?.CreateMemberSymbols(project, Symbol);
+            foreach (CSharpSwitchSection section in Sections)
+            {
+                section?.CreateMemberSymbols(project, Symbol);
+            }
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Expression?.ResolveMembers(project);
+            foreach (CSharpSwitchSection section in Sections)
+            {
+                section?.ResolveMembers(project);
+            }
+        }
+
         public override string ToString()
         {
             return $"switch ({Expression.ToString()})";

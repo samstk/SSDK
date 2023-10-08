@@ -3,6 +3,7 @@ using SSDK.CSC.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
     /// <summary>
     /// A c# switch expression arm.
     /// </summary>
-    public sealed class CSharpSwitchArm
+    public sealed class CSharpSwitchArm : CSharpComponent
     {
         #region Properties & Fields
         /// <summary>
@@ -40,6 +41,19 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             Syntax = syntax;
             Expression = syntax.Expression.ToExpression();
             Pattern = new CSharpPatternExpression(syntax.Pattern);
+        }
+
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol("arm", parentSymbol, this, false);
+            Pattern?.CreateMemberSymbols(project, Symbol);
+            Expression?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Pattern?.ResolveMembers(project);
+            Expression?.ResolveMembers(project);
         }
 
         public override string ToString()

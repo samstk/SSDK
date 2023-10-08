@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SSDK.CSC.Helpers;
 using System;
@@ -16,6 +17,14 @@ namespace SSDK.CSC.ScriptComponents
     {
         #region Properties & Fields
         /// <summary>
+        /// Gets the symbol that represents this component.
+        /// </summary>
+        /// <remarks>
+        /// ResolveMembers must be called on the project before being set.
+        /// </remarks>
+        public CSharpMemberSymbol Symbol { get; private set; }
+
+        /// <summary>
         /// Gets all attributes applied to this component.
         /// </summary>
         public CSharpAttribute[] Attributes { get; private set; }
@@ -31,6 +40,18 @@ namespace SSDK.CSC.ScriptComponents
         public MethodDeclarationSyntax Syntax { get; private set; }
 
         /// <summary>
+        /// If this method is a operator method, then get the syntax
+        /// that constructed this method.
+        /// </summary>
+        public OperatorDeclarationSyntax OperatorSyntax { get; private set; }
+
+        /// <summary>
+        /// If this method is a conversion operator method, then get the syntax
+        /// that constructed this method.
+        /// </summary>
+        public ConversionOperatorDeclarationSyntax ConversionOperatorSyntax { get; private set; }
+
+        /// <summary>
         /// True if this method is a constructor
         /// </summary>
         public bool IsConstructor { get; private set; } = false;
@@ -39,6 +60,22 @@ namespace SSDK.CSC.ScriptComponents
         /// True if this method is a destructor
         /// </summary>
         public bool IsDestructor { get; private set; } = false;
+
+        /// <summary>
+        /// True if this method is an operator overload.
+        /// </summary>
+        public bool IsOperator { get; private set; } = false;
+
+        /// <summary>
+        /// True if this method is an implicit operator.
+        /// </summary>
+        public bool IsImplicitOperator { get; private set; } = false;
+
+        /// <summary>
+        /// True if this method is an explicit operator.
+        /// </summary>
+        public bool IsExplicitOperator { get; private set; } = false;
+
 
         /// <summary>
         /// If this method is a constructor method, then get the syntax
@@ -136,6 +173,72 @@ namespace SSDK.CSC.ScriptComponents
             }
         }
 
+        internal CSharpMethod(OperatorDeclarationSyntax syntax)
+        {
+            IsOperator = true;
+
+            OperatorSyntax = syntax;
+
+            (GeneralModifier, AccessModifier) = syntax.Modifiers.GetConcreteModifier();
+
+            Name = syntax.OperatorToken.ValueText.ToString();
+
+            Attributes = syntax.AttributeLists.ToAttributes();
+
+            ReturnType = syntax.ReturnType.ToType();
+
+            Parameters = syntax.ParameterList.ToParameters();
+
+            TypeParameters = new string[0];
+
+            TypeConstraints = new Dictionary<string, CSharpType[]>();
+
+            if (syntax.Body != null)
+            {
+                Block = new CSharpStatementBlock(syntax.Body);
+                Block.IsMethodBlock = true;
+            }
+            else if (syntax.ExpressionBody != null)
+            {
+                Block = CSharpStatementBlock.WithReturn(syntax.ExpressionBody.Expression);
+                Block.IsMethodBlock = true;
+            }
+        }
+
+        internal CSharpMethod(ConversionOperatorDeclarationSyntax syntax)
+        {
+            IsOperator = true;
+            IsExplicitOperator = syntax.ImplicitOrExplicitKeyword.RawKind == (int)SyntaxKind.ExplicitKeyword;
+            IsImplicitOperator = !IsExplicitOperator;
+
+            ConversionOperatorSyntax = syntax;
+
+            (GeneralModifier, AccessModifier) = syntax.Modifiers.GetConcreteModifier();
+
+            Name = null;
+
+            Attributes = syntax.AttributeLists.ToAttributes();
+
+            ReturnType = syntax.Type.ToType();
+
+            Parameters = syntax.ParameterList.ToParameters();
+
+            TypeParameters = new string[0];
+
+            TypeConstraints = new Dictionary<string, CSharpType[]>();
+
+            if (syntax.Body != null)
+            {
+                Block = new CSharpStatementBlock(syntax.Body);
+                Block.IsMethodBlock = true;
+            }
+            else if (syntax.ExpressionBody != null)
+            {
+                Block = CSharpStatementBlock.WithReturn(syntax.ExpressionBody.Expression);
+                Block.IsMethodBlock = true;
+            }
+        }
+
         internal CSharpMethod(ConstructorDeclarationSyntax syntax)
         {
             IsConstructor = true;
@@ -198,6 +301,21 @@ namespace SSDK.CSC.ScriptComponents
                 Block = CSharpStatementBlock.WithReturn(syntax.ExpressionBody.Expression);
                 Block.IsMethodBlock = true;
             }
+        }
+
+        /// <summary>
+        /// Creates a member symbol for this component
+        /// </summary>
+        internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
+        {
+            Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+
+            Block?.CreateMemberSymbols(project, Symbol);
+        }
+
+        internal override void ResolveMembers(CSharpProject project)
+        {
+            Block?.ResolveMembers(project);
         }
 
         public override string ToString()
