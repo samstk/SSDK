@@ -28,6 +28,11 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         /// Gets the operator of this expression
         /// </summary>
         public string Operator { get; private set; }
+
+        /// <summary>
+        /// Gets the referenced symbol for the operator method.
+        /// </summary>
+        public CSharpMemberSymbol ReferencedOperatorSymbol { get; private set; }
         #endregion
 
         /// <summary>

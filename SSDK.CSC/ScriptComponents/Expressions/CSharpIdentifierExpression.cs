@@ -37,15 +37,18 @@ namespace SSDK.CSC.ScriptComponents.Expressions
 
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
-            // Technically, an identifier is a reference to something, so it must be set
-            // in ResolveMembers (through parent reference).
+            Symbol = new CSharpMemberSymbol("idref", parentSymbol, this, false);
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
-
+            Symbol = Symbol.FindBestMatchingSymbol(Name, null);
         }
 
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return Symbol.GetComponentType(project);
+        }
         public override string ToString()
         {
             return $"{Name}";

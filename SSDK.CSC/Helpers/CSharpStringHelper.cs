@@ -88,7 +88,8 @@ namespace SSDK.CSC.Helpers
                 prefix += "virtual ";
             if (modifier.HasFlag(CSharpGeneralModifier.Volatile))
                 prefix += "volatile ";
-
+            if (modifier.HasFlag(CSharpGeneralModifier.Partial))
+                prefix += "partial ";
             return prefix;
         }
 
@@ -127,6 +128,48 @@ namespace SSDK.CSC.Helpers
                     result += expr.ToString();
             }
             return result;
+        }
+
+        /// <summary>
+        /// Gets each target section in the given target string 
+        /// (e.g. x&lt;b&gt;.y.z would yield x&lt;b&gt;, y and z)
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns>an array existing of each section in the target</returns>
+        public static string[] GetTargetSections(this string target)
+        {
+            List<string> sections = new List<string>();
+            int startIndex = 0;
+            int index = 0;
+            int contextLevel = 0;
+            foreach(char c in target)
+            {
+                if (c=='<' || c == '(')
+                {
+                    contextLevel++;
+                }
+                else if (c=='>' || c==')')
+                {
+                    contextLevel--;
+                }
+                
+                if (c=='.')
+                {
+                    if (contextLevel == 0) {
+                        sections.Add(target.Substring(startIndex, index - startIndex));
+                        startIndex = index + 1;
+                    }
+                }
+
+                index++;
+            }
+
+            if (startIndex != index)
+            {
+                sections.Add(target.Substring(startIndex, index - startIndex));
+            }
+
+            return sections.ToArray();
         }
     }
 }

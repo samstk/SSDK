@@ -52,6 +52,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         {
             On?.ResolveMembers(project);
         }
+
         public override string ToString()
         {
             return $"{Operator}{On}";

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SSDK.CSC.Helpers;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,11 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         /// Gets the initializer of the instantiation (in curly braces)
         /// </summary>
         public CSharpExpression[] Initializer { get; private set; }
+
+        /// <summary>
+        /// Gets the referenced constructor of this instantiation.
+        /// </summary>
+        public CSharpMemberSymbol ReferencedSymbol { get; private set; }
 
         /// <summary>
         /// If true, then the Type instantiation is not set, which
@@ -88,6 +94,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol("new(", parentSymbol, this, false);
+            Type?.CreateMemberSymbols(project, Symbol);
             if (Arguments != null)
             {
                 foreach (CSharpExpression expression in Arguments)
@@ -103,6 +110,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            Type?.ResolveMembers(project);
             if (Arguments != null)
             {
                 foreach (CSharpExpression expression in Arguments)

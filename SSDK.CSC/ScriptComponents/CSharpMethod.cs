@@ -52,6 +52,11 @@ namespace SSDK.CSC.ScriptComponents
         public ConversionOperatorDeclarationSyntax ConversionOperatorSyntax { get; private set; }
 
         /// <summary>
+        /// Gets the type of this method as a generic Func or Action type.
+        /// </summary>
+        public CSharpType FuncType { get; private set; }
+
+        /// <summary>
         /// True if this method is a constructor
         /// </summary>
         public bool IsConstructor { get; private set; } = false;
@@ -310,17 +315,46 @@ namespace SSDK.CSC.ScriptComponents
         {
             Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
 
+            ReturnType?.CreateMemberSymbols(project, Symbol);
+            foreach(CSharpVariable variable in Parameters)
+            {
+                variable.CreateMemberSymbols(project, Symbol);
+            }
             Block?.CreateMemberSymbols(project, Symbol);
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            CSharpType[] types = new CSharpType[Parameters.Length];
+            int i = 0;
+            foreach (CSharpVariable variable in Parameters)
+            {
+                variable.ResolveMembers(project);
+                types[i++] = variable.Type;
+            }
+
+            if (ReturnType == null)
+            {
+                FuncType = new CSharpType("Action", types);
+            }
+            else
+            {
+                FuncType = new CSharpType("Func", types);
+            }
+            FuncType?.CreateMemberSymbols(project, Symbol);
+            FuncType?.ResolveMembers(project);
+
             Block?.ResolveMembers(project);
         }
 
         public override string ToString()
         {
             return $"{(AccessModifier.ToReadablePrefix())} {ReturnType} {Name}({Parameters.ToReadableString()}) ...";
+        }
+
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return FuncType;
         }
     }
 }

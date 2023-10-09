@@ -24,6 +24,10 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         /// </summary>
         public string Member { get; private set; }
 
+        /// <summary>
+        /// Gets the referenced member symbol
+        /// </summary>
+        public CSharpMemberSymbol ReferencedMemberSymbol { get; private set; }
         #endregion
 
         /// <summary>
@@ -43,13 +47,17 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         }
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
-            Symbol = new CSharpMemberSymbol("", parentSymbol, this, false);
+            Symbol = new CSharpMemberSymbol("(access)", parentSymbol, this, false);
             Target?.CreateMemberSymbols(project, Symbol);
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
             Target?.ResolveMembers(project);
+            CSharpType type = Target?.Symbol.GetComponentType(project);
+            ReferencedMemberSymbol = type?.ReferencedSymbol.FindBestMatchingSymbol(
+                new string[] {Member}, 0, 2
+                );
         }
 
         public override string ToString()
@@ -57,6 +65,9 @@ namespace SSDK.CSC.ScriptComponents.Expressions
             return $"{Target}.{Member}";
         }
 
-        
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return ReferencedMemberSymbol.GetComponentType(project);
+        }
     }
 }

@@ -47,7 +47,9 @@ namespace SSDK.CSC.ScriptComponents.Statements
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            
             Condition?.ResolveMembers(project);
+
             Block?.ResolveMembers(project);
         }
         public override string ToString()

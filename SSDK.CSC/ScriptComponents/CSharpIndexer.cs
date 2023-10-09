@@ -145,12 +145,15 @@ namespace SSDK.CSC.ScriptComponents
         {
             Symbol = new CSharpMemberSymbol("[]", parentSymbol, this);
 
+            Type?.CreateMemberSymbols(project, Symbol);
             Get?.CreateMemberSymbols(project, Symbol);
             Set?.CreateMemberSymbols(project, Symbol);
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            Type?.CreateMemberSymbols(project, Symbol);
+
             Get?.ResolveMembers(project);
             Set?.ResolveMembers(project);
         }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,11 @@ namespace SSDK.CSC.ScriptComponents
         /// If true, then this using directive has the static modifier on it.
         /// </summary>
         public bool IsStatic { get; private set; }
+
+        /// <summary>
+        /// If true, then this using directive should be used in all scripts.
+        /// </summary>
+        public bool IsGlobal { get; private set; }
         
         /// <summary>
         /// Gets the syntax that declared this directive.
@@ -42,16 +48,17 @@ namespace SSDK.CSC.ScriptComponents
         /// <summary>
         /// Gets the parent namespace that requires this using directive.
         /// </summary>
-        public CSharpNamespace ParentNamespace { get; private set; }
+        public CSharpNamespace ParentNamespace { get; internal set; }
         #endregion
 
         internal CSharpUsingDirective(UsingDirectiveSyntax syntax, CSharpNamespace parentNamespace)
         {
             Syntax = syntax;
-            
             if (syntax.Alias != null)
                 Alias = syntax.Alias.Name.ToString();
-            
+
+            IsGlobal = syntax.GlobalKeyword.RawKind == (int)SyntaxKind.GlobalKeyword;
+
             Target = syntax.Name.ToString();
 
             ParentNamespace = parentNamespace;
@@ -68,17 +75,36 @@ namespace SSDK.CSC.ScriptComponents
         {
             if (Alias != null)
             {
+                if (Alias.StartsWith("@"))
+                    Alias = Alias.Remove(0, 1);
                 Symbol = new CSharpMemberSymbol(Alias, parentSymbol, this);
-            } // else a using directive does not create a symbol, instead
-              // it simply loads all symbols of that referenced namespace
-              // under the using's parent symbol.
+            } 
+            else
+            {
+                Symbol = new CSharpMemberSymbol("using", parentSymbol, this, false);
+            }
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
-            if(Alias == null)
+            if (Alias == null)
             {
-                // ParentNamespace?.Symbol.LoadSymbols(project.GetChildrenOfSymbol(Target));
+                CSharpMemberSymbol member = Symbol.FindBestMatchingSymbol(Target, null);
+                if (member != null)
+                {
+                    member.Usages.Add(this);
+                    ParentNamespace.Symbol?.LoadedSymbols.AddRange(member.ChildSymbols);
+                }
+                else
+                {
+                    project.Errors.Add($"The target of the using directive did not exist in the current context at: {Syntax.GetLocation()}");
+                }
+                Symbol = member;
+            }
+            else
+            {
+                Symbol.AliasTo = Symbol.FindBestMatchingSymbol(Target, null);
+                ParentNamespace.Symbol?.LoadedSymbols.Add(Symbol);
             }
         }
 

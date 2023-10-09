@@ -37,7 +37,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
 
         internal override void ResolveMembers(CSharpProject project)
         {
-
+            Expression.ResolveMembers(project);
         }
 
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)

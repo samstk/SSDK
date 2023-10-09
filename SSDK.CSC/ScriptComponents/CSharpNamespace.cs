@@ -5,6 +5,7 @@ using SSDK.CSC.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -76,8 +77,8 @@ namespace SSDK.CSC.ScriptComponents
         public CompilationUnitSyntax CompilationUnitSyntax { get; private set; }
 
         /// <summary>
-        /// Gets the namespace syntax. If this syntax is root, then it will
-        /// not have one.
+        /// Gets the namespace syntax. If this syntax is root, or expanded from another namespace, 
+        /// then it will not have one (null)
         /// </summary>
         public NamespaceDeclarationSyntax Syntax { get; private set; }
         #endregion
@@ -162,7 +163,36 @@ namespace SSDK.CSC.ScriptComponents
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             if (Name != null)
-                Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+            {
+                // We need to immediately detect dot symbols in namespaces, as namespaces allow
+                // this.
+
+                int dotIndex = Name.IndexOf('.');
+                if (dotIndex == -1) {
+                    Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+                }
+                else {
+                    int startIndex = 0;
+                    // Update symbol until symbol reference refers to the child with no namespace
+                    // simplifications.
+                    Symbol = parentSymbol;
+                    while (dotIndex != -1)
+                    {
+                        string name = Name.Substring(startIndex, dotIndex);
+                        
+                        Symbol = new CSharpMemberSymbol(name, Symbol, null);
+                        startIndex = dotIndex + 1;
+                        dotIndex = Name.IndexOf('.', startIndex);
+                    }
+                    Symbol = new CSharpMemberSymbol(Name.Substring(startIndex), Symbol, this);
+                }
+            }
+            else Symbol = new CSharpMemberSymbol("root", parentSymbol, this);
+            
+            foreach (CSharpUsingDirective @using in UsingDirectives)
+            {
+                @using.CreateMemberSymbols(project, Symbol);
+            }
 
             foreach (CSharpClass @class in Classes)
             {
@@ -192,6 +222,11 @@ namespace SSDK.CSC.ScriptComponents
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            foreach (CSharpUsingDirective @using in UsingDirectives)
+            {
+                @using.ResolveMembers(project);
+            }
+
             foreach (CSharpClass @class in Classes)
             {
                 @class.ResolveMembers(project);
@@ -218,6 +253,22 @@ namespace SSDK.CSC.ScriptComponents
             }
         }
 
+        /// <summary>
+        /// Loads all base classes to inheriting classes.
+        /// </summary>
+        /// <param name="project">the project to report to</param>
+        internal void LoadInheritance(CSharpProject project)
+        {
+            foreach (CSharpClass @class in Classes)
+            {
+                @class.LoadInheritance(project);
+            }
+
+            foreach (CSharpStruct @struct in Structs)
+            {
+                @struct.LoadInheritance(project);
+            }
+        }
         public override string ToString()
         {
             if (Name == null)

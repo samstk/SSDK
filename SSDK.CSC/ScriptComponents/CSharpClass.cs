@@ -55,6 +55,7 @@ namespace SSDK.CSC.ScriptComponents
         public bool IsUnsafe { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Unsafe); } }
         public bool IsVirtual { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Virtual); } }
         public bool IsVolatile { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Volatile); } }
+        public bool IsPartial { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Partial); } }
         #endregion
 
         /// <summary>
@@ -81,6 +82,11 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets all sub-enums of this class.
         /// </summary>
         public CSharpEnum[] Subenums { get; private set; }
+
+        // <summary>
+        /// Gets the reference type of this class 
+        /// </summary>
+        public CSharpType ObjectType { get; private set; }
 
         /// <summary>
         /// Gets all delegate declarations in this class.
@@ -151,15 +157,6 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the type parameters of this class.
         /// </summary>
         public string[] TypeParameters { get; private set; }
-
-        /// <summary>
-        /// Gets the type parameters of this class as resolved
-        /// symbols.
-        /// </summary>
-        /// <remarks>
-        /// The ResolveMembers method must be called on the project.
-        /// </remarks>
-        public CSharpMemberSymbol[] TypeParameterSymbols { get; private set; }
 
         /// <summary>
         /// Gets the type constraints on the parameters.
@@ -390,6 +387,10 @@ namespace SSDK.CSC.ScriptComponents
             {
                 field.CreateMemberSymbols(project, Symbol);
             }
+            
+            ObjectType = new CSharpType(Name, CSharpType.Empty) { ReferencedSymbol = Symbol };
+
+            
         }
 
         public override string ToString()
@@ -397,8 +398,10 @@ namespace SSDK.CSC.ScriptComponents
             return $"{Attributes.ToReadablePrefix()}{AccessModifier.ToReadablePrefix()} {(IsStatic ? "static ":"")}class {Name}";
         }
 
+
         internal override void ResolveMembers(CSharpProject project)
         {
+            
             foreach (CSharpClass @class in Subclasses)
             {
                 @class.ResolveMembers(project);
@@ -467,6 +470,36 @@ namespace SSDK.CSC.ScriptComponents
             {
                 field.ResolveMembers(project);
             }
+
+            foreach (CSharpType type in Inherits)
+                type.ResolveMembers(project);
+        }
+
+        /// <summary>
+        /// Loads all base classes to inheriting classes.
+        /// </summary>
+        /// <param name="project">the project to report to</param>
+        internal void LoadInheritance(CSharpProject project)
+        {
+            for(int i = 0; i<Inherits.Length; i++)
+            {
+
+            }
+
+            foreach (CSharpClass @class in Subclasses)
+            {
+                @class.LoadInheritance(project);
+            }
+
+            foreach (CSharpStruct @struct in Substructs)
+            {
+                @struct.LoadInheritance(project);
+            }
+        }
+
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return ObjectType;
         }
     }
 }

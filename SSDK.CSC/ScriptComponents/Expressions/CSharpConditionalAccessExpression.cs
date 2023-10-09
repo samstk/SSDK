@@ -51,5 +51,6 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         {
             Target?.ResolveMembers(project);
         }
+
     }
 }

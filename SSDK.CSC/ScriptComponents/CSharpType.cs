@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.FindSymbols;
 using SSDK.CSC.Helpers;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,15 @@ namespace SSDK.CSC.ScriptComponents
         public string Name { get; private set; }
 
         /// <summary>
+        /// Gets the referenced type symbol
+        /// </summary>
+        /// <remarks>
+        /// Only applies to an simple type, and is generated after
+        /// ResolveMembers is called on the project.
+        /// </remarks>
+        public CSharpMemberSymbol ReferencedSymbol { get; internal set; }
+
+        /// <summary>
         /// Gets the access type when array dimensions > 0, or
         /// the type being accessed has a namespace included (e.g. System.String)
         /// </summary>
@@ -30,6 +40,11 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the generic type params for this type declaration.
         /// </summary>
         public CSharpType[] GenericTypes { get; private set; }
+        
+        /// <summary>
+        /// Gets the referenced symbols for the generic types.
+        /// </summary>
+        public CSharpMemberSymbol[] ReferencedGenericTypes { get; private set; }
 
         /// <summary>
         /// Is true if the syntax defined some generic types.
@@ -46,7 +61,7 @@ namespace SSDK.CSC.ScriptComponents
         /// If true, then the element type contains the actual
         /// type, and this is a pointer to that type (i.e. elementType*)
         /// </summary>
-        public bool Pointer { get; private set; } = false;
+        public bool IsPointer { get; private set; } = false;
 
         /// <summary>
         /// If true, then this type is simply a wrapper for a scope
@@ -110,7 +125,7 @@ namespace SSDK.CSC.ScriptComponents
             {
                 PointerTypeSyntax pointer = ((PointerTypeSyntax)typeSyntax);
                 AccessType = pointer.ElementType.ToType();
-                Pointer = true;
+                IsPointer = true;
                 Name = "Pointer";
             }
             else if (typeSyntax is QualifiedNameSyntax)
@@ -143,7 +158,7 @@ namespace SSDK.CSC.ScriptComponents
 
             if(!(HasGenericTypes != other.HasGenericTypes
                 || ArrayDimensions != other.ArrayDimensions
-                || Pointer != other.Pointer
+                || IsPointer != other.IsPointer
                 || IsRefOnly != other.IsRefOnly
                 || AccessType != other.AccessType
                 || GenericTypes.Length != other.GenericTypes.Length))
@@ -197,11 +212,60 @@ namespace SSDK.CSC.ScriptComponents
         {
             // Technically, a type in the CSC package is simply a reference to a symbol, so
             // it must be set in the ResolveMembers.
+            Symbol = new CSharpMemberSymbol("type<", parentSymbol, this, false);
+
+            for (int i = 0; i < GenericTypes.Length; i++)
+            {
+                GenericTypes[i]?.CreateMemberSymbols(project, Symbol);
+            }
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
-            
+            ReferencedGenericTypes = new CSharpMemberSymbol[GenericTypes.Length];
+            for(int i = 0; i<GenericTypes.Length; i++)
+            {
+                GenericTypes[i]?.ResolveMembers(project);
+                ReferencedGenericTypes[i] = GenericTypes[i].ReferencedSymbol;
+            }
+            if(!IsPointer && ArrayDimensions == 0)
+            {
+                ReferencedSymbol = Symbol.FindBestMatchingSymbol(Name, ReferencedGenericTypes);
+            }
+            else if (IsPointer) {
+                ReferencedSymbol = Symbol.FindBestMatchingSymbol("Pointer", new CSharpMemberSymbol[0]);
+            }
+            else if (ArrayDimensions > 0)
+            {
+                ReferencedSymbol = Symbol.FindBestMatchingSymbol("Array", new CSharpMemberSymbol[0]);
+            }
+        }
+
+        /// <summary>
+        /// Selects the most generic type of both types
+        /// </summary>
+        /// <param name="type1">the first type to compare</param>
+        /// <param name="type2">the second type to compare</param>
+        /// <returns>the most generic type</returns>
+        /// <remarks>
+        /// Pointers are not supported for inherited classes. Assumes
+        /// that both types are comparable (i.e. one is equal or inherited from the other).
+        /// Requires member references to exist.
+        /// </remarks>
+        public static CSharpType MostGeneric(CSharpType type1, CSharpType type2)
+        {
+            if (type1 == null) return type2;
+            if (type2 == null) return null;
+
+            if (type1.IsPointer && type2.IsPointer || type1.IsRefOnly && type2.IsRefOnly)
+                return MostGeneric(type1.AccessType, type2.AccessType);
+
+            return type1;
+        }
+
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return this;
         }
     }
 }

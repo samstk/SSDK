@@ -50,16 +50,18 @@ namespace SSDK.CSC.ScriptComponents
         public CSharpScript(string script, bool isFile=false, bool immediateCompilation=true)
         {
             // Get script contents if file and update local references
+            string filePath = "<runtime>";
             if (isFile)
             {
                 FileInfo fileInfo = new FileInfo(script);
                 File = fileInfo.FullName;
                 Name = fileInfo.Name;
+                filePath = script;
                 script = System.IO.File.ReadAllText(script);
             }
 
             // Create syntax tree
-            Syntax = SyntaxFactory.ParseSyntaxTree(script);
+            Syntax = SyntaxFactory.ParseSyntaxTree(script).WithFilePath(filePath);
             RootNamespace = new CSharpNamespace((CompilationUnitSyntax)Syntax.GetRoot());
         }
 
@@ -70,17 +72,45 @@ namespace SSDK.CSC.ScriptComponents
         /// <remarks>
         /// Assumes CreateMemberSymbols is called first on every script.
         /// </remarks>
-        public void ResolveMembers(CSharpProject project)
+        internal void ResolveMembers(CSharpProject project)
         {
-
+            RootNamespace?.ResolveMembers(project);
         }
 
         /// <summary>
         /// Creates new member symbols for the scripts.
         /// </summary>
-        public void CreateMemberSymbols(CSharpProject project)
+        internal void CreateMemberSymbols(CSharpProject project)
         {
             RootNamespace?.CreateMemberSymbols(project, null);
+        }
+
+        /// <summary>
+        /// Merges all member symbols with the same full name (e.g. System.Text),
+        /// if it is a mergable component (i.e. a namespace, or a struct/class/enum with partial on it)
+        /// </summary>
+        /// <param name="mappings">a mapping of full names to member symbols</param>
+        internal void MergeMemberSymbols(Dictionary<string, CSharpMemberSymbol> mappings)
+        {
+            RootNamespace?.Symbol?.MergeMemberSymbols(mappings);
+        }
+
+        /// <summary>
+        /// Inherit object members on all classes
+        /// </summary>
+        /// <param name="objectSymbol">the symbol to inherit all children of</param>
+        internal void InheritObjectSymbol(CSharpMemberSymbol objectSymbol)
+        {
+            RootNamespace?.Symbol?.InheritObjectMembers(objectSymbol);
+        }
+
+        /// <summary>
+        /// Loads all base classes to inheriting classes.
+        /// </summary>
+        /// <param name="project">the project to report to</param>
+        internal void LoadInheritance(CSharpProject project)
+        {
+            RootNamespace?.LoadInheritance(project);
         }
     }
 }

@@ -68,6 +68,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol("expr", parentSymbol, this, false);
+            Type?.CreateMemberSymbols(project, Symbol);
             foreach (CSharpExpression[] rank in Ranks)
             {
                 CSharpMemberSymbol sym = new CSharpMemberSymbol("rank[", parentSymbol, this, false);
@@ -91,6 +92,7 @@ namespace SSDK.CSC.ScriptComponents.Expressions
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            Type?.ResolveMembers(project);
             foreach (CSharpExpression[] rank in Ranks)
             {
                 foreach (CSharpExpression rankExpr in rank)

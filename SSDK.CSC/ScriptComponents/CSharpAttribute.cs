@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SSDK.CSC.Helpers;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,9 @@ namespace SSDK.CSC.ScriptComponents
         #region Properties & Fields
         internal static CSharpAttribute[] Empty = new CSharpAttribute[0];
         /// <summary>
-        /// Gets the used name of the attribute
+        /// Gets the used type of the attribute
         /// </summary>
-        public string Name { get; private set; }
+        public CSharpType Type { get; private set; }
 
         /// <summary>
         /// Gets the list of expressions depicts the parameters
@@ -33,19 +34,20 @@ namespace SSDK.CSC.ScriptComponents
         /// <param name="syntax">the syntax to create from</param>
         internal CSharpAttribute(AttributeSyntax syntax)
         {
-            Name = syntax.Name.ToString();
+            Type = syntax.Name.ToType();
             Parameters = syntax.ArgumentList.ToExpressions();
         }
 
         public override string ToString()
         {
-            return $"[{Name}({Parameters.ToReadableString()})]";
+            return $"[{Type}({Parameters.ToReadableString()})]";
         }
 
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol("attr[", parentSymbol, this, false);
-            foreach(CSharpExpression param in Parameters)
+            Type?.CreateMemberSymbols(project, Symbol);
+            foreach (CSharpExpression param in Parameters)
             {
                 param.CreateMemberSymbols(project, Symbol);
             }
@@ -53,10 +55,13 @@ namespace SSDK.CSC.ScriptComponents
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            
             foreach (CSharpExpression param in Parameters)
             {
                 param.ResolveMembers(project);
             }
+
+            
         }
     }
 }

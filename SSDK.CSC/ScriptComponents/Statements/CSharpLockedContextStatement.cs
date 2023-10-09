@@ -49,11 +49,12 @@ namespace SSDK.CSC.ScriptComponents
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol("lock{", parentSymbol, this, false);
+            LockTarget?.CreateMemberSymbols(project, Symbol);
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
-
+            LockTarget?.ResolveMembers(project);
         }
 
         public override string ToString()

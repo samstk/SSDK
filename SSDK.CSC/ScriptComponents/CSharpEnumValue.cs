@@ -23,6 +23,11 @@ namespace SSDK.CSC.ScriptComponents
         public CSharpMemberSymbol Symbol { get; private set; }
 
         /// <summary>
+        /// Gets the enum that defined this value.
+        /// </summary>
+        public CSharpEnum Enum { get; private set; }
+
+        /// <summary>
         /// Gets the name of the value.
         /// </summary>
         public string Name { get; private set; }
@@ -43,9 +48,11 @@ namespace SSDK.CSC.ScriptComponents
         public EnumMemberDeclarationSyntax Syntax { get; private set; }
         #endregion
 
-        internal CSharpEnumValue(EnumMemberDeclarationSyntax syntax)
+        internal CSharpEnumValue(EnumMemberDeclarationSyntax syntax, CSharpEnum @enum)
         {
             Name = syntax.Identifier.ToString();
+            
+            Enum = @enum;
 
             Expression = syntax.EqualsValue?.Value.ToExpression();
 
@@ -60,6 +67,11 @@ namespace SSDK.CSC.ScriptComponents
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+            foreach (CSharpAttribute attr in Attributes)
+            {
+                attr.CreateMemberSymbols(project, Symbol);
+            }
+            Expression?.CreateMemberSymbols(project, Symbol);
         }
 
         internal override void ResolveMembers(CSharpProject project)

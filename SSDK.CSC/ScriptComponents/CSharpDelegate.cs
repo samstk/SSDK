@@ -29,6 +29,11 @@ namespace SSDK.CSC.ScriptComponents
         public CSharpAttribute[] Attributes { get; private set; }
 
         /// <summary>
+        /// Gets the type of this method as a generic Func or Action type.
+        /// </summary>
+        public CSharpType FuncType { get; private set; }
+
+        /// <summary>
         /// Gets the access modifier applied to this delegate.
         /// </summary>
         public CSharpAccessModifier AccessModifier { get; private set; } = CSharpAccessModifier.DefaultOrNone;
@@ -90,16 +95,44 @@ namespace SSDK.CSC.ScriptComponents
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
+            ReturnType?.CreateMemberSymbols(project, Symbol);
+            foreach (CSharpVariable variable in Parameters)
+            {
+                variable.CreateMemberSymbols(project, Symbol);
+            }
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
-            
+            ReturnType?.ResolveMembers(project);
+            CSharpType[] types = new CSharpType[Parameters.Length];
+            int i = 0;
+            foreach (CSharpVariable variable in Parameters)
+            {
+                variable.ResolveMembers(project);
+                types[i++] = variable.Type;
+            }
+
+            if (ReturnType == null)
+            {
+                FuncType = new CSharpType("Action", types);
+            }
+            else
+            {
+                FuncType = new CSharpType("Func", types);
+            }
+            FuncType?.CreateMemberSymbols(project, Symbol);
+            FuncType?.ResolveMembers(project);
         }
 
         public override string ToString()
         {
             return $"{(AccessModifier.ToReadablePrefix())} delegate {ReturnType} {Name}({Parameters.ToReadableString()})";
+        }
+
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return FuncType;
         }
     }
 }

@@ -69,6 +69,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol("catch{", parentSymbol, this, false);
+            Filter?.CreateMemberSymbols(project, Symbol);
             Variable?.CreateMemberSymbols(project, Symbol);
             Block?.CreateMemberSymbols(project, Symbol);
         }

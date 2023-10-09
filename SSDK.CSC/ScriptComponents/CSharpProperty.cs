@@ -56,7 +56,7 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets the statement block for setting this property.
         /// </summary>
         public CSharpStatementBlock Set { get; private set; }
-        
+
         /// <summary>
         /// Gets the set access of this property.
         /// </summary>
@@ -100,23 +100,23 @@ namespace SSDK.CSC.ScriptComponents
         public bool IsVolatile { get { return GeneralModifier.HasFlag(CSharpGeneralModifier.Volatile); } }
         #endregion
         #endregion
-        
+
 
         internal CSharpProperty(PropertyDeclarationSyntax syntax)
         {
             (GeneralModifier, AccessModifier) = syntax.Modifiers.GetConcreteModifier();
-            
+
             Name = syntax.Identifier.ToString();
             Type = syntax.Type.ToType();
             Attributes = syntax.AttributeLists.ToAttributes();
-            if(syntax.ExpressionBody != null)
+            if (syntax.ExpressionBody != null)
             {
                 Expression = syntax.Initializer.ToExpression();
             }
 
-            foreach(AccessorDeclarationSyntax accessor in syntax.AccessorList.Accessors)
+            foreach (AccessorDeclarationSyntax accessor in syntax.AccessorList.Accessors)
             {
-                if(accessor.Keyword.RawKind == (int)SyntaxKind.GetKeyword)
+                if (accessor.Keyword.RawKind == (int)SyntaxKind.GetKeyword)
                 {
                     (_, GetAccess) = accessor.Modifiers.GetConcreteModifier();
                     if (accessor.Body != null)
@@ -132,7 +132,7 @@ namespace SSDK.CSC.ScriptComponents
                 else if (accessor.Keyword.RawKind == (int)SyntaxKind.SetKeyword)
                 {
                     (_, SetAccess) = accessor.Modifiers.GetConcreteModifier();
-                    if(accessor.Body != null)
+                    if (accessor.Body != null)
                     {
                         Set = new CSharpStatementBlock(accessor.Body);
                     }
@@ -152,6 +152,7 @@ namespace SSDK.CSC.ScriptComponents
         {
             Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
 
+            Type?.CreateMemberSymbols(project, Symbol);
             Get?.CreateMemberSymbols(project, Symbol);
             Set?.CreateMemberSymbols(project, Symbol);
         }
@@ -159,6 +160,11 @@ namespace SSDK.CSC.ScriptComponents
         {
             Get?.ResolveMembers(project);
             Set?.ResolveMembers(project);
+        }
+
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return Type;
         }
     }
 }

@@ -134,12 +134,22 @@ namespace SSDK.CSC.ScriptComponents
         {
             Symbol = new CSharpMemberSymbol(Name, parentSymbol, this);
 
+            Type?.CreateMemberSymbols(project, Symbol);
             Expression?.CreateMemberSymbols(project, Symbol);
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            Type?.ResolveMembers(project);
             Expression?.ResolveMembers(project);
+
+            // Must insert into nearest block, class, or function.
+            Symbol.LoadIntoBlockSymbol();
+        }
+
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return Type;
         }
     }
 }

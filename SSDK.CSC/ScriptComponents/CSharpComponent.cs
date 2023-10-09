@@ -40,5 +40,15 @@ namespace SSDK.CSC.ScriptComponents
         /// </summary>
         /// <param name="project">the project to resolve under</param>
         internal abstract void ResolveMembers(CSharpProject project);
+
+        /// <summary>
+        /// Gets the resulting type of the component's operation.
+        /// </summary>
+        /// <param name="project">the project to report under</param>
+        /// <returns>the c# type resulting from the operatioin</returns>
+        internal virtual CSharpType GetComponentType(CSharpProject project)
+        {
+            return null;
+        }
     }
 }

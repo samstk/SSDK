@@ -101,6 +101,9 @@ namespace SSDK.CSC.ConversionsMaps
 
             if (modifier.HasFlag(CSharpGeneralModifier.Ref))
                 result.Append("ref");
+
+            if (modifier.HasFlag(CSharpGeneralModifier.Partial))
+                result.Append("partial");
         }
 
         public override void ProcessAssignmentExpression(CSharpAssignmentExpression expression, StringBuilder result)
@@ -112,7 +115,7 @@ namespace SSDK.CSC.ConversionsMaps
 
         public override void ProcessAttribute(CSharpAttribute attribute, StringBuilder result)
         {
-            result.Append(attribute.Name);
+            result.Append(attribute.Type);
            
             if(attribute.Parameters.Length > 0)
             {
@@ -866,7 +869,7 @@ namespace SSDK.CSC.ConversionsMaps
                 result.Append(" ");
                 return;
             }
-            if (type.Pointer)
+            if (type.IsPointer)
             {
                 ProcessType(type.AccessType, result);
                 result.Append("*");

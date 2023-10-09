@@ -54,6 +54,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
             {
                 variable.CreateMemberSymbols(project, Symbol);
             }
+            Expression?.CreateMemberSymbols(project, Symbol);
             Block?.CreateMemberSymbols(project, Symbol);
         }
 
@@ -63,6 +64,7 @@ namespace SSDK.CSC.ScriptComponents.Statements
             {
                 variable.ResolveMembers(project);
             }
+            Expression?.ResolveMembers(project);
             Block?.ResolveMembers(project);
         }
 

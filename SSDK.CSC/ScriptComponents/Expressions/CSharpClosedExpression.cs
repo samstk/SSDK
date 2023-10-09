@@ -50,5 +50,10 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         {
             Expression?.ResolveMembers(project);
         }
+
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return Expression.GetComponentType(project);
+        }
     }
 }

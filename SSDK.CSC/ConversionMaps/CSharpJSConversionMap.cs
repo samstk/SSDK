@@ -1,4 +1,5 @@
-﻿using SSDK.CSC.ScriptComponents;
+﻿using Microsoft.CodeAnalysis;
+using SSDK.CSC.ScriptComponents;
 using SSDK.CSC.ScriptComponents.Expressions;
 using SSDK.CSC.ScriptComponents.Statements;
 using SSDK.CSC.ScriptComponents.Trivia;
@@ -24,11 +25,6 @@ namespace SSDK.CSC.ConversionMaps
     /// </summary>
     public class CSharpJSConversionMap : CSharpConversionMap
     {
-        /// <summary>
-        /// A list of unsupported errors that results from any unsupported (but functionality-based)
-        /// conversion operations.
-        /// </summary>
-        public List<string> UnsupportedErrors { get; private set; } = new List<string>();
         public override void ProcessAccessModifier(CSharpAccessModifier modifier, StringBuilder result)
         {
             // No access modifiers are supported.
@@ -236,7 +232,7 @@ namespace SSDK.CSC.ConversionMaps
 
         public override void ProcessNamespace(CSharpNamespace @namespace, StringBuilder result)
         {
-            if(!@namespace.Attributes.Any((a) => a.Name == "CSCIgnore"))
+            if(!@namespace.Attributes.Any((a) => a.Type.Name == "CSCIgnore"))
             {
 
             }

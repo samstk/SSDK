@@ -109,9 +109,10 @@ namespace SSDK.CSC.ScriptComponents
 
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
+            Symbol = new CSharpMemberSymbol("block", parentSymbol, this, false);
             foreach (CSharpStatement statement in Statements)
             {
-                statement.CreateMemberSymbols(project, parentSymbol);
+                statement.CreateMemberSymbols(project, Symbol);
             }
         }
 

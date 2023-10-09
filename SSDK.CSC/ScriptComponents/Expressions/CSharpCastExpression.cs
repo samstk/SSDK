@@ -45,13 +45,16 @@ namespace SSDK.CSC.ScriptComponents.Expressions
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol("cast(", parentSymbol, this, false);
+            Type?.CreateMemberSymbols(project, Symbol);
             Expression?.CreateMemberSymbols(project, Symbol);
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            Type?.ResolveMembers(project);
             Expression?.ResolveMembers(project);
         }
+
         public override string ToString()
         {
             return $"({Type}){Expression}";

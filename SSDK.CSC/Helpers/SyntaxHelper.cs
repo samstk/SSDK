@@ -756,6 +756,10 @@ namespace SSDK.CSC.Helpers
                     {
                         generalModifier |= CSharpGeneralModifier.Ref;
                     }
+                    else if (token.RawKind == (int)SyntaxKind.PartialKeyword)
+                    {
+                        generalModifier |= CSharpGeneralModifier.Partial;
+                    }
                 }
             }
 

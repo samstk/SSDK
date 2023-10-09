@@ -89,6 +89,10 @@ namespace SSDK.CSC.ScriptComponents
         /// Indicates that the variable (inside method parameters) represents all
         /// parameters after it in an array.
         /// </summary>
-        Params = 65536
+        Params = 65536,
+        /// <summary>
+        /// Indicates that a class is partial (i.e. to be merged with another class)
+        /// </summary>
+        Partial = 131072
     }
 }

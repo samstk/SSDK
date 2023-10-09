@@ -47,6 +47,10 @@ namespace SSDK.CSC.ScriptComponents
         internal override void CreateMemberSymbols(CSharpProject project, CSharpMemberSymbol parentSymbol)
         {
             Symbol = new CSharpMemberSymbol("fixed{", parentSymbol, this, false);
+            foreach(CSharpVariable variable in Variables)
+            {
+                variable.CreateMemberSymbols(project, Symbol);
+            }
             Block?.CreateMemberSymbols(project, Symbol);
         }
         public override void ProcessMap(CSharpConversionMap map, StringBuilder result)
@@ -56,6 +60,10 @@ namespace SSDK.CSC.ScriptComponents
 
         internal override void ResolveMembers(CSharpProject project)
         {
+            foreach (CSharpVariable variable in Variables)
+            {
+                variable.ResolveMembers(project);
+            }
             Block?.ResolveMembers(project);
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SSDK.CSC.Helpers;
 using System;
 using System.Collections.Generic;
@@ -36,7 +37,12 @@ namespace SSDK.CSC.ScriptComponents
         /// Gets all attributes applied to this component.
         /// </summary>
         public CSharpAttribute[] Attributes { get; private set; }
-        
+
+        // <summary>
+        /// Gets the reference type of this class 
+        /// </summary>
+        public CSharpType ObjectType { get; private set; }
+
         /// <summary>
         /// Gets the possible values of this enum.
         /// </summary>
@@ -68,7 +74,7 @@ namespace SSDK.CSC.ScriptComponents
             Values = new CSharpEnumValue[syntax.Members.Count];
             for(int i = 0; i<Values.Length; i++)
             {
-                Values[i] = new CSharpEnumValue(syntax.Members[i]);
+                Values[i] = new CSharpEnumValue(syntax.Members[i], this);
             }
             Syntax = syntax;
         }
@@ -84,11 +90,16 @@ namespace SSDK.CSC.ScriptComponents
             {
                 value.CreateMemberSymbols(project, Symbol);
             }
+            ObjectType = new CSharpType(Name, CSharpType.Empty) { ReferencedSymbol = Symbol };
         }
 
         internal override void ResolveMembers(CSharpProject project)
         {
-
+            
+        }
+        internal override CSharpType GetComponentType(CSharpProject project)
+        {
+            return ObjectType;
         }
     }
 }
