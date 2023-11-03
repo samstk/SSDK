@@ -94,6 +94,7 @@ namespace SSDK.Core.Structures.Graphs
         public List<GraphEdge<T>> GetPathBackFrom(GraphVertex<T> target, int desiredEdgeState=1)
         {
             List<GraphEdge<T>> path = new List<GraphEdge<T>>();
+            HashSet<GraphEdge<T>> explored = new HashSet<GraphEdge<T>>();
 
             GraphVertex<T> currentVertex = target;
 
@@ -114,8 +115,9 @@ namespace SSDK.Core.Structures.Graphs
                         }
                     }
 
-                    if(discoveryEdge != null)
+                    if(discoveryEdge != null && !explored.Contains(discoveryEdge))
                     {
+                        explored.Add(discoveryEdge);
                         path.Add(discoveryEdge);
                         currentVertex = discoveryEdge.TraverseBackFrom(currentVertex);
                         continue;

@@ -65,8 +65,9 @@ namespace SSDK.Core.Helpers
             // Return array conversion
             return args.ToArray();
         }
+
         /// <summary>
-        /// Inserts a string at a position by overwriting the original string.
+        /// Inserts a string at a position by overwriting the original string from the center.
         /// </summary>
         /// <param name="original">the original string</param>
         /// <param name="index">the index to insert at</param>
@@ -78,6 +79,31 @@ namespace SSDK.Core.Helpers
             if (target < 0) target = 0;
             if (target > original.Length) target = original.Length;
             return original.Remove(target, length).Insert(target, toInsert);
+        }
+
+        /// <summary>
+        /// Inserts a space before every capital after the initial character.
+        /// </summary>
+        /// <param name="original">the original string to space out</param>
+        /// <returns>the spaced out string</returns>
+        public static string SpaceOutCapitals(this string original)
+        {
+            StringBuilder b = new StringBuilder();
+            int wordStart = 0;
+            for(int i = 1; i < original.Length; i++)
+            {
+                if (char.IsUpper(original[i]))
+                {
+                    b.Append(original.Substring(wordStart, i - wordStart));
+                    b.Append(" ");
+                    wordStart = i;
+                }
+            }
+            if (wordStart != original.Length)
+            {
+                b.Append(original.Substring(wordStart));
+            }
+            return b.ToString();
         }
     }
 }

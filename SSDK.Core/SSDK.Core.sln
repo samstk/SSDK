@@ -12,9 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSDK.AI", "..\SSDK.AI\SSDK.AI.csproj", "{77D37D75-ACB1-40C1-8B59-1B81FCBCB720}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSDK.CSC", "..\SSDK.CSC\SSDK.CSC.csproj", "{FBE9BB72-070D-4453-AEE7-C6A476A96D43}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SSDK.CSC", "..\SSDK.CSC\SSDK.CSC.csproj", "{FBE9BB72-070D-4453-AEE7-C6A476A96D43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,10 +28,6 @@ Global
 		{11077908-BC3F-4475-A34F-244E6E03AC7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11077908-BC3F-4475-A34F-244E6E03AC7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11077908-BC3F-4475-A34F-244E6E03AC7A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77D37D75-ACB1-40C1-8B59-1B81FCBCB720}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77D37D75-ACB1-40C1-8B59-1B81FCBCB720}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77D37D75-ACB1-40C1-8B59-1B81FCBCB720}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77D37D75-ACB1-40C1-8B59-1B81FCBCB720}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FBE9BB72-070D-4453-AEE7-C6A476A96D43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FBE9BB72-070D-4453-AEE7-C6A476A96D43}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBE9BB72-070D-4453-AEE7-C6A476A96D43}.Release|Any CPU.ActiveCfg = Release|Any CPU
