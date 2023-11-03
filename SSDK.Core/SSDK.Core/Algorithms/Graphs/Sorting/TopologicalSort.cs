@@ -47,7 +47,7 @@ namespace SSDK.Core.Algorithms.Sorting
         public static GraphTraversal<T> SortTopologically<T>(this Graph<T> on)
         {
             // Generate basic traversal
-            GraphTraversal<T> traversal = new GraphTraversal<T>(on, "Topological Sort");
+            GraphTraversal<T> traversal = new GraphTraversal<T>(on, null, null, false, "Topological Sort");
             traversal.Configuration = new int[on.Vertices.Count];
 
             int left = on.Vertices.Count;

@@ -46,7 +46,7 @@ namespace SSDK.Core.Algorithms.Graphs.Exploration
         /// <returns>the graph traversal of the search</returns>
         public static GraphTraversal<T> DepthFirstSearch<T>(this Graph<T> graph, GraphVertex<T> v)
         {
-            GraphTraversal<T> traversal = new GraphTraversal<T>(graph, "DFS");
+            GraphTraversal<T> traversal = new GraphTraversal<T>(graph, v, null, false, "DFS");
 
             // Create DFS stack for algorithm.
             Stack<GraphVertex<T>> dfsStack = new();

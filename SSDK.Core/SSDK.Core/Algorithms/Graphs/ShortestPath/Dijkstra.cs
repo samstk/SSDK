@@ -48,7 +48,7 @@ namespace SSDK.Core.Algorithms.Graphs.ShortestPath
         /// </remarks>
         public static GraphTraversal<T> ShortestPathSearchDijkstra<T>(this Graph<T> graph, GraphVertex<T> v, GraphVertex<T> vTarget = null)
         {
-            GraphTraversal<T> traversal = new GraphTraversal<T>(graph, "Dijkstra");
+            GraphTraversal<T> traversal = new GraphTraversal<T>(graph, v, vTarget, true, "Dijkstra");
 
             // Create Priority Queue for algorithm
             FPriorityQueue<(GraphVertex<T>,GraphEdge<T>), UncontrolledNumber> priorityQueue = new FPriorityQueue<(GraphVertex<T>, GraphEdge<T>), UncontrolledNumber>();
